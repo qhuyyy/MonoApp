@@ -1,30 +1,19 @@
-import OnboardingScreen from '../screens/OnboardingScreen';
-import HomeScreen from '../screens/HomeScreen';
-import GetStartedScreen from '../screens/GetStartedScreen';
-
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { WelcomeStack } from './WelcomeStack';
+import HomeBottomStack from './HomeStack';
 
 export type RootStackParamList = {
-  Onboarding: undefined;
+  Welcome: undefined;
   Home: undefined;
-  GetStarted: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function RootStack() {
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="GetStarted"
-        component={GetStartedScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Onboarding"
-        component={OnboardingScreen}
-        options={{ headerShown: false }}
-      />
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Home" component={HomeBottomStack} />
+      <Stack.Screen name="Welcome" component={WelcomeStack} />
     </Stack.Navigator>
   );
 }

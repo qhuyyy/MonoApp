@@ -1,19 +1,18 @@
 import React from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Picker } from '@react-native-picker/picker';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { windowWidth } from '../utils/Dimensions';
-import FormInput from '../components/FormInput';
-import { useUserStore } from '../stores/useUserStore';
+import { windowWidth } from '../../utils/Dimensions';
+import FormInput from '../../components/FormInput';
+import { useUserStore } from '../../stores/useUserStore';
+import ButtonCustom from '../../components/ButtonCustom';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigations/RootStack';
 
-const GetStartedScreen = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
+
+const GetStartedScreen = ({ navigation }: Props) => {
   const {
     fullName,
     email,
@@ -31,12 +30,16 @@ const GetStartedScreen = () => {
         mediaType: 'photo',
         selectionLimit: 1,
       },
-      (response) => {
-        if (!response.didCancel && response.assets && response.assets.length > 0) {
+      response => {
+        if (
+          !response.didCancel &&
+          response.assets &&
+          response.assets.length > 0
+        ) {
           const uri = response.assets[0].uri;
           if (uri) setAvatar(uri);
         }
-      }
+      },
     );
   };
 
@@ -76,6 +79,7 @@ const GetStartedScreen = () => {
         />
 
         <Text style={styles.inputLabel}>Preferred Currency:</Text>
+
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={currency}
@@ -88,6 +92,13 @@ const GetStartedScreen = () => {
             <Picker.Item label="JPY - Japanese Yen" value="JPY" />
           </Picker>
         </View>
+      </View>
+
+      <View style={{ marginTop: 20 }}>
+        <ButtonCustom
+          text="Go to Home Screen"
+          onPress={() => navigation.navigate('Home')}
+        />
       </View>
     </LinearGradient>
   );
