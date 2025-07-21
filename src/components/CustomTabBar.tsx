@@ -47,7 +47,7 @@ const CustomTabBar = ({
           >
             <Ionicons
               name={getIconName(route.name, isFocused)}
-              size={24}
+              size={30}
               color={isFocused ? '#2A7C76' : '#aaa'}
             />
           </TouchableOpacity>
@@ -69,7 +69,7 @@ export default CustomTabBar;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    height: 60,
+    height: 80,
     backgroundColor: '#fff',
     borderTopWidth: 1,
     borderTopColor: '#ccc',
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   fabButton: {
     position: 'absolute',
-    bottom: 25,
+    bottom: 50,
     alignSelf: 'center',
     backgroundColor: '#549994',
     width: 64,
