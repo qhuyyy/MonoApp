@@ -4,9 +4,10 @@ import React from 'react';
 type FormInputProps = {
   title: string;
   placeholder: string | null;
+  value: string;
+  onChangeText: (text: string) => void;
 };
-
-const FormInput = ({ title, placeholder }: FormInputProps) => {
+const FormInput = ({ title, placeholder, value, onChangeText }: FormInputProps) => {
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{title}</Text>
@@ -14,6 +15,8 @@ const FormInput = ({ title, placeholder }: FormInputProps) => {
         style={styles.input}
         placeholder={placeholder ?? ''}
         placeholderTextColor="#999"
+        value={value}
+        onChangeText={onChangeText}
       />
     </View>
   );
@@ -33,7 +36,7 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#429690',
-    height: 48,
+    height: 55,
     paddingHorizontal: 12,
     borderRadius: 8,
     fontSize: 16,
