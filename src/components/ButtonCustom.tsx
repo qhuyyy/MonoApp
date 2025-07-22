@@ -1,12 +1,9 @@
 import {
-  Button,
-  ButtonProps,
   StyleSheet,
   Text,
   TouchableOpacity,
 } from 'react-native';
 import React from 'react';
-import { windowWidth } from '../utils/Dimensions';
 
 type ButtonCustomProps = {
   text: string;

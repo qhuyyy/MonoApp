@@ -4,6 +4,7 @@ export interface Status {
 }
 
 export type Category = {
+  id: string;
   name: string;
   status: 'income' | 'expense';
   color: string;

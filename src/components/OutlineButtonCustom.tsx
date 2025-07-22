@@ -1,8 +1,4 @@
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { windowWidth } from '../utils/Dimensions';
 
@@ -24,7 +20,8 @@ export default OutlineButtonCustom;
 
 const styles = StyleSheet.create({
   container: {
-    width: windowWidth - 50,
+    alignSelf: 'center',
+    width: '100%',
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',

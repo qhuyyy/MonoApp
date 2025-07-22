@@ -17,9 +17,11 @@ import FormInput from '../../components/FormInput';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useCategoryStore } from '../../stores/useCategoryStore';
 import { categorySchema } from '../../validation/CategorySchema';
-type AddNewCategoryScreenProps = NativeStackScreenProps<
+import uuid from 'react-native-uuid';
+
+type CreateCategoryScreenProps = NativeStackScreenProps<
   CategoriesStackParamList,
-  'AddNewCategory'
+  'CreateCategory'
 >;
 
 const COLORS = [
@@ -39,7 +41,7 @@ const COLORS = [
   '#1E272E', // Xanh xám tối (mới thêm)
 ];
 
-const AddNewCategoryScreen = ({ navigation }: AddNewCategoryScreenProps) => {
+const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
   const [color, setColor] = useState(COLORS[0]);
   const addCategory = useCategoryStore(state => state.addCategory);
 
@@ -51,6 +53,7 @@ const AddNewCategoryScreen = ({ navigation }: AddNewCategoryScreenProps) => {
     validationSchema: categorySchema, // không có dấu {} ở đây
     onSubmit: (values, { resetForm }) => {
       addCategory({
+        id: uuid.v4() as string,
         name: values.name,
         status: values.status as 'income' | 'expense',
         color,
@@ -59,7 +62,7 @@ const AddNewCategoryScreen = ({ navigation }: AddNewCategoryScreenProps) => {
       navigation.goBack();
     },
   });
-  
+
   const { values, handleChange, handleSubmit, errors, touched } = formik;
 
   return (
@@ -126,7 +129,7 @@ const AddNewCategoryScreen = ({ navigation }: AddNewCategoryScreenProps) => {
   );
 };
 
-export default AddNewCategoryScreen;
+export default CreateCategoryScreen;
 
 const styles = StyleSheet.create({
   container: {
