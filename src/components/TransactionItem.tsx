@@ -24,7 +24,7 @@ const TransactionItem = ({
     ? 'Today'
     : isYesterday(parsedDate)
     ? 'Yesterday'
-    : format(parsedDate, 'dd MMM yyyy'); // ví dụ: 21 Jul 2025
+    : format(parsedDate, 'dd MMM yyyy');
 
   return (
     <TouchableOpacity style={styles.container}>
@@ -35,7 +35,7 @@ const TransactionItem = ({
         />
       </View>
       <View style={styles.infoContainer}>
-        <Text style={styles.description}>{description}</Text>
+        <Text style={styles.description}>{description ?? 'No description'}</Text>
         <Text>{displayDate}</Text>
       </View>
       <View style={styles.amountContainer}>

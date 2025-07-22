@@ -1,23 +1,21 @@
-import { StyleSheet, Text, View, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TextInputProps } from 'react-native';
 import React from 'react';
 
 type FormInputProps = {
   title: string;
-  placeholder: string | null;
-  value: string;
-  onChangeText: (text: string) => void;
-};
-const FormInput = ({ title, placeholder, value, onChangeText }: FormInputProps) => {
+  error?: string | false;
+} & TextInputProps; 
+
+const FormInput = ({ title, error, ...rest }: FormInputProps) => {
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{title}</Text>
       <TextInput
-        style={styles.input}
-        placeholder={placeholder ?? ''}
+        style={[styles.input, error && styles.inputError]}
         placeholderTextColor="#999"
-        value={value}
-        onChangeText={onChangeText}
+        {...rest}
       />
+      {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>
   );
 };
@@ -42,5 +40,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: '#fff',
     color: '#000',
+  },
+  inputError: {
+    borderColor: '#ff4d4f',
+  },
+  errorText: {
+    color: '#ff4d4f',
+    marginTop: 4,
+    fontSize: 12,
   },
 });
