@@ -4,7 +4,7 @@ import {
   TextInput,
   View,
   TouchableOpacity,
-  Alert,
+  ScrollView,
 } from 'react-native';
 import React, { useState } from 'react';
 import ButtonCustom from '../../components/ButtonCustom';
@@ -12,37 +12,21 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CategoriesStackParamList } from '../../navigations/CategoriesStack';
 import Rectangle from '../../assets/svg/Rectangle';
 import { Picker } from '@react-native-picker/picker';
-import { Form, useFormik } from 'formik';
-import FormInput from '../../components/FormInput';
+import { useFormik } from 'formik';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useCategoryStore } from '../../stores/useCategoryStore';
 import { categorySchema } from '../../validation/CategorySchema';
 import uuid from 'react-native-uuid';
+import { COLORS, ICONS } from '../../constants/Category';
 
 type CreateCategoryScreenProps = NativeStackScreenProps<
   CategoriesStackParamList,
   'CreateCategory'
 >;
 
-const COLORS = [
-  '#FF6B6B', // Đỏ
-  '#FF8C42', // Cam
-  '#F4C430', // Vàng
-  '#F39C12', // Vàng cam
-  '#D35400', // Cam đậm
-  '#E91E63', // Hồng
-  '#9B59B6', // Tím
-  '#2ECC71', // Xanh lá cây
-  '#5DB075', // Xanh lá nhạt
-  '#1ABC9C', // Xanh ngọc
-  '#4D96FF', // Xanh dương
-  '#34495E', // Xanh đen
-  '#2C3E50', // Xanh đậm (mới thêm)
-  '#1E272E', // Xanh xám tối (mới thêm)
-];
-
 const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
   const [color, setColor] = useState(COLORS[0]);
+  const [icon, setIcon] = useState(ICONS[0]);
   const addCategory = useCategoryStore(state => state.addCategory);
 
   const formik = useFormik({
@@ -50,13 +34,14 @@ const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
       name: '',
       status: 'income',
     },
-    validationSchema: categorySchema, // không có dấu {} ở đây
+    validationSchema: categorySchema,
     onSubmit: (values, { resetForm }) => {
       addCategory({
         id: uuid.v4() as string,
         name: values.name,
         status: values.status as 'income' | 'expense',
         color,
+        icon,
       });
       resetForm();
       navigation.goBack();
@@ -69,7 +54,6 @@ const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Rectangle style={StyleSheet.absoluteFillObject} />
-
         <View style={styles.headerContent}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -97,12 +81,12 @@ const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
         <TextInput
           style={styles.input}
           placeholder="Enter name..."
-          value={formik.values.name}
-          onChangeText={formik.handleChange('name')}
+          value={values.name}
+          onChangeText={handleChange('name')}
           onBlur={formik.handleBlur('name')}
         />
-        {formik.touched.name && formik.errors.name && (
-          <Text style={{ color: 'red' }}>{formik.errors.name}</Text>
+        {touched.name && errors.name && (
+          <Text style={{ color: 'red' }}>{errors.name}</Text>
         )}
 
         <Text style={styles.label}>Choose Color</Text>
@@ -123,7 +107,29 @@ const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
           ))}
         </View>
 
-        <ButtonCustom text="Save" onPress={formik.handleSubmit} />
+        <Text style={styles.label}>Choose Icon</Text>
+        <View style={styles.iconList}>
+          {ICONS.map(i => (
+            <TouchableOpacity
+              key={i}
+              style={[
+                styles.colorItem, 
+                {
+                  backgroundColor: icon === i ? color : '#ccc',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderWidth: icon === i ? 3 : 1,
+                  borderColor: icon === i ? '#333' : '#ccc',
+                },
+              ]}
+              onPress={() => setIcon(i)}
+            >
+              <Ionicons name={i} size={24} color="#fff" />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        <ButtonCustom text="Save" onPress={handleSubmit} />
       </View>
     </View>
   );
@@ -172,10 +178,6 @@ const styles = StyleSheet.create({
     marginTop: 5,
     overflow: 'hidden',
   },
-  picker: {
-    height: 55,
-    width: '100%',
-  },
   colorList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -186,6 +188,16 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
+  },
+  iconList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginVertical: 8,
+  },
+  iconItem: {
+    padding: 10,
+    borderRadius: 12,
   },
   headerContent: {
     position: 'relative',

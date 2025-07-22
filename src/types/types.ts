@@ -8,6 +8,7 @@ export type Category = {
   name: string;
   status: 'income' | 'expense';
   color: string;
+  icon: string;
 };
 
 export interface Transaction {

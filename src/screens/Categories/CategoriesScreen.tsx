@@ -1,7 +1,5 @@
 import {
   Alert,
-  Button,
-  FlatList,
   ScrollView,
   StyleSheet,
   Text,
@@ -15,7 +13,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CategoriesStackParamList } from '../../navigations/CategoriesStack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ButtonCustom from '../../components/ButtonCustom';
 import { Category } from '../../types/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCategoryStore } from '../../stores/useCategoryStore';
@@ -43,33 +40,29 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
     }
   };
 
-  const handleClearCategories = async () => {
-    Alert.alert('Xác nhận', 'Bạn có chắc muốn xoá toàn bộ danh mục?', [
+  const clearAllCategories = async () => {
+    Alert.alert('Xác nhận', 'Bạn có chắc chắn muốn xoá toàn bộ danh mục?', [
+      { text: 'Hủy', style: 'cancel' },
       {
-        text: 'Hủy',
-        style: 'cancel',
-      },
-      {
-        text: 'Xóa',
+        text: 'Xoá',
         style: 'destructive',
         onPress: async () => {
           await useCategoryStore.persist.clearStorage();
           useCategoryStore.setState({ categories: [] });
+          setCategories([]);
         },
       },
     ]);
   };
 
-  // Load once on mount
   useEffect(() => {
     loadCategories();
   }, []);
 
-  // Load every time screen is focused
   useFocusEffect(
     useCallback(() => {
       loadCategories();
-    }, []),
+    }, [])
   );
 
   return (
@@ -91,6 +84,9 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Income</Text>
+          {categories.filter(c => c.status === 'income').length === 0 && (
+            <Text style={styles.emptyText}>There is no Income's categories</Text>
+          )}
           {categories
             .filter(cat => cat.status === 'income')
             .map((item, index) => (
@@ -98,10 +94,7 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
                 key={item.id ?? index}
                 category={item}
                 onPress={() =>
-                  navigation.navigate({
-                    name: 'UpdateCategory',
-                    params: { category: item },
-                  })
+                  navigation.navigate('UpdateCategory', { category: item })
                 }
               />
             ))}
@@ -109,6 +102,9 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
 
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Expense</Text>
+          {categories.filter(c => c.status === 'expense').length === 0 && (
+            <Text style={styles.emptyText}>There is no Expense's categories</Text>
+          )}
           {categories
             .filter(cat => cat.status === 'expense')
             .map((item, index) => (
@@ -116,17 +112,20 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
                 key={item.id ?? index}
                 category={item}
                 onPress={() =>
-                  navigation.navigate({
-                    name: 'UpdateCategory',
-                    params: { category: item },
-                  })
+                  navigation.navigate('UpdateCategory', { category: item })
                 }
               />
             ))}
         </View>
-      </ScrollView>
 
-      <Button title="Xóa toàn bộ danh mục" onPress={handleClearCategories} />
+        <TouchableOpacity
+          style={styles.clearButton}
+          onPress={clearAllCategories}
+        >
+          <Ionicons name="trash-outline" size={20} color="#fff" />
+          <Text style={styles.clearButtonText}>Xoá toàn bộ danh mục</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 };
@@ -136,7 +135,7 @@ export default CategoriesScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E9F3F2',
+    backgroundColor: '#F2F7F7',
   },
   header: {
     padding: 20,
@@ -153,35 +152,45 @@ const styles = StyleSheet.create({
   },
   title: {
     color: 'white',
-    fontSize: 30,
+    fontSize: 26,
     fontWeight: 'bold',
   },
   addIcon: {
     position: 'absolute',
     right: 16,
   },
-  formContainer: {
-    padding: 16,
-    marginVertical: 20,
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    marginHorizontal: 16,
-    borderWidth: 1,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  categoryText: {
-    fontSize: 16,
-    marginBottom: 6,
-  },
   sectionContainer: {
     paddingHorizontal: 16,
     marginBottom: 20,
   },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
+  },
   scrollContent: {
-    paddingBottom: 30,
+    paddingBottom: 40,
+  },
+  clearButton: {
+    marginTop: 20,
+    marginHorizontal: 16,
+    backgroundColor: '#E74C3C',
+    paddingVertical: 12,
+    borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  clearButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 8,
+    fontWeight: '500',
+  },
+  emptyText: {
+    fontStyle: 'italic',
+    color: '#888',
+    marginLeft: 5,
   },
 });

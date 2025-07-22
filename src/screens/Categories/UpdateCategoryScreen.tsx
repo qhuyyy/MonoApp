@@ -13,33 +13,16 @@ import { CategoriesStackParamList } from '../../navigations/CategoriesStack';
 import Rectangle from '../../assets/svg/Rectangle';
 import { Picker } from '@react-native-picker/picker';
 import { useFormik } from 'formik';
-import FormInput from '../../components/FormInput';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useCategoryStore } from '../../stores/useCategoryStore';
 import { categorySchema } from '../../validation/CategorySchema';
 import OutlineButtonCustom from '../../components/OutlineButtonCustom';
+import { COLORS, ICONS } from '../../constants/Category';
 
 type UpdateCategoryScreenProps = NativeStackScreenProps<
   CategoriesStackParamList,
   'UpdateCategory'
 >;
-
-const COLORS = [
-  '#FF6B6B',
-  '#FF8C42',
-  '#F4C430',
-  '#F39C12',
-  '#D35400',
-  '#E91E63',
-  '#9B59B6',
-  '#2ECC71',
-  '#5DB075',
-  '#1ABC9C',
-  '#4D96FF',
-  '#34495E',
-  '#2C3E50',
-  '#1E272E',
-];
 
 const UpdateCategoryScreen = ({
   navigation,
@@ -50,6 +33,7 @@ const UpdateCategoryScreen = ({
   const updateCategory = useCategoryStore(state => state.updateCategory);
   const deleteCategory = useCategoryStore(state => state.deleteCategory);
   const [color, setColor] = useState(category.color);
+  const [icon, setIcon] = useState(category.icon);
 
   const handleDelete = () => {
     Alert.alert(
@@ -82,6 +66,7 @@ const UpdateCategoryScreen = ({
         name: values.name,
         status: values.status as 'income' | 'expense',
         color,
+        icon,
       });
       navigation.goBack();
     },
@@ -91,7 +76,6 @@ const UpdateCategoryScreen = ({
     <View style={styles.container}>
       <View style={styles.header}>
         <Rectangle style={StyleSheet.absoluteFillObject} />
-
         <View style={styles.headerContent}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -114,6 +98,7 @@ const UpdateCategoryScreen = ({
             <Picker.Item label="Expense" value="expense" />
           </Picker>
         </View>
+
         <Text style={styles.label}>Category Name</Text>
         <TextInput
           style={styles.input}
@@ -125,6 +110,7 @@ const UpdateCategoryScreen = ({
         {formik.touched.name && formik.errors.name && (
           <Text style={{ color: 'red' }}>{formik.errors.name}</Text>
         )}
+
         <Text style={styles.label}>Choose Color</Text>
         <View style={styles.colorList}>
           {COLORS.map(c => (
@@ -142,6 +128,29 @@ const UpdateCategoryScreen = ({
             />
           ))}
         </View>
+
+        <Text style={styles.label}>Choose Icon</Text>
+        <View style={styles.iconList}>
+          {ICONS.map(i => (
+            <TouchableOpacity
+              key={i}
+              style={[
+                styles.colorItem,
+                {
+                  backgroundColor: icon === i ? color : '#ccc',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderWidth: icon === i ? 3 : 1,
+                  borderColor: icon === i ? '#333' : '#ccc',
+                },
+              ]}
+              onPress={() => setIcon(i)}
+            >
+              <Ionicons name={i} size={24} color="#fff" />
+            </TouchableOpacity>
+          ))}
+        </View>
+
         <ButtonCustom text="Update" onPress={formik.handleSubmit} />
         <OutlineButtonCustom text="Delete" onPress={handleDelete} />
       </View>
@@ -222,5 +231,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 24,
     fontWeight: '700',
+  },
+  iconList: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    marginVertical: 8,
+  },
+  iconItem: {
+    padding: 10,
+    borderRadius: 12,
   },
 });

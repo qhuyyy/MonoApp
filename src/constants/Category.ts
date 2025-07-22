@@ -1,0 +1,33 @@
+export const COLORS = [
+  '#FF6B6B',
+  '#FF8C42',
+  '#F4C430',
+  '#F39C12',
+  '#D35400',
+  '#E91E63',
+  '#9B59B6',
+  '#2ECC71',
+  '#5DB075',
+  '#1ABC9C',
+  '#4D96FF',
+  '#34495E',
+  '#2C3E50',
+  '#1E272E',
+];
+
+export const ICONS = [
+  'fast-food-outline',
+  'cart-outline',
+  'home-outline',
+  'car-sport-outline',
+  'airplane-outline',
+  'bus-outline',
+  'cash-outline',
+  'school-outline',
+  'tennisball-outline',
+  'film-outline',
+  'musical-notes-outline',
+  'phone-portrait-outline',
+  'barbell-outline',
+  'restaurant-outline',
+];

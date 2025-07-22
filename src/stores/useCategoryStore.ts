@@ -7,6 +7,7 @@ export type Category = {
   name: string;
   status: 'income' | 'expense';
   color: string;
+  icon: string;
 };
 
 type CategoryState = {
