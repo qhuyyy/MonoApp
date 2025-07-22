@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,8 @@ import { transactionSchema } from '../validation/TransactionSchema';
 
 import { Category } from '../types/types';
 import { useUserStore } from '../stores/useUserStore';
+import ButtonCustom from '../components/ButtonCustom';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -83,139 +85,170 @@ export default function TransactionTabs() {
   );
 }
 
-  function IncomeTab() {
-    const [openPicker, setOpenPicker] = useState(false);
-    const incomeCategories = categories.filter(cat => cat.status_id === 1);
-    const currency = useUserStore(state => state.currency);
-    
-    const handlePickImage = (setFieldValue: any) => {
-      launchImageLibrary({ mediaType: 'photo', quality: 0.5 }, response => {
-        if (
-          !response.didCancel &&
-          response.assets &&
-          response.assets.length > 0
-        ) {
-          setFieldValue('image', response.assets[0].uri);
+function IncomeTab() {
+  const [openPicker, setOpenPicker] = useState(false);
+  const [incomeCategories, setIncomeCategories] = useState<Category[]>([]);
+  const [initialCategory, setInitialCategory] = useState<string>('');
+  const currency = useUserStore(state => state.currency);
+
+  const handlePickImage = (setFieldValue: any) => {
+    launchImageLibrary({ mediaType: 'photo', quality: 0.5 }, response => {
+      if (
+        !response.didCancel &&
+        response.assets &&
+        response.assets.length > 0
+      ) {
+        setFieldValue('image', response.assets[0].uri);
+      }
+    });
+  };
+
+  useEffect(() => {
+    const fetchIncomeCategories = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem('category-storage');
+        if (storedData) {
+          const parsed = JSON.parse(storedData);
+          const allCategories: Category[] = parsed.state?.categories || [];
+
+          // Lọc chỉ những category có status === 'income'
+          const incomeOnly = allCategories.filter(
+            cat => cat.status === 'income',
+          );
+
+          setIncomeCategories(incomeOnly);
+
+          // Nếu có ít nhất 1 category, đặt giá trị mặc định ban đầu
+          if (incomeOnly.length > 0) {
+            setInitialCategory(incomeOnly[0].name);
+          }
         }
-      });
+      } catch (error) {
+        console.error('Failed to load income categories:', error);
+      }
     };
 
-    return (
-      <Formik
-        initialValues={{
-          amount: '',
-          description: '',
-          category: incomeCategories[0]?.name ?? '',
-          date: new Date(),
-          type: 'income',
-          image: null,
-        }}
-        validationSchema={transactionSchema}
-        onSubmit={(values, { resetForm }) => {
-          console.log('Submit:', values);
-          // Gửi dữ liệu API hoặc xử lý ở đây...
+    fetchIncomeCategories();
+  }, []);
 
-          resetForm({
-            values: {
-              ...values,
-              amount: '',
-              description: '',
-              image: null,
-            },
-          });
-        }}
-      >
-        {({
-          handleChange,
-          handleSubmit,
-          setFieldValue,
-          values,
-          errors,
-          touched,
-        }) => (
-          <View style={styles.formContainer}>
-            <Text style={styles.inputLabel}>Select image (optional)</Text>
-            <TouchableOpacity
-              onPress={() => handlePickImage(setFieldValue)}
-              style={styles.imageContainer}
-            >
-              {values.image ? (
-                <Image source={{ uri: values.image }} style={styles.image} />
-              ) : (
-                <View style={styles.imagePlaceholder}>
-                  <Text style={styles.imageText}>Pick Avatar</Text>
-                </View>
-              )}
-            </TouchableOpacity>
+  return (
+    <Formik
+      enableReinitialize
+      initialValues={{
+        amount: '',
+        description: '',
+        category: initialCategory,
+        date: new Date(),
+        type: 'income',
+        image: null,
+      }}
+      validationSchema={transactionSchema}
+      onSubmit={(values, { resetForm }) => {
+        console.log('Submit:', values);
+        // Gửi dữ liệu API hoặc xử lý ở đây...
 
-            <FormInput
-              value={values.amount}
-              placeholder={`Enter amount (${currency})`}
-              title="Amount"
-              keyboardType="numeric"
-              onChangeText={handleChange('amount')}
-              error={touched.amount && errors.amount}
-            />
-
-            <FormInput
-              value={values.description}
-              placeholder="Enter a description"
-              title="Description (optional)"
-              onChangeText={handleChange('description')}
-              error={touched.description && errors.description}
-            />
-
-            <Text style={styles.inputLabel}>Category</Text>
-            <View style={styles.pickerContainer}>
-              <Picker
-                selectedValue={values.category}
-                onValueChange={value => setFieldValue('category', value)}
-              >
-                {incomeCategories.map((cat: Category) => (
-                  <Picker.Item key={cat.id} label={cat.name} value={cat.name} />
-                ))}
-              </Picker>
-            </View>
-            {touched.category && errors.category && (
-              <Text style={styles.errorText}>{errors.category}</Text>
+        resetForm({
+          values: {
+            ...values,
+            amount: '',
+            description: '',
+            image: null,
+          },
+        });
+      }}
+    >
+      {({
+        handleChange,
+        handleSubmit,
+        setFieldValue,
+        values,
+        errors,
+        touched,
+      }) => (
+        <View style={styles.formContainer}>
+          <Text style={styles.inputLabel}>Select image (optional)</Text>
+          <TouchableOpacity
+            onPress={() => handlePickImage(setFieldValue)}
+            style={styles.imageContainer}
+          >
+            {values.image ? (
+              <Image source={{ uri: values.image }} style={styles.image} />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <Text style={styles.imageText}>Pick Avatar</Text>
+              </View>
             )}
+          </TouchableOpacity>
 
-            <Text style={styles.inputLabel}>Date</Text>
-            <Pressable
-              onPress={() => setOpenPicker(true)}
-              style={styles.dateInput}
-            >
-              <Text style={styles.dateText}>
-                {format(values.date, 'yyyy-MM-dd')}
-              </Text>
-            </Pressable>
-            <DatePicker
-              modal
-              open={openPicker}
-              date={values.date}
-              mode="date"
-              maximumDate={new Date()}
-              onConfirm={selectedDate => {
-                setOpenPicker(false);
-                setFieldValue('date', selectedDate);
-              }}
-              onCancel={() => setOpenPicker(false)}
-            />
-            {touched.date && typeof errors.date === 'string' && (
-              <Text style={styles.errorText}>{errors.date}</Text>
-            )}
+          <FormInput
+            value={values.amount}
+            placeholder={`Enter amount (${currency})`}
+            title="Amount"
+            keyboardType="numeric"
+            onChangeText={handleChange('amount')}
+            error={touched.amount && errors.amount}
+          />
 
-            <TouchableOpacity
-              onPress={() => handleSubmit()}
-              style={styles.submitButton}
+          <FormInput
+            value={values.description}
+            placeholder="Enter a description"
+            title="Description (optional)"
+            onChangeText={handleChange('description')}
+            error={touched.description && errors.description}
+          />
+
+          <Text style={styles.inputLabel}>Category</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={values.category}
+              onValueChange={value => setFieldValue('category', value)}
             >
-              <Text style={styles.submitText}>Save Transaction</Text>
-            </TouchableOpacity>
+              {incomeCategories.map((cat, index) => (
+                <Picker.Item key={index} label={cat.name} value={cat.name} />
+              ))}
+            </Picker>
           </View>
-        )}
-      </Formik>
-    );
-  }
+
+          {touched.category && errors.category && (
+            <Text style={styles.errorText}>{errors.category}</Text>
+          )}
+
+          <Text style={styles.inputLabel}>Date</Text>
+          <Pressable
+            onPress={() => setOpenPicker(true)}
+            style={styles.dateInput}
+          >
+            <Text style={styles.dateText}>
+              {format(values.date, 'yyyy-MM-dd')}
+            </Text>
+          </Pressable>
+          <DatePicker
+            modal
+            open={openPicker}
+            date={values.date}
+            mode="date"
+            maximumDate={new Date()}
+            onConfirm={selectedDate => {
+              setOpenPicker(false);
+              setFieldValue('date', selectedDate);
+            }}
+            onCancel={() => setOpenPicker(false)}
+          />
+          {touched.date && typeof errors.date === 'string' && (
+            <Text style={styles.errorText}>{errors.date}</Text>
+          )}
+
+          <View style={{ marginTop: 10 }}>
+            <ButtonCustom
+              text="Save Transaction"
+              onPress={() => handleSubmit()}
+            ></ButtonCustom>
+          </View>
+        </View>
+      )}
+    </Formik>
+  );
+}
 
 function ExpenseTab() {
   return <View></View>;
@@ -245,7 +278,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: '700',
   },
   mainContent: {

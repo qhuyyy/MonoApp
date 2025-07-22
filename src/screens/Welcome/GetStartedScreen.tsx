@@ -10,7 +10,7 @@ import ButtonCustom from '../../components/ButtonCustom';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigations/RootStack';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'Welcome'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'WelcomeStack'>;
 
 const GetStartedScreen = ({ navigation }: Props) => {
   const {
@@ -97,7 +97,7 @@ const GetStartedScreen = ({ navigation }: Props) => {
       <View style={{ marginTop: 20 }}>
         <ButtonCustom
           text="Go to Home Screen"
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => navigation.navigate('MainBottomTabs')}
         />
       </View>
     </LinearGradient>

@@ -24,12 +24,22 @@ export default function HomeScreen() {
           <Text style={styles.welcome}>Good afternoon,</Text>
           <Text style={styles.name}>Enjelin Morgeana</Text>
         </View>
-        <Ionicons
-          name="notifications-outline"
-          size={24}
-          color="#fff"
-          style={{ position: 'absolute', top: 60, right: 20 }}
-        />
+        <TouchableOpacity>
+          <Ionicons
+            name="notifications-outline"
+            size={24}
+            color="#fff"
+            style={{ position: 'absolute', top: -35, right: 40 }}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <Ionicons
+            name="settings-outline"
+            size={24}
+            color="#fff"
+            style={{ position: 'absolute', top: -35, right: 10 }}
+          />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.balanceCard}>
@@ -101,7 +111,18 @@ export default function HomeScreen() {
       </View>
 
       <View style={styles.transactionContainer}>
-        <Text style={styles.sectionTitle}>Transactions History</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Text style={styles.sectionTitle}>Transactions History</Text>
+          <TouchableOpacity>
+            <Text style={{ fontStyle: 'italic' }}>See all</Text>
+          </TouchableOpacity>
+        </View>
         <FlatList
           data={transactions}
           keyExtractor={item => item.id.toString()}
@@ -111,7 +132,7 @@ export default function HomeScreen() {
               description={item.description}
               date={item.date}
               amount={item.amount}
-              isIncome={item.status_id === 1} // status_id 1 = income
+              isIncome={item.status_id === 1}
             />
           )}
           contentContainerStyle={{ paddingTop: 10 }}

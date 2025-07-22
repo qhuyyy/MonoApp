@@ -18,9 +18,15 @@ export const transactionSchema = yup.object({
     .optional(),
 
   date: yup
-    .date()
-    .max(new Date(), 'Date cannot be in the future')
-    .required('Please select a date'),
+  .date()
+  .transform((value, originalValue) => {
+    return originalValue ? new Date(originalValue) : value;
+  })
+  .max(
+    new Date(new Date().setHours(23, 59, 59, 999)),
+    'Date cannot be in the future'
+  )
+  .required('Please select a date'),
 
   type: yup
     .string()

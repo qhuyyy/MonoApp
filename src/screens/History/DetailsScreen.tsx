@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-const SettingsScreen = () => {
+const DetailsScreen = () => {
   return (
     <View>
-      <Text>SettingsScreen</Text>
+      <Text>DetailsScreen</Text>
     </View>
   )
 }
 
-export default SettingsScreen
+export default DetailsScreen
 
 const styles = StyleSheet.create({})

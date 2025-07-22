@@ -1,4 +1,6 @@
 import {
+  Button,
+  ButtonProps,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -24,7 +26,8 @@ export default ButtonCustom;
 
 const styles = StyleSheet.create({
   container: {
-    width: windowWidth - 50,
+    alignSelf: 'center',
+    width: '100%',
     height: 50,
     alignItems: 'center',
     justifyContent: 'center',

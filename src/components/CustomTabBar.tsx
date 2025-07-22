@@ -9,12 +9,12 @@ const getIconName = (routeName: string, focused: boolean) => {
   switch (routeName) {
     case 'Home':
       return focused ? 'home' : 'home-outline';
-    case 'History':
+    case 'HistoryStack':
       return focused ? 'book' : 'book-outline';
     case 'Statistics':
       return focused ? 'bar-chart' : 'bar-chart-outline';
-    case 'Settings':
-      return focused ? 'settings' : 'settings-outline';
+    case 'CategoriesStack':
+      return focused ? 'grid' : 'grid-outline';
     default:
       return 'ellipse-outline';
   }

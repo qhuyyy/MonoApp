@@ -1,13 +1,13 @@
 export interface Status {
   id: number;
-  name: 'income' | 'expense';
+  name: 'income' | 'expense' ;
 }
 
-export interface Category {
-  id: number;
-  status_id: number;
+export type Category = {
   name: string;
-}
+  status: 'income' | 'expense';
+  color: string;
+};
 
 export interface Transaction {
   id: number;

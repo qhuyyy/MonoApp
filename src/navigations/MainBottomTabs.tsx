@@ -1,24 +1,25 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HomeScreen from '../screens/Home/HomeScreen';
-import HistoryScreen from '../screens/Home/HistoryScreen';
-import StatisticsScreen from '../screens/Home/StatisticsScreen';
-import SettingsScreen from '../screens/Home/SettingsScreen';
+import HomeScreen from '../screens/Main/HomeScreen';
+import HistoryStack from './HistoryStack';
+import CategoriesStack from './CategoriesStack';
+import StatisticsScreen from '../screens/Main/StatisticsScreen';
 import CustomTabBar from '../components/CustomTabBar';
 import AddNewTransTabs from './AddNewTransTab';
+
 const Tab = createBottomTabNavigator();
 
-export default function HomeBottomTabs() {
+export default function MainBottomTabs() {
   return (
     <Tab.Navigator
-      tabBar={(props) => <CustomTabBar {...props} />}
+      tabBar={props => <CustomTabBar {...props} />}
       screenOptions={{ headerShown: false }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="History" component={HistoryScreen} />
+      <Tab.Screen name="CategoriesStack" component={CategoriesStack} />
       <Tab.Screen name="AddNewTrans" component={AddNewTransTabs} />
+      <Tab.Screen name="HistoryStack" component={HistoryStack} />
       <Tab.Screen name="Statistics" component={StatisticsScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 }
