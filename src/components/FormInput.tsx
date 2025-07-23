@@ -1,10 +1,16 @@
-import { StyleSheet, Text, View, TextInput, TextInputProps } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TextInputProps,
+} from 'react-native';
 import React from 'react';
 
 type FormInputProps = {
   title: string;
   error?: string | false;
-} & TextInputProps; 
+} & TextInputProps;
 
 const FormInput = ({ title, error, ...rest }: FormInputProps) => {
   return (
@@ -30,6 +36,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     fontSize: 14,
     color: '#429690',
+    fontWeight: 'bold',
   },
   input: {
     borderWidth: 1,

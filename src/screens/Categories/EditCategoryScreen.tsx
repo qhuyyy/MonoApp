@@ -24,10 +24,7 @@ type EditCategoryScreenProps = NativeStackScreenProps<
   'EditCategory'
 >;
 
-const EditCategoryScreen = ({
-  navigation,
-  route,
-}: EditCategoryScreenProps) => {
+const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
   const { category } = route.params;
 
   const updateCategory = useCategoryStore(state => state.updateCategory);
@@ -83,7 +80,7 @@ const EditCategoryScreen = ({
           >
             <Ionicons name="chevron-back-outline" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Update Category</Text>
+          <Text style={styles.headerTitle}>Edit Category</Text>
         </View>
       </View>
 
@@ -179,9 +176,26 @@ const styles = StyleSheet.create({
     gap: 10,
     borderWidth: 1,
   },
+  headerContent: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: 50,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 0,
+    padding: 8,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '700',
+  },
   label: {
     fontWeight: 'bold',
     marginTop: 12,
+    color: '#429690',
   },
   input: {
     borderWidth: 1,
@@ -215,22 +229,6 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-  },
-  headerContent: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-    top: 50,
-  },
-  backButton: {
-    position: 'absolute',
-    left: 0,
-    padding: 8,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
   },
   iconList: {
     flexDirection: 'row',

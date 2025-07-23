@@ -16,10 +16,17 @@ import TransactionItem from '../../components/TransactionItem';
 import { useTransactionStore } from '../../stores/useTransactionStore';
 import { Transaction } from '../../types/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { HistoryStackParamList } from '../../navigations/HistoryStack';
+
+type HistoryScreenProps = NativeStackScreenProps<
+  HistoryStackParamList,
+  'History'
+>;
 
 const PAGE_SIZE = 4;
 
-const HistoryScreen = () => {
+const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const transactions = useTransactionStore(state => state.transactions);
 
   const [search, setSearch] = useState('');
@@ -120,7 +127,7 @@ const HistoryScreen = () => {
                 styles.actionTouchableOpacity,
                 { backgroundColor: '#FFA500' },
               ]}
-              onPress={() => Alert.alert('Edit')}
+              onPress={() => navigation.navigate('EditTransaction', { transaction: item })}
             >
               <Ionicons name="pencil-outline" size={24} color="#fff" />
             </TouchableOpacity>

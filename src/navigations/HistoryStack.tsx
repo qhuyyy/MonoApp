@@ -1,10 +1,11 @@
 import HistoryScreen from '../screens/History/HistoryScreen';
-import DetailsScreen from '../screens/History/DetailsScreen';
+import EditTransactionScreen from '../screens/History/EditTransactionScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { Transaction } from '../types/types';
 
 export type HistoryStackParamList = {
   History: undefined;
-  Details: { id: string };
+  EditTransaction: { transaction: Transaction };
 };
 
 const Stack = createNativeStackNavigator<HistoryStackParamList>();
@@ -13,7 +14,7 @@ export default function HistoryStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="History" component={HistoryScreen} />
-      <Stack.Screen name="Details" component={DetailsScreen} />
+      <Stack.Screen name="EditTransaction" component={EditTransactionScreen} />
     </Stack.Navigator>
   );
 }

@@ -6,9 +6,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 type TransactionItemProps = {
   transaction: Transaction;
+  onPress?: (transaction: Transaction) => void;
 };
 
-const TransactionItem = ({ transaction }: TransactionItemProps) => {
+const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
   if (!transaction) return null;
 
   const { amount, category, description, date } = transaction;
@@ -23,7 +24,7 @@ const TransactionItem = ({ transaction }: TransactionItemProps) => {
   const isIncome = category.status === 'income';
 
   return (
-    <TouchableOpacity style={[styles.container, {borderColor: category.color || '#ccc'}]}>
+    <TouchableOpacity style={[styles.container, {borderColor: category.color || '#ccc'}]} onPress={onPress ? () => onPress(transaction) : undefined}>
       <View style={styles.iconContainer}>
         <Ionicons
           name={category.icon}
