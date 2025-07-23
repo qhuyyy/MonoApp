@@ -1,49 +1,68 @@
+// useTransactionStore.ts
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Transaction } from '../types/types';
 
-const STORAGE_KEY = 'transaction-storage';
-
 type TransactionState = {
   transactions: Transaction[];
+  addTransaction: (transaction: Transaction) => void;
+  updateTransaction: (updatedTransaction: Transaction) => void;
+  deleteTransaction: (id: string) => void;
   loadTransactions: () => Promise<void>;
-  addTransaction: (transaction: Transaction) => Promise<void>;
-  updateTransaction: (updatedTransaction: Transaction) => Promise<void>;
-  deleteTransaction: (id: string) => Promise<void>;
 };
 
-export const useTransactionStore = create<TransactionState>((set, get) => ({
-  transactions: [],
+export const useTransactionStore = create<TransactionState>()(
+  persist(
+    (set) => ({
+      transactions: [],
 
-  loadTransactions: async () => {
-    try {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed: Transaction[] = JSON.parse(stored);
-        set({ transactions: parsed });
-      }
-    } catch (error) {
-      console.error('Failed to load transactions:', error);
+      addTransaction: (transaction) =>
+        set((state) => ({
+          transactions: [...state.transactions, transaction],
+        })),
+
+      updateTransaction: (updatedTransaction) =>
+        set((state) => ({
+          transactions: state.transactions.map((t) =>
+            t.id === updatedTransaction.id ? updatedTransaction : t
+          ),
+        })),
+
+      deleteTransaction: (id) =>
+        set((state) => ({
+          transactions: state.transactions.filter((t) => t.id !== id),
+        })),
+
+      loadTransactions: async () => {
+        try {
+          const storedData = await AsyncStorage.getItem('transaction-storage');
+          if (storedData) {
+            const parsed = JSON.parse(storedData);
+            const allTransactions: Transaction[] = parsed.state?.transactions || [];
+            set({ transactions: allTransactions });
+          } else {
+            set({ transactions: [] });
+          }
+        } catch (error) {
+          console.error('Failed to load transactions from AsyncStorage:', error);
+        }
+      },
+    }),
+    {
+      name: 'transaction-storage',
+      storage: {
+        getItem: async (key) => {
+          const value = await AsyncStorage.getItem(key);
+          return value ? JSON.parse(value) : null;
+        },
+        setItem: async (key, value) => {
+          await AsyncStorage.setItem(key, JSON.stringify(value));
+        },
+        removeItem: async (key) => {
+          await AsyncStorage.removeItem(key);
+        },
+      },
     }
-  },
-
-  addTransaction: async (transaction: Transaction) => {
-    const updated = [...get().transactions, transaction];
-    set({ transactions: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  },
-
-  updateTransaction: async (updatedTransaction: Transaction) => {
-    const updated = get().transactions.map(t =>
-      t.id === updatedTransaction.id ? updatedTransaction : t
-    );
-    set({ transactions: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  },
-
-  deleteTransaction: async (id: string) => {
-    const updated = get().transactions.filter(t => t.id !== id);
-    set({ transactions: updated });
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  },
-}));
+  )
+);

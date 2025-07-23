@@ -12,11 +12,12 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Rectangle from '../../assets/svg/Rectangle';
 import TransactionItem from '../../components/TransactionItem';
-import transactions from '../../assets/dummydata/transactions';
 import { useUserStore } from '../../stores/useUserStore';
+import { useTransactionStore } from '../../stores/useTransactionStore';
 
 export default function HomeScreen() {
   const fullName = useUserStore(state => state.fullName);
+  const transactions = useTransactionStore(state => state.transactions);
 
   return (
     <View style={styles.container}>
@@ -125,20 +126,17 @@ export default function HomeScreen() {
             <Text style={{ fontStyle: 'italic' }}>See all</Text>
           </TouchableOpacity>
         </View>
-        {/* <FlatList
-          data={transactions}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({ item }) => (
-            <TransactionItem
-              image={item.image}
-              description={item.description}
-              date={item.date}
-              amount={item.amount}
-              isIncome={item.status_id === 1}
-            />
-          )}
+        <FlatList
+          data={transactions.slice().reverse()}
+          keyExtractor={item => item.id}
+          renderItem={({ item }) => <TransactionItem transaction={item} />}
           contentContainerStyle={{ paddingTop: 10 }}
-        /> */}
+          ListEmptyComponent={
+            <Text style={{ textAlign: 'center', marginTop: 20 }}>
+              No transactions found.
+            </Text>
+          }
+        />
       </View>
     </View>
   );
@@ -147,7 +145,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E9F3F2',
+    backgroundColor: '#fff',
   },
   header: {
     padding: 20,

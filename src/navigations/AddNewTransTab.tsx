@@ -11,21 +11,29 @@ import {
 import Rectangle from '../assets/svg/Rectangle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FormInput from '../components/FormInput';
-import categories from '../assets/dummydata/categories';
 import { Picker } from '@react-native-picker/picker';
 import { format } from 'date-fns';
 import DatePicker from 'react-native-date-picker';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { useTransactionStore } from '../stores/useTransactionStore';
 import { Formik } from 'formik';
 import { transactionSchema } from '../validation/TransactionSchema';
 
-import { Category } from '../types/types';
+import { Category, Transaction } from '../types/types';
 import { useUserStore } from '../stores/useUserStore';
 import ButtonCustom from '../components/ButtonCustom';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTransactionStore } from '../stores/useTransactionStore';
+import uuid from 'react-native-uuid';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { MainBottomTabsParamList } from './MainBottomTabs';
+import { useNavigation } from '@react-navigation/native';
 
-const { width } = Dimensions.get('window');
+import { windowWidth } from '../utils/Dimensions';
+
+type AddNewTransNavigationProp = NativeStackNavigationProp<
+  MainBottomTabsParamList,
+  'AddNewTrans'
+>;
 
 export default function TransactionTabs() {
   const [activeTab, setActiveTab] = useState<'Income' | 'Expense'>('Income');
@@ -88,8 +96,12 @@ export default function TransactionTabs() {
 function IncomeTab() {
   const [openPicker, setOpenPicker] = useState(false);
   const [incomeCategories, setIncomeCategories] = useState<Category[]>([]);
-  const [initialCategory, setInitialCategory] = useState<string>('');
+  const [initialCategory, setInitialCategory] = useState<Category | null>(null);
+
+  const navigation = useNavigation<AddNewTransNavigationProp>();
+
   const currency = useUserStore(state => state.currency);
+  const addTransaction = useTransactionStore(state => state.addTransaction);
 
   const handlePickImage = (setFieldValue: any) => {
     launchImageLibrary({ mediaType: 'photo', quality: 0.5 }, response => {
@@ -111,16 +123,13 @@ function IncomeTab() {
           const parsed = JSON.parse(storedData);
           const allCategories: Category[] = parsed.state?.categories || [];
 
-          // Lọc chỉ những category có status === 'income'
           const incomeOnly = allCategories.filter(
             cat => cat.status === 'income',
           );
 
           setIncomeCategories(incomeOnly);
-
-          // Nếu có ít nhất 1 category, đặt giá trị mặc định ban đầu
           if (incomeOnly.length > 0) {
-            setInitialCategory(incomeOnly[0].name);
+            setInitialCategory(incomeOnly[0]);
           }
         }
       } catch (error) {
@@ -131,6 +140,10 @@ function IncomeTab() {
     fetchIncomeCategories();
   }, []);
 
+  if (!initialCategory) {
+    return <Text style={{ padding: 20 }}>Loading categories...</Text>;
+  }
+
   return (
     <Formik
       enableReinitialize
@@ -140,19 +153,27 @@ function IncomeTab() {
         category: initialCategory,
         date: new Date(),
         type: 'income',
-        image: null,
+        image: '',
       }}
       validationSchema={transactionSchema}
-      onSubmit={(values, { resetForm }) => {
-        console.log('Submit:', values);
-        // Gửi dữ liệu API hoặc xử lý ở đây...
+      onSubmit={async (values, { resetForm }) => {
+        const newTransaction: Transaction = {
+          id: uuid.v4().toString(),
+          amount: parseFloat(values.amount),
+          description: values.description,
+          image: values.image,
+          category: values.category,
+          date: values.date.toISOString(),
+        };
 
+        await addTransaction(newTransaction);
+        navigation.navigate('Home');
         resetForm({
           values: {
             ...values,
             amount: '',
             description: '',
-            image: null,
+            image: '',
           },
         });
       }}
@@ -175,7 +196,7 @@ function IncomeTab() {
               <Image source={{ uri: values.image }} style={styles.image} />
             ) : (
               <View style={styles.imagePlaceholder}>
-                <Text style={styles.imageText}>Pick Avatar</Text>
+                <Text style={styles.imageText}>Pick Image</Text>
               </View>
             )}
           </TouchableOpacity>
@@ -200,16 +221,19 @@ function IncomeTab() {
           <Text style={styles.inputLabel}>Category</Text>
           <View style={styles.pickerContainer}>
             <Picker
-              selectedValue={values.category}
-              onValueChange={value => setFieldValue('category', value)}
+              selectedValue={values.category?.id}
+              onValueChange={value => {
+                const selected = incomeCategories.find(cat => cat.id === value);
+                if (selected) setFieldValue('category', selected);
+              }}
             >
-              {incomeCategories.map((cat, index) => (
-                <Picker.Item key={index} label={cat.name} value={cat.name} />
+              {incomeCategories.map(cat => (
+                <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
               ))}
             </Picker>
           </View>
 
-          {touched.category && errors.category && (
+          {touched.category && typeof errors.category === 'string' && (
             <Text style={styles.errorText}>{errors.category}</Text>
           )}
 
@@ -239,10 +263,7 @@ function IncomeTab() {
           )}
 
           <View style={{ marginTop: 10 }}>
-            <ButtonCustom
-              text="Save Transaction"
-              onPress={() => handleSubmit()}
-            ></ButtonCustom>
+            <ButtonCustom text="Save Transaction" onPress={handleSubmit} />
           </View>
         </View>
       )}
@@ -293,7 +314,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 4,
     alignSelf: 'center',
-    width: width * 0.6,
+    width: windowWidth * 0.6,
     marginBottom: 24,
     marginTop: 20,
   },
@@ -323,7 +344,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     marginVertical: 20,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     borderRadius: 20,
     marginHorizontal: 16,
     marginTop: -24,
