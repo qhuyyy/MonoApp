@@ -13,16 +13,18 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import Rectangle from '../../assets/svg/Rectangle';
 import TransactionItem from '../../components/TransactionItem';
 import transactions from '../../assets/dummydata/transactions';
+import { useUserStore } from '../../stores/useUserStore';
 
 export default function HomeScreen() {
+  const fullName = useUserStore(state => state.fullName);
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Rectangle style={StyleSheet.absoluteFillObject} />
         <View style={{ paddingTop: 60, paddingHorizontal: 10 }}>
           <Text style={styles.welcome}>Good afternoon,</Text>
-          <Text style={styles.name}>Enjelin Morgeana</Text>
+          <Text style={styles.name}>{fullName || 'User'}</Text>
         </View>
         <TouchableOpacity>
           <Ionicons
@@ -123,7 +125,7 @@ export default function HomeScreen() {
             <Text style={{ fontStyle: 'italic' }}>See all</Text>
           </TouchableOpacity>
         </View>
-        <FlatList
+        {/* <FlatList
           data={transactions}
           keyExtractor={item => item.id.toString()}
           renderItem={({ item }) => (
@@ -136,7 +138,7 @@ export default function HomeScreen() {
             />
           )}
           contentContainerStyle={{ paddingTop: 10 }}
-        />
+        /> */}
       </View>
     </View>
   );

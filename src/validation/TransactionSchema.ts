@@ -9,8 +9,12 @@ export const transactionSchema = yup.object({
     .required('Please enter the amount'),
 
   category: yup
-    .string()
-    .required('Please select a category'),
+    .object({
+      name: yup.string().required('Category name is required'),
+      status: yup.string().oneOf(['income', 'expense']),
+    })
+    .required('Please select a category')
+    .typeError('Invalid category selected'),
 
   description: yup
     .string()
@@ -18,15 +22,15 @@ export const transactionSchema = yup.object({
     .optional(),
 
   date: yup
-  .date()
-  .transform((value, originalValue) => {
-    return originalValue ? new Date(originalValue) : value;
-  })
-  .max(
-    new Date(new Date().setHours(23, 59, 59, 999)),
-    'Date cannot be in the future'
-  )
-  .required('Please select a date'),
+    .date()
+    .transform((value, originalValue) => {
+      return originalValue ? new Date(originalValue) : value;
+    })
+    .max(
+      new Date(new Date().setHours(23, 59, 59, 999)),
+      'Date cannot be in the future'
+    )
+    .required('Please select a date'),
 
   type: yup
     .string()

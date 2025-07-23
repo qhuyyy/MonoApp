@@ -4,7 +4,7 @@ import HomeScreen from '../screens/Main/HomeScreen';
 import HistoryStack from './HistoryStack';
 import CategoriesStack from './CategoriesStack';
 import StatisticsScreen from '../screens/Main/StatisticsScreen';
-import CustomTabBar from '../components/CustomTabBar';
+import CustomBottomTabBar from '../components/CustomBottomTabBar';
 import AddNewTransTabs from './AddNewTransTab';
 
 const Tab = createBottomTabNavigator();
@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 export default function MainBottomTabs() {
   return (
     <Tab.Navigator
-      tabBar={props => <CustomTabBar {...props} />}
+      tabBar={props => <CustomBottomTabBar {...props} />}
       screenOptions={{ headerShown: false }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />

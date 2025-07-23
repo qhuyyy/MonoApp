@@ -1,8 +1,3 @@
-export interface Status {
-  id: number;
-  name: 'income' | 'expense' ;
-}
-
 export type Category = {
   id: string;
   name: string;
@@ -12,11 +7,10 @@ export type Category = {
 };
 
 export interface Transaction {
-  id: number;
-  status_id: number;
-  categories_id: number;
-  amount: number;
-  date: string; 
+  id: string;
   image: string;
+  amount: number;
   description: string;
+  category: Category;
+  date: Date; 
 }

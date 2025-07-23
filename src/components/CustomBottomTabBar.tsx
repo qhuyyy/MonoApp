@@ -20,7 +20,7 @@ const getIconName = (routeName: string, focused: boolean) => {
   }
 };
 
-const CustomTabBar = ({
+const CustomBottomTabBar = ({
   state,
   descriptors,
   navigation,
@@ -64,7 +64,7 @@ const CustomTabBar = ({
   );
 };
 
-export default CustomTabBar;
+export default CustomBottomTabBar;
 
 const styles = StyleSheet.create({
   container: {

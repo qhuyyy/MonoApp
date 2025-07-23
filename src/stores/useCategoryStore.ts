@@ -1,14 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-export type Category = {
-  id: string; // ✅ Bạn cần có `id` để xác định khi cập nhật
-  name: string;
-  status: 'income' | 'expense';
-  color: string;
-  icon: string;
-};
+import { Category } from '../types/types';
 
 type CategoryState = {
   categories: Category[];

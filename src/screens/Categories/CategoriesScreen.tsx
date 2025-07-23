@@ -123,7 +123,7 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
           onPress={clearAllCategories}
         >
           <Ionicons name="trash-outline" size={20} color="#fff" />
-          <Text style={styles.clearButtonText}>Xoá toàn bộ danh mục</Text>
+          <Text style={styles.clearButtonText}>Delete all Categories</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
@@ -171,6 +171,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 40,
+    width: '95%',
+    alignSelf: 'center',
   },
   clearButton: {
     marginTop: 20,
