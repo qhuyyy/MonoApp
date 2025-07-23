@@ -1,4 +1,4 @@
-import HistoryScreen from '../screens/Main/HistoryScreen';
+import HistoryScreen from '../screens/History/HistoryScreen';
 import DetailsScreen from '../screens/History/DetailsScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 

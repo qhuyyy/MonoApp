@@ -6,7 +6,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ImageBackground,
   FlatList,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -18,6 +17,16 @@ import { useTransactionStore } from '../../stores/useTransactionStore';
 export default function HomeScreen() {
   const fullName = useUserStore(state => state.fullName);
   const transactions = useTransactionStore(state => state.transactions);
+
+  const income = transactions
+    .filter(t => t.category?.status === 'income')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const expense = transactions
+    .filter(t => t.category?.status === 'expense')
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const totalBalance = income - expense;
 
   return (
     <View style={styles.container}>
@@ -64,7 +73,7 @@ export default function HomeScreen() {
                 { fontSize: 30, fontWeight: 'bold' },
               ]}
             >
-              $ 2,548.00
+              $ {totalBalance.toFixed(2)}
             </Text>
           </View>
         </View>
@@ -88,7 +97,7 @@ export default function HomeScreen() {
                   { fontWeight: 'bold', fontSize: 20 },
                 ]}
               >
-                $ 1,840.00
+                $ {income.toFixed(2)}
               </Text>
             </View>
           </View>
@@ -106,7 +115,7 @@ export default function HomeScreen() {
                   { fontWeight: 'bold', fontSize: 20 },
                 ]}
               >
-                $ 284.00
+                $ {expense.toFixed(2)}
               </Text>
             </View>
           </View>

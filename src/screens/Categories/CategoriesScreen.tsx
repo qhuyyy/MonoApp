@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useCallback, useEffect} from 'react';
+import React, { useCallback, useEffect } from 'react';
 import Rectangle from '../../assets/svg/Rectangle';
 import CategoryItem from '../../components/CategoryItem';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -31,7 +31,7 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
     useCallback(() => {
       loadCategories();
     }, []),
-  )
+  );
 
   return (
     <View style={styles.container}>
@@ -40,7 +40,13 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
       </View>
 
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>Categories</Text>
+        <View>
+          <Text style={styles.title}>Categories</Text>
+          <Text style={styles.subTitle}>
+            Press into the category to edit or delete!
+          </Text>
+        </View>
+
         <TouchableOpacity
           style={styles.addIcon}
           onPress={() => navigation.navigate('CreateCategory')}
@@ -104,7 +110,7 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
     paddingTop: 0,
-    height: 100,
+    height: 50,
   },
   titleContainer: {
     flexDirection: 'row',
@@ -118,6 +124,14 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 26,
     fontWeight: 'bold',
+    alignSelf: 'center',
+  },
+  subTitle: {
+    color: 'white',
+    fontSize: 14,
+    fontStyle: 'italic',
+    marginLeft: 10,
+    marginTop: 5,
   },
   addIcon: {
     position: 'absolute',
@@ -135,7 +149,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 40,
-    width: '95%',
+    width: '98%',
     alignSelf: 'center',
   },
   clearButton: {

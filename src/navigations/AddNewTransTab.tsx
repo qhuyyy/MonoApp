@@ -37,15 +37,15 @@ type AddNewTransNavigationProp = NativeStackNavigationProp<
 
 export default function TransactionTabs() {
   const [activeTab, setActiveTab] = useState<'Income' | 'Expense'>('Income');
+  const navigation = useNavigation<AddNewTransNavigationProp>();
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Rectangle style={StyleSheet.absoluteFillObject} />
 
         <View style={styles.headerContent}>
-          <TouchableOpacity onPress={() => {}} style={styles.backButton}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
             <Ionicons name="chevron-back-outline" size={24} color="#fff" />
           </TouchableOpacity>
 
@@ -57,28 +57,35 @@ export default function TransactionTabs() {
         <View style={styles.tabSwitcher}>
           <Pressable
             onPress={() => setActiveTab('Income')}
-            style={[styles.tabItem, activeTab === 'Income' && styles.activeTab]}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === 'Income' && styles.activeText,
-              ]}
-            >
-              Income
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setActiveTab('Expense')}
             style={[
               styles.tabItem,
-              activeTab === 'Expense' && styles.activeTab,
+              activeTab === 'Income' && { backgroundColor: '#2e7d32' },
             ]}
           >
             <Text
               style={[
                 styles.tabText,
-                activeTab === 'Expense' && styles.activeText,
+                activeTab === 'Income' && { color: '#fff', fontWeight: 'bold' },
+              ]}
+            >
+              Income
+            </Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => setActiveTab('Expense')}
+            style={[
+              styles.tabItem,
+              activeTab === 'Expense' && { backgroundColor: '#9A031E' }, 
+            ]}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === 'Expense' && {
+                  color: '#fff',
+                  fontWeight: 'bold',
+                },
               ]}
             >
               Expense
@@ -186,8 +193,21 @@ function IncomeTab() {
         errors,
         touched,
       }) => (
-        <View style={styles.formContainer}>
-          <Text style={styles.inputLabel}>Select image (optional)</Text>
+        <View style={[styles.formContainer, { borderColor: 'green' }]}>
+          <Text
+            style={[
+              {
+                color: 'green',
+                alignSelf: 'center',
+                fontWeight: 'bold',
+                fontSize: 20,
+                marginBottom: 10,
+              },
+            ]}
+          >
+            Add Income
+          </Text>
+          {/* <Text style={styles.inputLabel}>Select image (optional)</Text>
           <TouchableOpacity
             onPress={() => handlePickImage(setFieldValue)}
             style={styles.imageContainer}
@@ -199,7 +219,191 @@ function IncomeTab() {
                 <Text style={styles.imageText}>Pick Image</Text>
               </View>
             )}
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+          <FormInput
+            value={values.amount}
+            placeholder={`Enter amount (${currency})`}
+            title="Amount"
+            keyboardType="numeric"
+            onChangeText={handleChange('amount')}
+            error={touched.amount && errors.amount}
+          />
+          <FormInput
+            value={values.description}
+            placeholder="Enter a description"
+            title="Description (optional)"
+            onChangeText={handleChange('description')}
+            error={touched.description && errors.description}
+          />
+          <Text style={styles.inputLabel}>Category</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={values.category?.id}
+              onValueChange={value => {
+                const selected = incomeCategories.find(cat => cat.id === value);
+                if (selected) setFieldValue('category', selected);
+              }}
+            >
+              {incomeCategories.map(cat => (
+                <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
+              ))}
+            </Picker>
+          </View>
+          {touched.category && typeof errors.category === 'string' && (
+            <Text style={styles.errorText}>{errors.category}</Text>
+          )}
+          <Text style={styles.inputLabel}>Date</Text>
+          <Pressable
+            onPress={() => setOpenPicker(true)}
+            style={styles.dateInput}
+          >
+            <Text style={styles.dateText}>
+              {format(values.date, 'yyyy-MM-dd')}
+            </Text>
+          </Pressable>
+          <DatePicker
+            modal
+            open={openPicker}
+            date={values.date}
+            mode="date"
+            maximumDate={new Date()}
+            onConfirm={selectedDate => {
+              setOpenPicker(false);
+              setFieldValue('date', selectedDate);
+            }}
+            onCancel={() => setOpenPicker(false)}
+          />
+          {touched.date && typeof errors.date === 'string' && (
+            <Text style={styles.errorText}>{errors.date}</Text>
+          )}
+          <View style={{ marginTop: 10 }}>
+            <ButtonCustom text="Save Transaction" onPress={handleSubmit} />
+          </View>
+        </View>
+      )}
+    </Formik>
+  );
+}
+
+function ExpenseTab() {
+  const [openPicker, setOpenPicker] = useState(false);
+  const [expenseCategories, setExpenseCategories] = useState<Category[]>([]);
+  const [initialCategory, setInitialCategory] = useState<Category | null>(null);
+
+  const navigation = useNavigation<AddNewTransNavigationProp>();
+  const currency = useUserStore(state => state.currency);
+  const addTransaction = useTransactionStore(state => state.addTransaction);
+
+  const handlePickImage = (setFieldValue: any) => {
+    launchImageLibrary({ mediaType: 'photo', quality: 0.5 }, response => {
+      if (
+        !response.didCancel &&
+        response.assets &&
+        response.assets.length > 0
+      ) {
+        setFieldValue('image', response.assets[0].uri);
+      }
+    });
+  };
+
+  useEffect(() => {
+    const fetchExpenseCategories = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem('category-storage');
+        if (storedData) {
+          const parsed = JSON.parse(storedData);
+          const allCategories: Category[] = parsed.state?.categories || [];
+
+          const expenseOnly = allCategories.filter(
+            cat => cat.status === 'expense',
+          );
+
+          setExpenseCategories(expenseOnly);
+          if (expenseOnly.length > 0) {
+            setInitialCategory(expenseOnly[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load expense categories:', error);
+      }
+    };
+
+    fetchExpenseCategories();
+  }, []);
+
+  if (!initialCategory) {
+    return <Text style={{ padding: 20 }}>Loading categories...</Text>;
+  }
+
+  return (
+    <Formik
+      enableReinitialize
+      initialValues={{
+        amount: '',
+        description: '',
+        category: initialCategory,
+        date: new Date(),
+        type: 'expense',
+        image: '',
+      }}
+      validationSchema={transactionSchema}
+      onSubmit={async (values, { resetForm }) => {
+        const newTransaction: Transaction = {
+          id: uuid.v4().toString(),
+          amount: parseFloat(values.amount),
+          description: values.description,
+          image: values.image,
+          category: values.category,
+          date: values.date.toISOString(),
+        };
+
+        await addTransaction(newTransaction);
+        navigation.navigate('Home');
+        resetForm({
+          values: {
+            ...values,
+            amount: '',
+            description: '',
+            image: '',
+          },
+        });
+      }}
+    >
+      {({
+        handleChange,
+        handleSubmit,
+        setFieldValue,
+        values,
+        errors,
+        touched,
+      }) => (
+        <View style={[styles.formContainer, { borderColor: '#9A031E' }]}>
+          <Text
+            style={[
+              {
+                color: '#9A031E',
+                alignSelf: 'center',
+                fontWeight: 'bold',
+                fontSize: 20,
+                marginBottom: 10,
+              },
+            ]}
+          >
+            Add Expense
+          </Text>
+          {/* <Text style={styles.inputLabel}>Select image (optional)</Text>
+          <TouchableOpacity
+            onPress={() => handlePickImage(setFieldValue)}
+            style={styles.imageContainer}
+          >
+            {values.image ? (
+              <Image source={{ uri: values.image }} style={styles.image} />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <Text style={styles.imageText}>Pick Image</Text>
+              </View>
+            )}
+          </TouchableOpacity> */}
 
           <FormInput
             value={values.amount}
@@ -223,11 +427,13 @@ function IncomeTab() {
             <Picker
               selectedValue={values.category?.id}
               onValueChange={value => {
-                const selected = incomeCategories.find(cat => cat.id === value);
+                const selected = expenseCategories.find(
+                  cat => cat.id === value,
+                );
                 if (selected) setFieldValue('category', selected);
               }}
             >
-              {incomeCategories.map(cat => (
+              {expenseCategories.map(cat => (
                 <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
               ))}
             </Picker>
@@ -269,10 +475,6 @@ function IncomeTab() {
       )}
     </Formik>
   );
-}
-
-function ExpenseTab() {
-  return <View></View>;
 }
 
 const styles = StyleSheet.create({
@@ -348,7 +550,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginHorizontal: 16,
     marginTop: -24,
-    borderWidth: 1,
+    borderWidth: 3,
+    elevation: 10,
   },
   inputLabel: {
     marginBottom: 6,
