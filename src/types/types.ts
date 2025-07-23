@@ -12,5 +12,5 @@ export interface Transaction {
   amount: number;
   description: string;
   category: Category;
-  date: Date; 
+  date: string; 
 }

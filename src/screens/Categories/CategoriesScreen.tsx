@@ -6,14 +6,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect} from 'react';
 import Rectangle from '../../assets/svg/Rectangle';
 import CategoryItem from '../../components/CategoryItem';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CategoriesStackParamList } from '../../navigations/CategoriesStack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Category } from '../../types/types';
 import { useFocusEffect } from '@react-navigation/native';
 import { useCategoryStore } from '../../stores/useCategoryStore';
 
@@ -23,37 +21,7 @@ type CategoriesScreenProps = NativeStackScreenProps<
 >;
 
 const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
-  const [categories, setCategories] = useState<Category[]>([]);
-
-  const loadCategories = async () => {
-    try {
-      const storedData = await AsyncStorage.getItem('category-storage');
-      if (storedData) {
-        const parsed = JSON.parse(storedData);
-        const allCategories: Category[] = parsed.state?.categories || [];
-        setCategories(allCategories);
-      } else {
-        setCategories([]);
-      }
-    } catch (error) {
-      console.error('Failed to load categories from AsyncStorage:', error);
-    }
-  };
-
-  const clearAllCategories = async () => {
-    Alert.alert('Xác nhận', 'Bạn có chắc chắn muốn xoá toàn bộ danh mục?', [
-      { text: 'Hủy', style: 'cancel' },
-      {
-        text: 'Xoá',
-        style: 'destructive',
-        onPress: async () => {
-          await useCategoryStore.persist.clearStorage();
-          useCategoryStore.setState({ categories: [] });
-          setCategories([]);
-        },
-      },
-    ]);
-  };
+  const { categories, loadCategories } = useCategoryStore();
 
   useEffect(() => {
     loadCategories();
@@ -62,8 +30,8 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
   useFocusEffect(
     useCallback(() => {
       loadCategories();
-    }, [])
-  );
+    }, []),
+  )
 
   return (
     <View style={styles.container}>
@@ -85,7 +53,9 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Income</Text>
           {categories.filter(c => c.status === 'income').length === 0 && (
-            <Text style={styles.emptyText}>There is no Income's categories</Text>
+            <Text style={styles.emptyText}>
+              There is no Income's categories
+            </Text>
           )}
           {categories
             .filter(cat => cat.status === 'income')
@@ -103,7 +73,9 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
         <View style={styles.sectionContainer}>
           <Text style={styles.sectionTitle}>Expense</Text>
           {categories.filter(c => c.status === 'expense').length === 0 && (
-            <Text style={styles.emptyText}>There is no Expense's categories</Text>
+            <Text style={styles.emptyText}>
+              There is no Expense's categories
+            </Text>
           )}
           {categories
             .filter(cat => cat.status === 'expense')
@@ -117,14 +89,6 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
               />
             ))}
         </View>
-
-        <TouchableOpacity
-          style={styles.clearButton}
-          onPress={clearAllCategories}
-        >
-          <Ionicons name="trash-outline" size={20} color="#fff" />
-          <Text style={styles.clearButtonText}>Delete all Categories</Text>
-        </TouchableOpacity>
       </ScrollView>
     </View>
   );

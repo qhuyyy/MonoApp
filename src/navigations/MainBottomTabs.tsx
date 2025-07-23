@@ -7,6 +7,14 @@ import StatisticsScreen from '../screens/Main/StatisticsScreen';
 import CustomBottomTabBar from '../components/CustomBottomTabBar';
 import AddNewTransTabs from './AddNewTransTab';
 
+export type MainBottomTabsParamList = {
+  Home: undefined;
+  CategoriesStack: undefined;
+  AddNewTrans: undefined;
+  HistoryStack: undefined;
+  Statistics: undefined;
+};
+
 const Tab = createBottomTabNavigator();
 
 export default function MainBottomTabs() {
