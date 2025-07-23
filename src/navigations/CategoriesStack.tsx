@@ -1,6 +1,6 @@
 import CategoriesScreen from '../screens/Categories/CategoriesScreen';
 import CreateCategoryScreen from '../screens/Categories/CreateCategoryScreen';
-import UpdateCategoryScreen from '../screens/Categories/UpdateCategoryScreen';
+import EditCategoryScreen from '../screens/Categories/EditCategoryScreen';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Category } from '../types/types';
@@ -8,7 +8,7 @@ import { Category } from '../types/types';
 export type CategoriesStackParamList = {
   Categories: undefined;
   CreateCategory: undefined;
-  UpdateCategory: { category: Category };
+  EditCategory: { category: Category };
 };
 
 const Stack = createNativeStackNavigator<CategoriesStackParamList>();
@@ -18,7 +18,7 @@ export default function CategoriesStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Categories" component={CategoriesScreen} />
       <Stack.Screen name="CreateCategory" component={CreateCategoryScreen} />
-      <Stack.Screen name="UpdateCategory" component={UpdateCategoryScreen} />
+      <Stack.Screen name="EditCategory" component={EditCategoryScreen} />
     </Stack.Navigator>
   );
 }

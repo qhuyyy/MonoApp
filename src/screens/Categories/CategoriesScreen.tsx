@@ -70,7 +70,7 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
                 key={item.id ?? index}
                 category={item}
                 onPress={() =>
-                  navigation.navigate('UpdateCategory', { category: item })
+                  navigation.navigate('EditCategory', { category: item })
                 }
               />
             ))}
@@ -90,7 +90,7 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
                 key={item.id ?? index}
                 category={item}
                 onPress={() =>
-                  navigation.navigate('UpdateCategory', { category: item })
+                  navigation.navigate('EditCategory', { category: item })
                 }
               />
             ))}

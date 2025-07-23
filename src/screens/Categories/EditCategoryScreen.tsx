@@ -19,15 +19,15 @@ import { categorySchema } from '../../validation/CategorySchema';
 import OutlineButtonCustom from '../../components/OutlineButtonCustom';
 import { COLORS, ICONS } from '../../constants/Category';
 
-type UpdateCategoryScreenProps = NativeStackScreenProps<
+type EditCategoryScreenProps = NativeStackScreenProps<
   CategoriesStackParamList,
-  'UpdateCategory'
+  'EditCategory'
 >;
 
-const UpdateCategoryScreen = ({
+const EditCategoryScreen = ({
   navigation,
   route,
-}: UpdateCategoryScreenProps) => {
+}: EditCategoryScreenProps) => {
   const { category } = route.params;
 
   const updateCategory = useCategoryStore(state => state.updateCategory);
@@ -158,7 +158,7 @@ const UpdateCategoryScreen = ({
   );
 };
 
-export default UpdateCategoryScreen;
+export default EditCategoryScreen;
 
 const styles = StyleSheet.create({
   container: {
