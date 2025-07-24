@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   FlatList,
   Animated,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Rectangle from '../../assets/svg/Rectangle';
@@ -26,11 +27,22 @@ type NavigationProp = NativeStackNavigationProp<MainBottomTabsParamList>;
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const fullName = useUserStore(state => state.fullName);
+
   const transactions = useTransactionStore(state => state.transactions);
   const loadRecentTransactions = useTransactionStore(
     state => state.loadRecentTransactions,
   );
-  const recentTransactions = loadRecentTransactions();
+  const deleteTransaction = useTransactionStore(
+    state => state.deleteTransaction,
+  );
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [openRow, setOpenRow] = useState<Swipeable | null>(null);
+
+  // load dữ liệu mỗi khi render
+  useEffect(() => {
+    loadRecentTransactions();
+  }, [loadRecentTransactions]);
 
   const income = transactions
     .filter(t => t.category?.status === 'income')
@@ -48,7 +60,7 @@ export default function HomeScreen() {
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => useTransactionStore.getState().deleteTransaction(id),
+        onPress: () => deleteTransaction(id),
       },
     ]);
   };
@@ -78,7 +90,6 @@ export default function HomeScreen() {
               <Ionicons name="trash-outline" size={24} color="#fff" />
             </TouchableOpacity>
           </Animated.View>
-
           <Animated.View style={{ transform: [{ translateX: trans1 }] }}>
             <TouchableOpacity
               style={[
@@ -99,26 +110,44 @@ export default function HomeScreen() {
       );
     };
 
-  const renderItem = ({ item }: { item: Transaction }) => (
-    <Swipeable
-      renderRightActions={renderRightActions(item)}
-      overshootRight={false}
-      rightThreshold={150}
-    >
-      <TransactionItem
-        transaction={item}
-        onPress={() =>
-          navigation.navigate('HistoryStack', {
-            screen: 'EditTransaction',
-            params: { transaction: item },
-          })
-        }
-      />
-    </Swipeable>
+  const handleSwipeableOpen = (ref: Swipeable) => {
+    if (openRow && openRow !== ref) {
+      openRow.close();
+    }
+    setOpenRow(ref);
+  };
+
+  const renderItem = useCallback(
+    ({ item }: { item: Transaction }) => {
+      let swipeableRef: Swipeable | null = null;
+      return (
+        <Swipeable
+          ref={ref => {
+            swipeableRef = ref;
+          }}
+          onSwipeableOpen={() =>
+            swipeableRef && handleSwipeableOpen(swipeableRef)
+          }
+          renderRightActions={renderRightActions(item)}
+          overshootRight={false}
+          rightThreshold={150}
+        >
+          <TransactionItem transaction={item} />
+        </Swipeable>
+      );
+    },
+    [openRow],
   );
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadRecentTransactions();
+    setRefreshing(false);
+  };
 
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Rectangle style={StyleSheet.absoluteFillObject} />
         <View style={{ paddingTop: 60, paddingHorizontal: 10 }}>
@@ -133,8 +162,9 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Balance */}
       <View style={styles.balanceCard}>
-        <View style={styles.totalBalance}>
+        <View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Text style={styles.balanceCardText}>Total Balance</Text>
             <Ionicons name="chevron-up-outline" size={16} color="#fff" />
@@ -189,6 +219,7 @@ export default function HomeScreen() {
         </View>
       </View>
 
+      {/* Transactions */}
       <View style={styles.transactionContainer}>
         <View
           style={{
@@ -207,9 +238,12 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
         <FlatList
-          data={recentTransactions}
+          data={transactions.slice(0, 5)} // recent
           keyExtractor={item => item.id}
           renderItem={renderItem}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
           contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <Text style={{ textAlign: 'center', marginTop: 20 }}>
@@ -223,24 +257,10 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  header: {
-    padding: 20,
-    paddingTop: 0,
-    height: 287,
-  },
-  welcome: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  name: {
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
+  container: { flex: 1, backgroundColor: '#fff' },
+  header: { padding: 20, paddingTop: 0, height: 287 },
+  welcome: { color: '#fff', fontSize: 16 },
+  name: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
   balanceCard: {
     backgroundColor: '#3A837B',
     height: 202,
@@ -251,23 +271,14 @@ const styles = StyleSheet.create({
     zIndex: 10,
     elevation: 5,
   },
-  balanceCardText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  totalBalance: {},
+  balanceCardText: { color: '#fff', fontSize: 16 },
   incomeExpense: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 40,
   },
-  transactionContainer: {
-    padding: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
+  transactionContainer: { padding: 20 },
+  sectionTitle: { fontSize: 18, fontWeight: '600' },
   actionContainer: {
     flexDirection: 'row',
     width: 150,
@@ -283,9 +294,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: 3,
   },
-  listContent: {
-    paddingBottom: 20,
-    paddingHorizontal: 5,
-    marginTop: 10,
-  },
+  listContent: { paddingBottom: 20, paddingHorizontal: 5, marginTop: 10 },
 });

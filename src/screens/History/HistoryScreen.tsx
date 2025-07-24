@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState, useMemo, useEffect } from 'react';
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+  useCallback,
+} from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,6 +15,7 @@ import {
   Alert,
   TouchableOpacity,
   Animated,
+  RefreshControl,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import Rectangle from '../../assets/svg/Rectangle';
@@ -19,6 +26,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HistoryStackParamList } from '../../navigations/HistoryStack';
 import { windowHeight } from '../../utils/Dimensions';
+import { useFocusEffect } from '@react-navigation/native';
 
 type HistoryScreenProps = NativeStackScreenProps<
   HistoryStackParamList,
@@ -32,12 +40,24 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const duplicateTransaction = useTransactionStore(
     state => state.duplicateTransaction,
   );
+  const loadTransactions = useTransactionStore(state => state.loadTransactions);
+
+  const swipeableRefs = useRef<Record<string, Swipeable | null>>({});
+  const [refreshing, setRefreshing] = useState(false);
+
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>(
     'all',
   );
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [page, setPage] = useState(1);
+
+  // Refresh khi quay lại màn hình
+  useFocusEffect(
+    useCallback(() => {
+      loadTransactions();
+    }, [loadTransactions]),
+  );
 
   const filteredTransactions = useMemo(() => {
     let result = [...transactions];
@@ -63,12 +83,18 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
     return result;
   }, [transactions, search, filterType, sortBy]);
 
-  const paginatedData = filteredTransactions.slice(0, page * PAGE_SIZE);
+  const data = filteredTransactions.slice(0, page * PAGE_SIZE);
 
   const handleLoadMore = () => {
     if (page * PAGE_SIZE < filteredTransactions.length) {
       setPage(prev => prev + 1);
     }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    loadTransactions();
+    setTimeout(() => setRefreshing(false), 500);
   };
 
   const handleDelete = (id: string) => {
@@ -95,8 +121,16 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
     ]);
   };
 
+  const handleSwipeableOpen = (id: string) => {
+    Object.entries(swipeableRefs.current).forEach(([key, ref]) => {
+      if (key !== id && ref) {
+        ref.close();
+      }
+    });
+  };
+
   const renderRightActions =
-    (item: Transaction, handleDelete: (id: string) => void) =>
+    (item: Transaction) =>
     (progress: Animated.AnimatedInterpolation<number>) => {
       const trans1 = progress.interpolate({
         inputRange: [0, 1],
@@ -119,9 +153,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
                 styles.actionTouchableOpacity,
                 { backgroundColor: '#3A837B' },
               ]}
-              onPress={() => {
-                handleDuplicate(item.id);
-              }}
+              onPress={() => handleDuplicate(item.id)}
             >
               <Ionicons name="copy-outline" size={24} color="#fff" />
             </TouchableOpacity>
@@ -159,10 +191,6 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   useEffect(() => {
     setPage(1);
   }, [search, filterType, sortBy]);
-
-  const data = useMemo(() => {
-    return filteredTransactions.slice(0, page * PAGE_SIZE);
-  }, [filteredTransactions, page]);
 
   return (
     <View style={styles.container}>
@@ -223,13 +251,20 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
           keyExtractor={item => item.id}
           renderItem={({ item }) => (
             <Swipeable
-              renderRightActions={renderRightActions(item, handleDelete)}
+              ref={ref => {
+                swipeableRefs.current[item.id] = ref;
+              }}
+              onSwipeableOpen={() => handleSwipeableOpen(item.id)}
+              renderRightActions={renderRightActions(item)}
               overshootRight={false}
               rightThreshold={150}
             >
               <TransactionItem transaction={item} />
             </Swipeable>
           )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
           contentContainerStyle={styles.listContent}
