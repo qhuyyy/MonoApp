@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Category } from '../types/types';
+import { Category, Transaction } from '../types/types';
 import { Alert } from 'react-native';
 
 type CategoryState = {
@@ -29,29 +29,24 @@ export const useCategoryStore = create<CategoryState>()(
           ),
         })),
 
-      deleteCategory: async id => {
+      deleteCategory: async (id: string) => {
         try {
-          const categoryToDelete = get().categories.find(cat => cat.id === id);
-          if (!categoryToDelete) return;
-
           const transactionData = await AsyncStorage.getItem(
             'transaction-storage',
           );
-          if (transactionData) {
-            const parsed = JSON.parse(transactionData);
-            const transactions = parsed.state?.transactions || [];
+          const parsed = transactionData ? JSON.parse(transactionData) : null;
+          const transactions = parsed?.state?.transactions || [];
 
-            const hasTransactions = transactions.some(
-              (t: any) => t.category?.id === categoryToDelete.id,
+          const used = transactions.some(
+            (t: Transaction) => t.category?.id === id,
+          );
+          
+          if (used) {
+            Alert.alert(
+              'Cannot Delete',
+              'This category is being used in a transaction.',
             );
-
-            if (hasTransactions) {
-              Alert.alert(
-                'Cannot delete',
-                `This category is being used by some transactions.`,
-              );
-              return;
-            }
+            return;
           }
 
           set(state => ({

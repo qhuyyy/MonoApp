@@ -357,13 +357,20 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: '#3A837B',
   },
-  headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
   title: {
     fontSize: 16,
     color: '#fff',
     fontStyle: 'italic',
   },
-  searchContainer: { paddingHorizontal: 20, marginBottom: 10 },
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
   searchInput: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -376,7 +383,6 @@ const styles = StyleSheet.create({
   filterContainer: {
     paddingHorizontal: 20,
   },
-
   filterBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -391,8 +397,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#3A837B',
   },
-  filterActive: { backgroundColor: '#3A837B' },
-  filterText: { fontSize: 14, fontWeight: '500', color: '#333' },
+  filterActive: {
+    backgroundColor: '#3A837B',
+  },
+  filterText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+  },
   filterTextActive: { color: '#fff' },
   sortTouchableOpacity: {
     paddingHorizontal: 12,
@@ -403,7 +415,11 @@ const styles = StyleSheet.create({
     width: 110,
     marginHorizontal: 4,
   },
-  sortText: { fontWeight: 'bold', color: '#333', alignSelf: 'center' },
+  sortText: {
+    fontWeight: 'bold',
+    color: '#333',
+    alignSelf: 'center',
+  },
   contentContainer: {
     maxHeight: windowHeight - 500,
     backgroundColor: '#fff',
@@ -450,8 +466,14 @@ const styles = StyleSheet.create({
     borderColor: '#429690',
     margin: 3,
   },
-  chipSelected: { backgroundColor: '#429690' },
-  chipText: { marginLeft: 5, color: '#429690', fontWeight: '600' },
+  chipSelected: {
+    backgroundColor: '#429690',
+  },
+  chipText: {
+    marginLeft: 5,
+    color: '#429690',
+    fontWeight: '600',
+  },
   inputLabel: {
     fontSize: 14,
     color: '#429690',

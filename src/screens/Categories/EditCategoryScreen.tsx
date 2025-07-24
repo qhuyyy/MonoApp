@@ -32,7 +32,7 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
   const [color, setColor] = useState(category.color);
   const [icon, setIcon] = useState(category.icon);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     Alert.alert(
       'Delete Category',
       'Are you sure you want to delete this category?',
@@ -41,8 +41,8 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => {
-            deleteCategory(category.id);
+          onPress: async () => {
+            await deleteCategory(category.id);
             navigation.goBack();
           },
         },
