@@ -32,6 +32,8 @@ export default function HomeScreen() {
   const loadRecentTransactions = useTransactionStore(
     state => state.loadRecentTransactions,
   );
+  const recentTransactions = loadRecentTransactions();
+
   const deleteTransaction = useTransactionStore(
     state => state.deleteTransaction,
   );
@@ -238,7 +240,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
         <FlatList
-          data={transactions.slice(0, 5)} // recent
+          data={recentTransactions}
           keyExtractor={item => item.id}
           renderItem={renderItem}
           refreshControl={

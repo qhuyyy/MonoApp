@@ -40,6 +40,7 @@ const EditTransactionScreen = ({
   const { transaction } = route.params;
 
   const currency = useUserStore(state => state.currency);
+
   const updateTransaction = useTransactionStore(
     state => state.updateTransaction,
   );
@@ -48,6 +49,14 @@ const EditTransactionScreen = ({
   );
   const [openPicker, setOpenPicker] = useState(false);
   const [incomeCategories, setIncomeCategories] = useState<Category[]>([]);
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const toggleCategory = (id: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id],
+    );
+  };
 
   const handleDelete = () => {
     Alert.alert(
@@ -80,6 +89,7 @@ const EditTransactionScreen = ({
       }
     };
     fetchIncomeCategories();
+    console.log(transaction);
   }, [transaction.category?.status]);
 
   return (

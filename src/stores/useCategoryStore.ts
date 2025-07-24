@@ -42,7 +42,7 @@ export const useCategoryStore = create<CategoryState>()(
             const transactions = parsed.state?.transactions || [];
 
             const hasTransactions = transactions.some(
-              (t: any) => t.category?.name === categoryToDelete.name,
+              (t: any) => t.category?.id === categoryToDelete.id,
             );
 
             if (hasTransactions) {
@@ -50,7 +50,7 @@ export const useCategoryStore = create<CategoryState>()(
                 'Cannot delete',
                 `This category is being used by some transactions.`,
               );
-              return; 
+              return;
             }
           }
 

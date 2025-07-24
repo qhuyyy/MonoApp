@@ -18,10 +18,11 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Rectangle from '../../assets/svg/Rectangle';
 import TransactionItem from '../../components/TransactionItem';
 import { useTransactionStore } from '../../stores/useTransactionStore';
-import { Transaction } from '../../types/types';
+import { Transaction, Category } from '../../types/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HistoryStackParamList } from '../../navigations/HistoryStack';
@@ -33,7 +34,7 @@ type HistoryScreenProps = NativeStackScreenProps<
   'History'
 >;
 
-const PAGE_SIZE = 4;
+const PAGE_SIZE = 5;
 
 const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const transactions = useTransactionStore(state => state.transactions);
@@ -51,6 +52,28 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   );
   const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
   const [page, setPage] = useState(1);
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  // Load categories từ AsyncStorage
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const stored = await AsyncStorage.getItem('category-storage');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const allCategories: Category[] = parsed.state?.categories || [];
+        setCategories(allCategories);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const toggleCategory = (id: string) => {
+    setSelectedCategories(prev =>
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id],
+    );
+  };
 
   // Refresh khi quay lại màn hình
   useFocusEffect(
@@ -72,6 +95,12 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
       result = result.filter(t => t.category?.status === filterType);
     }
 
+    if (selectedCategories.length > 0) {
+      result = result.filter(
+        t => t.category && selectedCategories.includes(t.category.id),
+      );
+    }
+
     if (sortBy === 'date') {
       result.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -81,7 +110,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
     }
 
     return result;
-  }, [transactions, search, filterType, sortBy]);
+  }, [transactions, search, filterType, sortBy, selectedCategories]);
 
   const data = filteredTransactions.slice(0, page * PAGE_SIZE);
 
@@ -190,7 +219,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
   useEffect(() => {
     setPage(1);
-  }, [search, filterType, sortBy]);
+  }, [search, filterType, sortBy, selectedCategories]);
 
   return (
     <View style={styles.container}>
@@ -209,40 +238,79 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
         />
       </View>
 
-      <View style={styles.filterBar}>
-        {['all', 'income', 'expense'].map(type => (
-          <TouchableOpacity
-            key={type}
-            style={[
-              styles.filterButton,
-              filterType === type && [
-                styles.filterActive,
-                type === 'income'
-                  ? { backgroundColor: '#2E7D32' }
-                  : type === 'expense'
-                  ? { backgroundColor: '#9A031E' }
-                  : { backgroundColor: '#666' },
-              ],
-            ]}
-            onPress={() => setFilterType(type as any)}
-          >
-            <Text
-              style={[
-                styles.filterText,
-                filterType === type && styles.filterTextActive,
-              ]}
-            >
-              {type.toUpperCase()}
-            </Text>
-          </TouchableOpacity>
-        ))}
+      <View style={[styles.filterContainer]}>
+        <Text style={styles.title}>Status</Text>
+        <View style={[styles.filterBar]}>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
+            {['all', 'income', 'expense'].map(type => (
+              <TouchableOpacity
+                key={type}
+                style={[
+                  styles.filterButton,
+                  filterType === type && [
+                    styles.filterActive,
+                    type === 'income'
+                      ? { backgroundColor: '#2E7D32' }
+                      : type === 'expense'
+                      ? { backgroundColor: '#9A031E' }
+                      : { backgroundColor: '#666' },
+                  ],
+                ]}
+                onPress={() => setFilterType(type as any)}
+              >
+                <Text
+                  style={[
+                    styles.filterText,
+                    filterType === type && styles.filterTextActive,
+                  ]}
+                >
+                  {type.toUpperCase()}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-        <TouchableOpacity
-          style={styles.sortTouchableOpacity}
-          onPress={() => setSortBy(sortBy === 'date' ? 'amount' : 'date')}
-        >
-          <Text style={styles.sortText}>Sort: {sortBy}</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.sortTouchableOpacity}
+            onPress={() => setSortBy(sortBy === 'date' ? 'amount' : 'date')}
+          >
+            <Text style={styles.sortText}>Sort: {sortBy}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View>
+          <View>
+            <Text style={styles.title}>Categories</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {categories.map(cat => (
+                <TouchableOpacity
+                  key={cat.id}
+                  style={[
+                    styles.chip,
+                    selectedCategories.includes(cat.id) && styles.chipSelected,
+                  ]}
+                  onPress={() => toggleCategory(cat.id)}
+                >
+                  <Ionicons
+                    name={cat.icon}
+                    size={18}
+                    color={
+                      selectedCategories.includes(cat.id) ? '#fff' : cat.color
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.chipText,
+                      selectedCategories.includes(cat.id) && { color: '#fff' },
+                    ]}
+                  >
+                    {cat.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </View>
       </View>
 
       <View style={styles.contentContainer}>
@@ -281,26 +349,21 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
 export default HistoryScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F8F9FA',
-  },
+  container: { flex: 1, backgroundColor: '#F8F9FA' },
   header: {
-    height: 120,
+    height: 80,
     justifyContent: 'flex-end',
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    marginBottom: 10,
     backgroundColor: '#3A837B',
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
+  title: {
+    fontSize: 16,
     color: '#fff',
+    fontStyle: 'italic',
   },
-  searchContainer: {
-    marginTop: 10,
-    paddingHorizontal: 20,
-  },
+  searchContainer: { paddingHorizontal: 20, marginBottom: 10 },
   searchInput: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -310,11 +373,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
+  filterContainer: {
+    paddingHorizontal: 20,
+  },
+
   filterBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginTop: 10,
+    marginTop: 2,
   },
   filterButton: {
     paddingHorizontal: 12,
@@ -322,26 +388,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#eee',
     marginHorizontal: 2,
-    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: '#3A837B',
   },
-  filterTouchableOpacity: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 20,
-    marginRight: 8,
-  },
-  filterActive: {
-    backgroundColor: '#3A837B',
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  filterTextActive: {
-    color: '#fff',
-  },
+  filterActive: { backgroundColor: '#3A837B' },
+  filterText: { fontSize: 14, fontWeight: '500', color: '#333' },
+  filterTextActive: { color: '#fff' },
   sortTouchableOpacity: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -350,15 +402,10 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     width: 110,
     marginHorizontal: 4,
-    marginBottom: 6,
   },
-  sortText: {
-    fontWeight: 'bold',
-    color: '#333',
-    alignSelf: 'center',
-  },
+  sortText: { fontWeight: 'bold', color: '#333', alignSelf: 'center' },
   contentContainer: {
-    maxHeight: windowHeight - 330,
+    maxHeight: windowHeight - 500,
     backgroundColor: '#fff',
     borderWidth: 1,
     marginTop: 10,
@@ -367,15 +414,15 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   listContent: {
-    paddingBottom: 20,
     paddingHorizontal: 5,
     marginTop: 10,
   },
   emptyText: {
     textAlign: 'center',
-    marginTop: 30,
+    alignItems: 'center',
     fontSize: 16,
     color: '#999',
+    paddingBottom: 10,
   },
   actionContainer: {
     flexDirection: 'row',
@@ -391,5 +438,25 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 10,
     marginHorizontal: 3,
+  },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    backgroundColor: '#fff',
+    borderColor: '#429690',
+    margin: 3,
+  },
+  chipSelected: { backgroundColor: '#429690' },
+  chipText: { marginLeft: 5, color: '#429690', fontWeight: '600' },
+  inputLabel: {
+    fontSize: 14,
+    color: '#429690',
+    fontWeight: 'bold',
+    marginHorizontal: 16,
+    marginTop: 8,
   },
 });
