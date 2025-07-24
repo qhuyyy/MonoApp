@@ -5,6 +5,7 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from 'react-native';
 import React, { useState } from 'react';
 import ButtonCustom from '../../components/ButtonCustom';
@@ -43,8 +44,13 @@ const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
         color,
         icon,
       });
+      Alert.alert('Success', 'Category created successfully', [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
       resetForm();
-      navigation.goBack();
     },
   });
 
@@ -113,7 +119,7 @@ const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
             <TouchableOpacity
               key={i}
               style={[
-                styles.colorItem, 
+                styles.colorItem,
                 {
                   backgroundColor: icon === i ? color : '#ccc',
                   justifyContent: 'center',

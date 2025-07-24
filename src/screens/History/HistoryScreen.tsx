@@ -18,6 +18,7 @@ import { Transaction } from '../../types/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HistoryStackParamList } from '../../navigations/HistoryStack';
+import { windowHeight } from '../../utils/Dimensions';
 
 type HistoryScreenProps = NativeStackScreenProps<
   HistoryStackParamList,
@@ -69,7 +70,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert('Delete', 'Are you sure?', [
+    Alert.alert('Delete', 'Are you sure you want to delete this transaction?', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
@@ -127,7 +128,9 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
                 styles.actionTouchableOpacity,
                 { backgroundColor: '#FFA500' },
               ]}
-              onPress={() => navigation.navigate('EditTransaction', { transaction: item })}
+              onPress={() =>
+                navigation.navigate('EditTransaction', { transaction: item })
+              }
             >
               <Ionicons name="pencil-outline" size={24} color="#fff" />
             </TouchableOpacity>
@@ -161,7 +164,6 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
         />
       </View>
 
-      {/* Filter buttons */}
       <View style={styles.filterBar}>
         {['all', 'income', 'expense'].map(type => (
           <TouchableOpacity
@@ -198,9 +200,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
         </TouchableOpacity>
       </View>
 
-      {/* Transaction list */}
       <View style={styles.contentContainer}>
-        {' '}
         <FlatList
           data={data}
           keyExtractor={item => item.id}
@@ -216,6 +216,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <Text style={styles.emptyText}>No transactions found.</Text>
           }
@@ -244,7 +245,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-
   searchContainer: {
     marginTop: 10,
     paddingHorizontal: 20,
@@ -306,6 +306,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   contentContainer: {
+    maxHeight: windowHeight - 330,
     backgroundColor: '#fff',
     borderWidth: 1,
     marginTop: 10,
@@ -324,7 +325,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
   },
-
   actionContainer: {
     flexDirection: 'row',
     width: 180,
@@ -339,9 +339,5 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
     borderRadius: 10,
     marginHorizontal: 3,
-  },
-  actionText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
 });

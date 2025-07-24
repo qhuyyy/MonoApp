@@ -5,6 +5,7 @@ import {
   View,
   Pressable,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
@@ -24,13 +25,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HistoryStackParamList } from '../../navigations/HistoryStack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Dropdown } from 'react-native-element-dropdown';
-
-const transactionSchema = Yup.object().shape({
-  amount: Yup.number().required('Amount is required').min(0.01, 'Must be > 0'),
-  description: Yup.string(),
-  category: Yup.object().required('Category is required'),
-  date: Yup.date().required('Date is required'),
-});
+import { transactionSchema } from '../../validation/TransactionSchema';
+import OutlineButtonCustom from '../../components/OutlineButtonCustom';
 
 type EditTransactionScreenProps = NativeStackScreenProps<
   HistoryStackParamList,
@@ -47,9 +43,29 @@ const EditTransactionScreen = ({
   const updateTransaction = useTransactionStore(
     state => state.updateTransaction,
   );
-
+  const deleteTransaction = useTransactionStore(
+    state => state.deleteTransaction,
+  );
   const [openPicker, setOpenPicker] = useState(false);
   const [incomeCategories, setIncomeCategories] = useState<Category[]>([]);
+
+  const handleDelete = () => {
+    Alert.alert(
+      'Delete Transaction',
+      'Are you sure you want to delete this transaction?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await deleteTransaction(transaction.id);
+            navigation.navigate('History');
+          },
+        },
+      ],
+    );
+  };
 
   useEffect(() => {
     const fetchIncomeCategories = async () => {
@@ -78,17 +94,21 @@ const EditTransactionScreen = ({
         image: transaction.image || '',
       }}
       validationSchema={transactionSchema}
-      onSubmit={async (values, { resetForm }) => {
-        const updatedTransaction: Transaction = {
+      onSubmit={async values => {
+        await updateTransaction({
           ...transaction,
           amount: parseFloat(values.amount),
           description: values.description,
           category: values.category,
-          date: values.date.toISOString(),
+          date: new Date().toISOString(),
           image: values.image,
-        };
-        await updateTransaction(updatedTransaction);
-        navigation.goBack();
+        });
+        Alert.alert('Success', 'Transaction updated successfully', [
+          {
+            text: 'OK',
+            onPress: () => navigation.navigate('History'),
+          },
+        ]);
       }}
     >
       {({
@@ -104,7 +124,7 @@ const EditTransactionScreen = ({
             <Rectangle style={StyleSheet.absoluteFillObject} />
             <View style={styles.headerContent}>
               <TouchableOpacity
-                onPress={() => navigation.goBack()}
+                onPress={() => navigation.navigate('History')}
                 style={styles.backButton}
               >
                 <Ionicons name="chevron-back-outline" size={24} color="#fff" />
@@ -154,7 +174,7 @@ const EditTransactionScreen = ({
                 data={incomeCategories.map(cat => ({
                   label: cat.name,
                   value: cat.id,
-                  icon: cat.icon, // icon của category
+                  icon: cat.icon,
                 }))}
                 labelField="label"
                 valueField="value"
@@ -224,7 +244,11 @@ const EditTransactionScreen = ({
             </View>
 
             <View style={{ marginTop: 10 }}>
-              <ButtonCustom text="Save Changes" onPress={handleSubmit} />
+              <ButtonCustom text="Update" onPress={handleSubmit} />
+            </View>
+
+            <View style={{ marginTop: 10 }}>
+              <OutlineButtonCustom text="Delete" onPress={handleDelete} />
             </View>
           </View>
         </View>

@@ -10,11 +10,12 @@ type TransactionState = {
   updateTransaction: (updatedTransaction: Transaction) => void;
   deleteTransaction: (id: string) => void;
   loadTransactions: () => Promise<void>;
+  loadRecentTransactions: () => Transaction[]; 
 };
 
 export const useTransactionStore = create<TransactionState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       transactions: [],
 
       addTransaction: (transaction) =>
@@ -47,6 +48,16 @@ export const useTransactionStore = create<TransactionState>()(
         } catch (error) {
           console.error('Failed to load transactions from AsyncStorage:', error);
         }
+      },
+
+      loadRecentTransactions: () => {
+        const { transactions } = get();
+        return [...transactions]
+          .sort(
+            (a, b) =>
+              new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+          .slice(0, 5);
       },
     }),
     {

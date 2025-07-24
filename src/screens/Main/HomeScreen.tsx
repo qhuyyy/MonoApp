@@ -7,16 +7,30 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
+  Animated,
+  Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Rectangle from '../../assets/svg/Rectangle';
 import TransactionItem from '../../components/TransactionItem';
 import { useUserStore } from '../../stores/useUserStore';
 import { useTransactionStore } from '../../stores/useTransactionStore';
+import { MainBottomTabsParamList } from '../../navigations/MainBottomTabs';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+import { Transaction } from '../../types/types';
+import { Swipeable } from 'react-native-gesture-handler';
+
+type NavigationProp = NativeStackNavigationProp<MainBottomTabsParamList>;
 
 export default function HomeScreen() {
+  const navigation = useNavigation<NavigationProp>();
   const fullName = useUserStore(state => state.fullName);
   const transactions = useTransactionStore(state => state.transactions);
+  const loadRecentTransactions = useTransactionStore(
+    state => state.loadRecentTransactions,
+  );
+  const recentTransactions = loadRecentTransactions();
 
   const income = transactions
     .filter(t => t.category?.status === 'income')
@@ -28,6 +42,81 @@ export default function HomeScreen() {
 
   const totalBalance = income - expense;
 
+  const handleDelete = (id: string) => {
+    Alert.alert('Delete', 'Are you sure you want to delete this transaction?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => useTransactionStore.getState().deleteTransaction(id),
+      },
+    ]);
+  };
+
+  const renderRightActions =
+    (item: Transaction) =>
+    (progress: Animated.AnimatedInterpolation<number>) => {
+      const trans1 = progress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [80, 0],
+      });
+      const trans2 = progress.interpolate({
+        inputRange: [0, 1],
+        outputRange: [160, 0],
+      });
+
+      return (
+        <View style={styles.actionContainer}>
+          <Animated.View style={{ transform: [{ translateX: trans2 }] }}>
+            <TouchableOpacity
+              style={[
+                styles.actionTouchableOpacity,
+                { backgroundColor: '#9A031E' },
+              ]}
+              onPress={() => handleDelete(item.id)}
+            >
+              <Ionicons name="trash-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+          </Animated.View>
+
+          <Animated.View style={{ transform: [{ translateX: trans1 }] }}>
+            <TouchableOpacity
+              style={[
+                styles.actionTouchableOpacity,
+                { backgroundColor: '#FFA500' },
+              ]}
+              onPress={() =>
+                navigation.navigate('HistoryStack', {
+                  screen: 'EditTransaction',
+                  params: { transaction: item },
+                })
+              }
+            >
+              <Ionicons name="pencil-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      );
+    };
+
+  const renderItem = ({ item }: { item: Transaction }) => (
+    <Swipeable
+      renderRightActions={renderRightActions(item)}
+      overshootRight={false}
+      rightThreshold={150}
+    >
+      <TransactionItem
+        transaction={item}
+        onPress={() =>
+          navigation.navigate('HistoryStack', {
+            screen: 'EditTransaction',
+            params: { transaction: item },
+          })
+        }
+      />
+    </Swipeable>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -36,46 +125,28 @@ export default function HomeScreen() {
           <Text style={styles.welcome}>Good afternoon,</Text>
           <Text style={styles.name}>{fullName || 'User'}</Text>
         </View>
-        <TouchableOpacity>
-          <Ionicons
-            name="notifications-outline"
-            size={24}
-            color="#fff"
-            style={{ position: 'absolute', top: -35, right: 40 }}
-          />
+        <TouchableOpacity style={{ position: 'absolute', top: 70, right: 60 }}>
+          <Ionicons name="notifications-outline" size={24} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity>
-          <Ionicons
-            name="settings-outline"
-            size={24}
-            color="#fff"
-            style={{ position: 'absolute', top: -35, right: 10 }}
-          />
+        <TouchableOpacity style={{ position: 'absolute', top: 70, right: 30 }}>
+          <Ionicons name="settings-outline" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.balanceCard}>
         <View style={styles.totalBalance}>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 4,
-            }}
-          >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Text style={styles.balanceCardText}>Total Balance</Text>
             <Ionicons name="chevron-up-outline" size={16} color="#fff" />
           </View>
-          <View>
-            <Text
-              style={[
-                styles.balanceCardText,
-                { fontSize: 30, fontWeight: 'bold' },
-              ]}
-            >
-              $ {totalBalance.toFixed(2)}
-            </Text>
-          </View>
+          <Text
+            style={[
+              styles.balanceCardText,
+              { fontSize: 30, fontWeight: 'bold' },
+            ]}
+          >
+            $ {totalBalance.toFixed(2)}
+          </Text>
         </View>
 
         <View style={styles.incomeExpense}>
@@ -90,16 +161,14 @@ export default function HomeScreen() {
               />
               <Text style={styles.balanceCardText}>Income</Text>
             </View>
-            <View style={{ marginHorizontal: 5 }}>
-              <Text
-                style={[
-                  styles.balanceCardText,
-                  { fontWeight: 'bold', fontSize: 20 },
-                ]}
-              >
-                $ {income.toFixed(2)}
-              </Text>
-            </View>
+            <Text
+              style={[
+                styles.balanceCardText,
+                { fontWeight: 'bold', fontSize: 20 },
+              ]}
+            >
+              $ {income.toFixed(2)}
+            </Text>
           </View>
           <View>
             <View
@@ -108,16 +177,14 @@ export default function HomeScreen() {
               <Ionicons name="arrow-up-circle-outline" size={20} color="#fff" />
               <Text style={styles.balanceCardText}>Expense</Text>
             </View>
-            <View style={{ marginHorizontal: 5 }}>
-              <Text
-                style={[
-                  styles.balanceCardText,
-                  { fontWeight: 'bold', fontSize: 20 },
-                ]}
-              >
-                $ {expense.toFixed(2)}
-              </Text>
-            </View>
+            <Text
+              style={[
+                styles.balanceCardText,
+                { fontWeight: 'bold', fontSize: 20 },
+              ]}
+            >
+              $ {expense.toFixed(2)}
+            </Text>
           </View>
         </View>
       </View>
@@ -131,15 +198,19 @@ export default function HomeScreen() {
           }}
         >
           <Text style={styles.sectionTitle}>Transactions History</Text>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('HistoryStack', { screen: 'History' })
+            }
+          >
             <Text style={{ fontStyle: 'italic' }}>See all</Text>
           </TouchableOpacity>
         </View>
         <FlatList
-          data={transactions.slice().reverse()}
+          data={recentTransactions}
           keyExtractor={item => item.id}
-          renderItem={({ item }) => <TransactionItem transaction={item} />}
-          contentContainerStyle={{ paddingTop: 10 }}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContent}
           ListEmptyComponent={
             <Text style={{ textAlign: 'center', marginTop: 20 }}>
               No transactions found.
@@ -196,5 +267,25 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
+  },
+  actionContainer: {
+    flexDirection: 'row',
+    width: 150,
+    height: 68,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionTouchableOpacity: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+    aspectRatio: 1,
+    borderRadius: 10,
+    marginHorizontal: 3,
+  },
+  listContent: {
+    paddingBottom: 20,
+    paddingHorizontal: 5,
+    marginTop: 10,
   },
 });

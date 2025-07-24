@@ -1,17 +1,18 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/Main/HomeScreen';
-import HistoryStack from './HistoryStack';
+import HistoryStack, { HistoryStackParamList } from './HistoryStack';
 import CategoriesStack from './CategoriesStack';
 import StatisticsScreen from '../screens/Main/StatisticsScreen';
 import CustomBottomTabBar from '../components/CustomBottomTabBar';
 import AddNewTransTabs from './AddNewTransTab';
+import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type MainBottomTabsParamList = {
   Home: undefined;
   CategoriesStack: undefined;
   AddNewTrans: undefined;
-  HistoryStack: undefined;
+  HistoryStack: NavigatorScreenParams<HistoryStackParamList>;
   Statistics: undefined;
 };
 

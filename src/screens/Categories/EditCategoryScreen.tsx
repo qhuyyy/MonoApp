@@ -65,7 +65,13 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
         color,
         icon,
       });
-      navigation.goBack();
+
+      Alert.alert('Success', 'Category updated successfully', [
+        {
+          text: 'OK',
+          onPress: () => navigation.goBack(),
+        },
+      ]);
     },
   });
 

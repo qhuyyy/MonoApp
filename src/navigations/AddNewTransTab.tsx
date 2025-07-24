@@ -7,6 +7,7 @@ import {
   Dimensions,
   Image,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import Rectangle from '../assets/svg/Rectangle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -45,7 +46,10 @@ export default function TransactionTabs() {
         <Rectangle style={StyleSheet.absoluteFillObject} />
 
         <View style={styles.headerContent}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
             <Ionicons name="chevron-back-outline" size={24} color="#fff" />
           </TouchableOpacity>
 
@@ -76,7 +80,7 @@ export default function TransactionTabs() {
             onPress={() => setActiveTab('Expense')}
             style={[
               styles.tabItem,
-              activeTab === 'Expense' && { backgroundColor: '#9A031E' }, 
+              activeTab === 'Expense' && { backgroundColor: '#9A031E' },
             ]}
           >
             <Text
@@ -93,7 +97,6 @@ export default function TransactionTabs() {
           </Pressable>
         </View>
 
-        {/* Content */}
         {activeTab === 'Income' ? <IncomeTab /> : <ExpenseTab />}
       </View>
     </View>
@@ -164,25 +167,22 @@ function IncomeTab() {
       }}
       validationSchema={transactionSchema}
       onSubmit={async (values, { resetForm }) => {
-        const newTransaction: Transaction = {
+        await addTransaction({
           id: uuid.v4().toString(),
           amount: parseFloat(values.amount),
           description: values.description,
           image: values.image,
           category: values.category,
           date: values.date.toISOString(),
-        };
-
-        await addTransaction(newTransaction);
-        navigation.navigate('Home');
-        resetForm({
-          values: {
-            ...values,
-            amount: '',
-            description: '',
-            image: '',
-          },
         });
+        Alert.alert('Success', 'Transaction created successfully', [
+          {
+            text: 'OK',
+            onPress: () =>
+              navigation.navigate('HistoryStack', { screen: 'History' }),
+          },
+        ]);
+        resetForm();
       }}
     >
       {({
@@ -348,25 +348,23 @@ function ExpenseTab() {
       }}
       validationSchema={transactionSchema}
       onSubmit={async (values, { resetForm }) => {
-        const newTransaction: Transaction = {
+        await addTransaction({
           id: uuid.v4().toString(),
           amount: parseFloat(values.amount),
           description: values.description,
           image: values.image,
           category: values.category,
           date: values.date.toISOString(),
-        };
-
-        await addTransaction(newTransaction);
-        navigation.navigate('Home');
-        resetForm({
-          values: {
-            ...values,
-            amount: '',
-            description: '',
-            image: '',
-          },
         });
+
+        Alert.alert('Success', 'Transaction created successfully', [
+          {
+            text: 'OK',
+            onPress: () =>
+              navigation.navigate('HistoryStack', { screen: 'History' }),
+          },
+        ]);
+        resetForm();
       }}
     >
       {({
