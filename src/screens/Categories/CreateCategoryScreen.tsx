@@ -4,7 +4,6 @@ import {
   TextInput,
   View,
   TouchableOpacity,
-  ScrollView,
   Alert,
 } from 'react-native';
 import React, { useState } from 'react';
@@ -13,11 +12,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CategoriesStackParamList } from '../../navigations/CategoriesStack';
 import Rectangle from '../../assets/svg/Rectangle';
 import { Picker } from '@react-native-picker/picker';
-import { useFormik } from 'formik';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useCategoryStore } from '../../stores/useCategoryStore';
-import { categorySchema } from '../../validation/CategorySchema';
-import uuid from 'react-native-uuid';
+import { useCreateCategoryForm } from '../../hooks/useCreateCategoryForm';
 import { COLORS, ICONS } from '../../constants/Category';
 
 type CreateCategoryScreenProps = NativeStackScreenProps<
@@ -28,33 +24,15 @@ type CreateCategoryScreenProps = NativeStackScreenProps<
 const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
   const [color, setColor] = useState(COLORS[0]);
   const [icon, setIcon] = useState(ICONS[0]);
-  const addCategory = useCategoryStore(state => state.addCategory);
 
-  const formik = useFormik({
-    initialValues: {
-      name: '',
-      status: 'income',
-    },
-    validationSchema: categorySchema,
-    onSubmit: (values, { resetForm }) => {
-      addCategory({
-        id: uuid.v4() as string,
-        name: values.name,
-        status: values.status as 'income' | 'expense',
-        color,
-        icon,
-      });
+  const form = useCreateCategoryForm(
+    () =>
       Alert.alert('Success', 'Category created successfully', [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
-      resetForm();
-    },
-  });
-
-  const { values, handleChange, handleSubmit, errors, touched } = formik;
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]),
+    color,
+    icon,
+  );
 
   return (
     <View style={styles.container}>
@@ -75,8 +53,8 @@ const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
         <Text style={styles.label}>Category Type</Text>
         <View style={styles.pickerContainer}>
           <Picker
-            selectedValue={values.status}
-            onValueChange={handleChange('status')}
+            selectedValue={form.watch('status')}
+            onValueChange={value => form.setValue('status', value)}
           >
             <Picker.Item label="Income" value="income" />
             <Picker.Item label="Expense" value="expense" />
@@ -87,12 +65,14 @@ const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
         <TextInput
           style={styles.input}
           placeholder="Enter name..."
-          value={values.name}
-          onChangeText={handleChange('name')}
-          onBlur={formik.handleBlur('name')}
+          value={form.watch('name')}
+          onChangeText={text => form.setValue('name', text)}
+          onBlur={() => form.trigger('name')}
         />
-        {touched.name && errors.name && (
-          <Text style={{ color: 'red' }}>{errors.name}</Text>
+        {form.formState.errors.name && (
+          <Text style={{ color: 'red' }}>
+            {form.formState.errors.name.message}
+          </Text>
         )}
 
         <Text style={styles.label}>Choose Color</Text>
@@ -135,7 +115,7 @@ const CreateCategoryScreen = ({ navigation }: CreateCategoryScreenProps) => {
           ))}
         </View>
 
-        <ButtonCustom text="Save" onPress={handleSubmit} />
+        <ButtonCustom text="Save" onPress={form.onSubmit} />
       </View>
     </View>
   );

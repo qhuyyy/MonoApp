@@ -5,13 +5,13 @@ import HistoryStack, { HistoryStackParamList } from './HistoryStack';
 import CategoriesStack from './CategoriesStack';
 import StatisticsScreen from '../screens/Main/StatisticsScreen';
 import CustomBottomTabBar from '../components/CustomBottomTabBar';
-import AddNewTransTabs from './AddNewTransTab';
+import CreateTransactionTabs from './CreateTransactionTabs';
 import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type MainBottomTabsParamList = {
   Home: undefined;
   CategoriesStack: undefined;
-  AddNewTrans: undefined;
+  CreateTransactionTabs: undefined;
   HistoryStack: NavigatorScreenParams<HistoryStackParamList>;
   Statistics: undefined;
 };
@@ -26,7 +26,7 @@ export default function MainBottomTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="CategoriesStack" component={CategoriesStack} />
-      <Tab.Screen name="AddNewTrans" component={AddNewTransTabs} />
+      <Tab.Screen name="CreateTransactionTabs" component={CreateTransactionTabs} />
       <Tab.Screen name="HistoryStack" component={HistoryStack} />
       <Tab.Screen name="Statistics" component={StatisticsScreen} />
     </Tab.Navigator>

@@ -6,17 +6,16 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ButtonCustom from '../../components/ButtonCustom';
+import OutlineButtonCustom from '../../components/OutlineButtonCustom';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CategoriesStackParamList } from '../../navigations/CategoriesStack';
 import Rectangle from '../../assets/svg/Rectangle';
 import { Picker } from '@react-native-picker/picker';
-import { useFormik } from 'formik';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useCategoryStore } from '../../stores/useCategoryStore';
-import { categorySchema } from '../../validation/CategorySchema';
-import OutlineButtonCustom from '../../components/OutlineButtonCustom';
+import { useEditCategoryForm } from '../../hooks/useEditCategoryForm';
 import { COLORS, ICONS } from '../../constants/Category';
 
 type EditCategoryScreenProps = NativeStackScreenProps<
@@ -26,11 +25,15 @@ type EditCategoryScreenProps = NativeStackScreenProps<
 
 const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
   const { category } = route.params;
-
-  const updateCategory = useCategoryStore(state => state.updateCategory);
   const deleteCategory = useCategoryStore(state => state.deleteCategory);
   const [color, setColor] = useState(category.color);
   const [icon, setIcon] = useState(category.icon);
+
+  const form = useEditCategoryForm(category, color, icon, () =>
+    Alert.alert('Success', 'Category updated successfully', [
+      { text: 'OK', onPress: () => navigation.goBack() },
+    ]),
+  );
 
   const handleDelete = async () => {
     Alert.alert(
@@ -49,31 +52,6 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
       ],
     );
   };
-
-  const formik = useFormik({
-    enableReinitialize: true,
-    initialValues: {
-      name: category.name,
-      status: category.status,
-    },
-    validationSchema: categorySchema,
-    onSubmit: values => {
-      updateCategory({
-        id: category.id,
-        name: values.name,
-        status: values.status as 'income' | 'expense',
-        color,
-        icon,
-      });
-
-      Alert.alert('Success', 'Category updated successfully', [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]);
-    },
-  });
 
   return (
     <View style={styles.container}>
@@ -94,8 +72,8 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
         <Text style={styles.label}>Category Type</Text>
         <View style={styles.pickerContainer}>
           <Picker
-            selectedValue={formik.values.status}
-            onValueChange={formik.handleChange('status')}
+            selectedValue={form.watch('status')}
+            onValueChange={value => form.setValue('status', value)}
           >
             <Picker.Item label="Income" value="income" />
             <Picker.Item label="Expense" value="expense" />
@@ -106,12 +84,14 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
         <TextInput
           style={styles.input}
           placeholder="Enter name..."
-          value={formik.values.name}
-          onChangeText={formik.handleChange('name')}
-          onBlur={formik.handleBlur('name')}
+          value={form.watch('name')}
+          onChangeText={text => form.setValue('name', text)}
+          onBlur={() => form.trigger('name')}
         />
-        {formik.touched.name && formik.errors.name && (
-          <Text style={{ color: 'red' }}>{formik.errors.name}</Text>
+        {form.formState.errors.name && (
+          <Text style={{ color: 'red' }}>
+            {form.formState.errors.name.message}
+          </Text>
         )}
 
         <Text style={styles.label}>Choose Color</Text>
@@ -154,7 +134,7 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
           ))}
         </View>
 
-        <ButtonCustom text="Update" onPress={formik.handleSubmit} />
+        <ButtonCustom text="Update" onPress={form.onSubmit} />
         <OutlineButtonCustom text="Delete" onPress={handleDelete} />
       </View>
     </View>

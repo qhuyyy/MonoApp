@@ -56,7 +56,7 @@ const CustomBottomTabBar = ({
 
       <TouchableOpacity
         style={styles.fabButton}
-        onPress={() => navigation.navigate('AddNewTrans')}
+        onPress={() => navigation.navigate('CreateTransactionTabs')}
       >
         <Ionicons name="add" size={32} color="#fff" />
       </TouchableOpacity>
