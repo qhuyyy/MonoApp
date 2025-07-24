@@ -29,7 +29,9 @@ const PAGE_SIZE = 4;
 
 const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const transactions = useTransactionStore(state => state.transactions);
-
+  const duplicateTransaction = useTransactionStore(
+    state => state.duplicateTransaction,
+  );
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>(
     'all',
@@ -80,6 +82,19 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
     ]);
   };
 
+  const handleDuplicate = (id: string) => {
+    Alert.alert('Duplicate', 'Do you want to duplicate this transaction?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Duplicate',
+        style: 'default',
+        onPress: () => {
+          duplicateTransaction(id);
+        },
+      },
+    ]);
+  };
+
   const renderRightActions =
     (item: Transaction, handleDelete: (id: string) => void) =>
     (progress: Animated.AnimatedInterpolation<number>) => {
@@ -104,7 +119,9 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
                 styles.actionTouchableOpacity,
                 { backgroundColor: '#3A837B' },
               ]}
-              onPress={() => Alert.alert('Duplicate')}
+              onPress={() => {
+                handleDuplicate(item.id);
+              }}
             >
               <Ionicons name="copy-outline" size={24} color="#fff" />
             </TouchableOpacity>
