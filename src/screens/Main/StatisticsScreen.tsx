@@ -31,11 +31,9 @@ const StatisticsScreen = () => {
     );
   };
 
-  // --- Filter by period ---
   const filtered = useMemo(() => {
     const now = new Date();
     let startDate = new Date();
-
     if (period === 'month') {
       startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     } else if (period === '3months') {
@@ -43,17 +41,14 @@ const StatisticsScreen = () => {
     } else {
       startDate = new Date(now.getFullYear(), 0, 1);
     }
-
     return transactions.filter(
       t => new Date(t.date).getTime() >= startDate.getTime(),
     );
   }, [transactions, period]);
 
-  // --- Bar Chart ---
   const barData = useMemo(() => {
     const labels: string[] = [];
     const expenseArr: number[] = [];
-
     const now = new Date();
     let startDate = new Date();
     if (period === 'month') {
@@ -63,14 +58,12 @@ const StatisticsScreen = () => {
     } else {
       startDate = new Date(now.getFullYear(), 0, 1);
     }
-
     const tempDate = new Date(startDate);
     while (tempDate <= now) {
       labels.push(`${tempDate.getMonth() + 1}/${tempDate.getFullYear()}`);
       expenseArr.push(0);
       tempDate.setMonth(tempDate.getMonth() + 1);
     }
-
     filtered.forEach(t => {
       const d = new Date(t.date);
       const label = `${d.getMonth() + 1}/${d.getFullYear()}`;
@@ -79,7 +72,6 @@ const StatisticsScreen = () => {
         expenseArr[idx] += t.amount;
       }
     });
-
     return {
       labels,
       datasets: [{ data: expenseArr, color: () => '#FF7043' }],
@@ -87,7 +79,6 @@ const StatisticsScreen = () => {
     };
   }, [filtered, period]);
 
-  // --- Line Chart ---
   const lineData = useMemo(() => {
     const now = new Date();
     let startDate = new Date();
@@ -98,19 +89,16 @@ const StatisticsScreen = () => {
     } else {
       startDate = new Date(now.getFullYear(), 0, 1);
     }
-
     const labels: string[] = [];
     const incomeArr: number[] = [];
     const expenseArr: number[] = [];
     const tempDate = new Date(startDate);
-
     while (tempDate <= now) {
       labels.push(`${tempDate.getMonth() + 1}/${tempDate.getFullYear()}`);
       incomeArr.push(0);
       expenseArr.push(0);
       tempDate.setMonth(tempDate.getMonth() + 1);
     }
-
     filtered.forEach(t => {
       const d = new Date(t.date);
       const label = `${d.getMonth() + 1}/${d.getFullYear()}`;
@@ -120,7 +108,6 @@ const StatisticsScreen = () => {
         if (t.category?.status === 'expense') expenseArr[idx] += t.amount;
       }
     });
-
     return {
       labels,
       datasets: [
@@ -136,7 +123,6 @@ const StatisticsScreen = () => {
     const expenseMap: Record<string, number> = {};
     const incomeColor: Record<string, string> = {};
     const expenseColor: Record<string, string> = {};
-
     filtered.forEach(t => {
       if (!t.category) return;
       if (t.category.status === 'income') {
@@ -149,7 +135,6 @@ const StatisticsScreen = () => {
         expenseColor[t.category.name] = t.category.color;
       }
     });
-
     return {
       incomePieData: Object.keys(incomeMap).map(key => ({
         name: key,
@@ -170,10 +155,7 @@ const StatisticsScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Rectangle />
-      </View>
-
+      <Rectangle style={styles.rectangleBackground} />
       <View style={styles.contentContainer}>
         <Text style={styles.headerTitle}>Statistics & Report</Text>
         <View style={styles.switchContainer}>
@@ -204,16 +186,18 @@ const StatisticsScreen = () => {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Monthly Expenses Bar Chart</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <BarChart
-                data={barData}
-                width={Math.max(screenWidth, barData.labels.length * 5)}
-                height={260}
-                fromZero
-                yAxisSuffix=""
-                yAxisLabel="$"
-                chartConfig={chartConfig}
-                style={styles.chart}
-              />
+              <View style={styles.chartWrapper}>
+                <BarChart
+                  data={barData}
+                  width={Math.max(screenWidth - 40, barData.labels.length * 60)}
+                  height={260}
+                  fromZero
+                  yAxisLabel="$"
+                  yAxisSuffix=""
+                  chartConfig={chartConfig}
+                  style={styles.chart}
+                />
+              </View>
             </ScrollView>
           </View>
         )}
@@ -224,53 +208,105 @@ const StatisticsScreen = () => {
               Income & Expense Trend Line Chart
             </Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <LineChart
-                data={lineData}
-                width={Math.max(screenWidth, lineData.labels.length * 5)}
-                height={260}
-                chartConfig={chartConfig}
-                yAxisLabel="$"
-                bezier
-                style={styles.chart}
-              />
+              <View style={styles.chartWrapper}>
+                <LineChart
+                  data={lineData}
+                  width={Math.max(
+                    screenWidth - 40,
+                    lineData.labels.length * 60,
+                  )}
+                  height={260}
+                  chartConfig={chartConfig}
+                  yAxisLabel="$"
+                  bezier
+                  style={styles.chart}
+                />
+              </View>
             </ScrollView>
           </View>
         )}
 
         {chartType === 'pie' && (
           <>
-            <View style={styles.card}>
+            <View
+              style={[
+                styles.card,
+                { alignItems: 'center', justifyContent: 'center' },
+              ]}
+            >
               <Text style={styles.cardTitle}>Income by Category</Text>
               {incomePieData.length > 0 ? (
-                <PieChart
-                  data={incomePieData}
-                  width={screenWidth - 16}
-                  height={220}
-                  chartConfig={chartConfig}
-                  accessor={'population'}
-                  
-                  backgroundColor={'transparent'}
-                  paddingLeft={'15'}
-                  absolute
-                />
+                <>
+                  <View style={styles.pieChartCenter}>
+                    <View style={styles.pieChartWrapper}>
+                      <PieChart
+                        data={incomePieData}
+                        width={200} // nhỏ hơn, cố định
+                        height={180}
+                        chartConfig={chartConfig}
+                        accessor="population"
+                        backgroundColor="transparent"
+                        paddingLeft="50"
+                        hasLegend={false}
+                        absolute
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.legendContainer}>
+                    {incomePieData.map(item => (
+                      <View key={item.name} style={styles.legendItem}>
+                        <View
+                          style={[
+                            styles.legendColor,
+                            { backgroundColor: item.color },
+                          ]}
+                        />
+                        <Text style={styles.legendText}>{item.name}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </>
               ) : (
                 <Text style={styles.emptyText}>No income data</Text>
               )}
             </View>
 
-            <View style={styles.card}>
+            <View
+              style={[
+                styles.card,
+                { alignItems: 'center', justifyContent: 'center' },
+              ]}
+            >
               <Text style={styles.cardTitle}>Expense by Category</Text>
               {expensePieData.length > 0 ? (
-                <PieChart
-                  data={expensePieData}
-                  width={screenWidth}
-                  height={220}
-                  chartConfig={chartConfig}
-                  accessor={'population'}
-                  backgroundColor={'transparent'}
-                  paddingLeft={'15'}
-                  absolute
-                />
+                <>
+                  <View style={styles.pieChartCenter}>
+                    <PieChart
+                      data={expensePieData}
+                      width={200}
+                      height={180}
+                      chartConfig={chartConfig}
+                      accessor="population"
+                      backgroundColor="transparent"
+                      paddingLeft="50"
+                      hasLegend={false}
+                      absolute
+                    />
+                  </View>
+                  <View style={styles.legendContainer}>
+                    {expensePieData.map(item => (
+                      <View key={item.name} style={styles.legendItem}>
+                        <View
+                          style={[
+                            styles.legendColor,
+                            { backgroundColor: item.color },
+                          ]}
+                        />
+                        <Text style={styles.legendText}>{item.name}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </>
               ) : (
                 <Text style={styles.emptyText}>No expense data</Text>
               )}
@@ -285,24 +321,28 @@ const StatisticsScreen = () => {
 export default StatisticsScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F7F7' },
-  header: { height: 50, justifyContent: 'center' },
-  headerTitle: { color: '#fff', fontSize: 24, fontWeight: '700' },
+  container: {
+    flex: 1,
+    backgroundColor: '#F2F7F7',
+  },
+  rectangleBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: -1,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '700',
+  },
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 10,
     justifyContent: 'space-around',
   },
-  sortButton: {
-    marginLeft: 'auto',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: '#FFD54F',
-    borderRadius: 20,
-  },
-  sortText: { fontWeight: 'bold', color: '#333' },
-  contentContainer: { paddingHorizontal: 20 },
   pickerContainer: {
     flex: 1,
     maxWidth: 240,
@@ -312,7 +352,26 @@ const styles = StyleSheet.create({
     marginRight: 10,
     overflow: 'hidden',
   },
-  picker: { height: 52, width: '100%', color: '#333' },
+  picker: {
+    height: 52,
+    width: '100%',
+    color: '#333',
+  },
+  sortButton: {
+    marginLeft: 'auto',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#FFD54F',
+    borderRadius: 20,
+  },
+  sortText: {
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  contentContainer: {
+    paddingHorizontal: 20,
+    top: 50,
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -325,8 +384,60 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 2,
+    alignItems: 'center',
   },
-  cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 10 },
-  chart: { borderRadius: 12 },
-  emptyText: { textAlign: 'center', marginVertical: 10, color: '#777' },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
+  },
+  chartWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chart: {
+    borderRadius: 12,
+  },
+  pieChartCenter: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 8,
+  },
+  pieChartWrapper: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 8,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginVertical: 10,
+    color: '#777',
+  },
+  legendContainer: {
+    marginTop: 10,
+    width: '90%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '48%',
+    marginBottom: 8,
+  },
+  legendColor: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    marginRight: 8,
+  },
+  legendText: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#444',
+  },
 });
