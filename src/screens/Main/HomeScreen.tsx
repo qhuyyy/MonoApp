@@ -166,7 +166,10 @@ export default function HomeScreen() {
       </View>
 
       {/* Balance */}
-      <Pressable style={styles.balanceCard}>
+      <Pressable
+        style={styles.balanceCard}
+        onPress={() => navigation.navigate('Statistics')}
+      >
         <View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Text style={styles.balanceCardText}>Total Balance</Text>

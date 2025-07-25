@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,9 +8,14 @@ import {
   Dimensions,
 } from 'react-native';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
+import { Picker } from '@react-native-picker/picker';
 import Rectangle from '../../assets/svg/Rectangle';
 import { useTransactionStore } from '../../stores/useTransactionStore';
-import { Picker } from '@react-native-picker/picker';
+
+import ViewShot from 'react-native-view-shot';
+import Share from 'react-native-share';
+import RNFS from 'react-native-fs';
+import Papa from 'papaparse';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -24,6 +29,7 @@ const StatisticsScreen = () => {
   const [chartType, setChartType] = useState<'bar' | 'line' | 'pie'>('bar');
   const [period, setPeriod] = useState<'month' | '3months' | 'year'>('month');
   const { transactions } = useTransactionStore();
+  const chartRef = useRef<ViewShot>(null);
 
   const cyclePeriod = () => {
     setPeriod(prev =>
@@ -31,6 +37,7 @@ const StatisticsScreen = () => {
     );
   };
 
+  // --- Filter data by period ---
   const filtered = useMemo(() => {
     const now = new Date();
     let startDate = new Date();
@@ -46,6 +53,7 @@ const StatisticsScreen = () => {
     );
   }, [transactions, period]);
 
+  // --- Bar Chart data ---
   const barData = useMemo(() => {
     const labels: string[] = [];
     const expenseArr: number[] = [];
@@ -79,6 +87,7 @@ const StatisticsScreen = () => {
     };
   }, [filtered, period]);
 
+  // --- Line Chart data ---
   const lineData = useMemo(() => {
     const now = new Date();
     let startDate = new Date();
@@ -118,6 +127,7 @@ const StatisticsScreen = () => {
     };
   }, [filtered, period]);
 
+  // --- Pie chart data ---
   const { incomePieData, expensePieData } = useMemo(() => {
     const incomeMap: Record<string, number> = {};
     const expenseMap: Record<string, number> = {};
@@ -153,6 +163,53 @@ const StatisticsScreen = () => {
     };
   }, [filtered]);
 
+  const PieLegend = ({ data }: { data: any[] }) => (
+    <View style={styles.legendContainer}>
+      {data.map(item => (
+        <View key={item.name} style={styles.legendItem}>
+          <View style={[styles.legendColor, { backgroundColor: item.color }]} />
+          <Text style={styles.legendText}>{item.name}</Text>
+        </View>
+      ))}
+    </View>
+  );
+
+  // --- Share chart image ---
+  const shareChart = async () => {
+    try {
+      const uri = await chartRef.current?.capture?.();
+      if (!uri) return;
+      await Share.open({
+        url: `file://${uri}`,
+        type: 'image/png',
+        failOnCancel: false,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // --- Export CSV ---
+  const exportCSV = async () => {
+    const csv = Papa.unparse(
+      filtered.map(t => ({
+        Date: t.date,
+        Category: t.category?.name || '',
+        Type: t.category?.status || '',
+        Amount: t.amount,
+      })),
+    );
+
+    const path = `${RNFS.DocumentDirectoryPath}/transactions.csv`;
+    await RNFS.writeFile(path, csv, 'utf8');
+
+    await Share.open({
+      url: `file://${path}`,
+      type: 'text/csv',
+      failOnCancel: false,
+    });
+  };
+
   return (
     <ScrollView style={styles.container}>
       <Rectangle style={styles.rectangleBackground} />
@@ -182,11 +239,21 @@ const StatisticsScreen = () => {
           </TouchableOpacity>
         </View>
 
-        {chartType === 'bar' && (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>Monthly Expenses Bar Chart</Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View style={styles.chartWrapper}>
+        {/* Export buttons */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <TouchableOpacity onPress={shareChart} style={styles.exportButton}>
+            <Text style={styles.exportButtonText}>Chia sẻ biểu đồ</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={exportCSV} style={styles.exportButton}>
+            <Text style={styles.exportButtonText}>Xuất CSV</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ViewShot ref={chartRef} options={{ format: 'png', quality: 0.9 }}>
+          {chartType === 'bar' && (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>Monthly Expenses Bar Chart</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <BarChart
                   data={barData}
                   width={Math.max(screenWidth - 40, barData.labels.length * 60)}
@@ -197,18 +264,16 @@ const StatisticsScreen = () => {
                   chartConfig={chartConfig}
                   style={styles.chart}
                 />
-              </View>
-            </ScrollView>
-          </View>
-        )}
+              </ScrollView>
+            </View>
+          )}
 
-        {chartType === 'line' && (
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>
-              Income & Expense Trend Line Chart
-            </Text>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-              <View style={styles.chartWrapper}>
+          {chartType === 'line' && (
+            <View style={styles.card}>
+              <Text style={styles.cardTitle}>
+                Income & Expense Trend Line Chart
+              </Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 <LineChart
                   data={lineData}
                   width={Math.max(
@@ -221,98 +286,46 @@ const StatisticsScreen = () => {
                   bezier
                   style={styles.chart}
                 />
+              </ScrollView>
+            </View>
+          )}
+
+          {chartType === 'pie' && (
+            <>
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Income by Category</Text>
+                <PieChart
+                  data={incomePieData}
+                  width={200}
+                  height={180}
+                  chartConfig={chartConfig}
+                  accessor="population"
+                  backgroundColor="transparent"
+                  paddingLeft="50"
+                  hasLegend={false}
+                  absolute
+                />
+                <PieLegend data={incomePieData} />
               </View>
-            </ScrollView>
-          </View>
-        )}
 
-        {chartType === 'pie' && (
-          <>
-            <View
-              style={[
-                styles.card,
-                { alignItems: 'center', justifyContent: 'center' },
-              ]}
-            >
-              <Text style={styles.cardTitle}>Income by Category</Text>
-              {incomePieData.length > 0 ? (
-                <>
-                  <View style={styles.pieChartCenter}>
-                    <View style={styles.pieChartWrapper}>
-                      <PieChart
-                        data={incomePieData}
-                        width={200} // nhỏ hơn, cố định
-                        height={180}
-                        chartConfig={chartConfig}
-                        accessor="population"
-                        backgroundColor="transparent"
-                        paddingLeft="50"
-                        hasLegend={false}
-                        absolute
-                      />
-                    </View>
-                  </View>
-                  <View style={styles.legendContainer}>
-                    {incomePieData.map(item => (
-                      <View key={item.name} style={styles.legendItem}>
-                        <View
-                          style={[
-                            styles.legendColor,
-                            { backgroundColor: item.color },
-                          ]}
-                        />
-                        <Text style={styles.legendText}>{item.name}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </>
-              ) : (
-                <Text style={styles.emptyText}>No income data</Text>
-              )}
-            </View>
-
-            <View
-              style={[
-                styles.card,
-                { alignItems: 'center', justifyContent: 'center' },
-              ]}
-            >
-              <Text style={styles.cardTitle}>Expense by Category</Text>
-              {expensePieData.length > 0 ? (
-                <>
-                  <View style={styles.pieChartCenter}>
-                    <PieChart
-                      data={expensePieData}
-                      width={200}
-                      height={180}
-                      chartConfig={chartConfig}
-                      accessor="population"
-                      backgroundColor="transparent"
-                      paddingLeft="50"
-                      hasLegend={false}
-                      absolute
-                    />
-                  </View>
-                  <View style={styles.legendContainer}>
-                    {expensePieData.map(item => (
-                      <View key={item.name} style={styles.legendItem}>
-                        <View
-                          style={[
-                            styles.legendColor,
-                            { backgroundColor: item.color },
-                          ]}
-                        />
-                        <Text style={styles.legendText}>{item.name}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </>
-              ) : (
-                <Text style={styles.emptyText}>No expense data</Text>
-              )}
-            </View>
-          </>
-        )}
+              <View style={styles.card}>
+                <Text style={styles.cardTitle}>Expense by Category</Text>
+                <PieChart
+                  data={expensePieData}
+                  width={200}
+                  height={180}
+                  chartConfig={chartConfig}
+                  accessor="population"
+                  backgroundColor="transparent"
+                  paddingLeft="50"
+                  hasLegend={false}
+                  absolute
+                />
+                <PieLegend data={expensePieData} />
+              </View>
+            </>
+          )}
+        </ViewShot>
       </View>
     </ScrollView>
   );
@@ -321,10 +334,7 @@ const StatisticsScreen = () => {
 export default StatisticsScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F2F7F7',
-  },
+  container: { flex: 1, backgroundColor: '#F2F7F7' },
   rectangleBackground: {
     position: 'absolute',
     top: 0,
@@ -332,17 +342,21 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: -1,
   },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
+  headerTitle: { color: '#fff', fontSize: 24, fontWeight: '700' },
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 10,
-    justifyContent: 'space-around',
   },
+  sortButton: {
+    marginLeft: 'auto',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: '#FFD54F',
+    borderRadius: 20,
+  },
+  sortText: { fontWeight: 'bold', color: '#333' },
+  contentContainer: { paddingHorizontal: 20, top: 50 },
   pickerContainer: {
     flex: 1,
     maxWidth: 240,
@@ -352,26 +366,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
     overflow: 'hidden',
   },
-  picker: {
-    height: 52,
-    width: '100%',
-    color: '#333',
-  },
-  sortButton: {
-    marginLeft: 'auto',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    backgroundColor: '#FFD54F',
-    borderRadius: 20,
-  },
-  sortText: {
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  contentContainer: {
-    paddingHorizontal: 20,
-    top: 50,
-  },
+  picker: { height: 52, width: '100%', color: '#333' },
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -379,43 +374,17 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     padding: 12,
     marginVertical: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
     alignItems: 'center',
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-  },
-  chartWrapper: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chart: {
-    borderRadius: 12,
-  },
-  pieChartCenter: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 8,
-  },
-  pieChartWrapper: {
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 8,
-  },
-  emptyText: {
-    textAlign: 'center',
+  cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 10 },
+  chart: { borderRadius: 12 },
+  exportButton: {
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    borderRadius: 8,
     marginVertical: 10,
-    color: '#777',
   },
+  exportButtonText: { color: '#fff', fontWeight: '600' },
   legendContainer: {
     marginTop: 10,
     width: '90%',

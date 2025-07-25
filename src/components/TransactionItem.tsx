@@ -24,7 +24,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
       : format(parsedDate, 'dd MMM yyyy');
   }
 
-  const formattedDate = date ? format(new Date(date), 'dd/MM/yyyy') : '';
+  const formattedDate = date ? format(new Date(date), 'MMMM dd, yyyy') : '';
 
   const isIncome = category.status === 'income';
 
@@ -34,7 +34,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
       onPress={onPress ? () => onPress(transaction) : undefined}
     >
       <View style={styles.iconContainer}>
-        <Ionicons name={category.icon} size={30} color={category.color} />
+        <Ionicons name={category.icon} size={28} color={category.color} />
       </View>
 
       <View style={styles.infoContainer}>
@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
   iconContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 35,
-    height: 35,
+    width: 30,
+    height: 30,
     borderRadius: 10,
   },
   infoContainer: {
