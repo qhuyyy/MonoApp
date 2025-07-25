@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {
-  useState,
-  useMemo,
   useEffect,
   useRef,
   useCallback,
+  useMemo,
+  useState,
 } from 'react';
 import {
   StyleSheet,
@@ -22,7 +22,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Rectangle from '../../assets/svg/Rectangle';
 import TransactionItem from '../../components/TransactionItem';
 import { useTransactionStore } from '../../stores/useTransactionStore';
-import { Transaction, Category } from '../../types/types';
+import { useHistoryFilterStore } from '../../stores/useHistoryFilterStore';
+import { Transaction } from '../../types/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HistoryStackParamList } from '../../navigations/HistoryStack';
@@ -36,45 +37,38 @@ type HistoryScreenProps = NativeStackScreenProps<
 >;
 
 const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
-  const transactions = useTransactionStore(state => state.transactions);
-  const duplicateTransaction = useTransactionStore(
-    state => state.duplicateTransaction,
-  );
-  const loadTransactions = useTransactionStore(state => state.loadTransactions);
+  const { transactions, duplicateTransaction, loadTransactions } =
+    useTransactionStore();
+
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  
+  const {
+    search,
+    filterType,
+    sortBy,
+    page,
+    categories,
+    selectedCategories,
+    setSearch,
+    setFilterType,
+    setSortBy,
+    toggleCategory,
+    setCategories,
+    setPage,
+  } = useHistoryFilterStore();
 
   const swipeableRefs = useRef<Record<string, Swipeable | null>>({});
   const [refreshing, setRefreshing] = useState(false);
 
-  const [search, setSearch] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>(
-    'all',
-  );
-  const [sortBy, setSortBy] = useState<'date' | 'amount' | 'updated'>(
-    'updated',
-  );
-  const [page, setPage] = useState(1);
-
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-
   // Load categories từ AsyncStorage
   useEffect(() => {
-    const fetchCategories = async () => {
-      const stored = await AsyncStorage.getItem('category-storage');
+    AsyncStorage.getItem('category-storage').then(stored => {
       if (stored) {
         const parsed = JSON.parse(stored);
-        const allCategories: Category[] = parsed.state?.categories || [];
-        setCategories(allCategories);
+        setCategories(parsed.state?.categories || []);
       }
-    };
-    fetchCategories();
-  }, []);
-
-  const toggleCategory = (id: string) => {
-    setSelectedCategories(prev =>
-      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id],
-    );
-  };
+    });
+  }, [setCategories]);
 
   // Refresh khi quay lại màn hình
   useFocusEffect(
@@ -91,18 +85,14 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
         t.description?.toLowerCase().includes(search.toLowerCase()),
       );
     }
-
     if (filterType !== 'all') {
       result = result.filter(t => t.category?.status === filterType);
     }
-
     if (selectedCategories.length > 0) {
       result = result.filter(
         t => t.category && selectedCategories.includes(t.category.id),
       );
     }
-
-    // ---- Sort logic ----
     if (sortBy === 'date') {
       result.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -115,7 +105,6 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
           new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
       );
     }
-
     return result;
   }, [transactions, search, filterType, sortBy, selectedCategories]);
 
@@ -123,7 +112,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
   const handleLoadMore = () => {
     if (page * PAGE_SIZE < filteredTransactions.length) {
-      setPage(prev => prev + 1);
+      setPage(page + 1);
     }
   };
 
@@ -150,18 +139,14 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
       {
         text: 'Duplicate',
         style: 'default',
-        onPress: () => {
-          duplicateTransaction(id);
-        },
+        onPress: () => duplicateTransaction(id),
       },
     ]);
   };
 
   const handleSwipeableOpen = (id: string) => {
     Object.entries(swipeableRefs.current).forEach(([key, ref]) => {
-      if (key !== id && ref) {
-        ref.close();
-      }
+      if (key !== id && ref) ref.close();
     });
   };
 
@@ -224,9 +209,10 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
       );
     };
 
+  // Reset page khi filter thay đổi
   useEffect(() => {
     setPage(1);
-  }, [search, filterType, sortBy, selectedCategories]);
+  }, [search, filterType, sortBy, selectedCategories, setPage]);
 
   return (
     <View style={styles.container}>
@@ -245,9 +231,9 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
         />
       </View>
 
-      <View style={[styles.filterContainer]}>
+      <View style={styles.filterContainer}>
         <Text style={styles.title}>Status</Text>
-        <View style={[styles.filterBar]}>
+        <View style={styles.filterBar}>
           <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
             {['all', 'income', 'expense'].map(type => (
               <TouchableOpacity
@@ -279,52 +265,46 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
           <TouchableOpacity
             style={styles.sortTouchableOpacity}
-            onPress={() =>
-              setSortBy(prev =>
-                prev === 'date'
+            onPress={() => {
+              const next =
+                sortBy === 'date'
                   ? 'amount'
-                  : prev === 'amount'
+                  : sortBy === 'amount'
                   ? 'updated'
-                  : 'date',
-              )
-            }
+                  : 'date';
+              setSortBy(next);
+            }}
           >
             <Text style={styles.sortText}>Sort: {sortBy}</Text>
           </TouchableOpacity>
         </View>
 
-        <View>
-          <View>
-            <Text style={styles.title}>Categories</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-              {categories.map(cat => (
-                <TouchableOpacity
-                  key={cat.id}
-                  style={[
-                    styles.chip,
-                    selectedCategories.includes(cat.id) && styles.chipSelected,
-                  ]}
-                  onPress={() => toggleCategory(cat.id)}
-                >
-                  <Ionicons
-                    name={cat.icon}
-                    size={18}
-                    color={
-                      selectedCategories.includes(cat.id) ? '#fff' : cat.color
-                    }
-                  />
-                  <Text
-                    style={[
-                      styles.chipText,
-                      selectedCategories.includes(cat.id) && { color: '#fff' },
-                    ]}
-                  >
-                    {cat.name}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
+        <Text style={styles.title}>Categories</Text>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+          {categories.map(cat => (
+            <TouchableOpacity
+              key={cat.id}
+              style={[
+                styles.chip,
+                selectedCategories.includes(cat.id) && styles.chipSelected,
+              ]}
+              onPress={() => toggleCategory(cat.id)}
+            >
+              <Ionicons
+                name={cat.icon}
+                size={18}
+                color={selectedCategories.includes(cat.id) ? '#fff' : cat.color}
+              />
+              <Text
+                style={[
+                  styles.chipText,
+                  selectedCategories.includes(cat.id) && { color: '#fff' },
+                ]}
+              >
+                {cat.name}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
@@ -372,20 +352,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: '#3A837B',
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
-  title: {
-    fontSize: 16,
-    color: '#fff',
-    fontStyle: 'italic',
-  },
-  searchContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 5,
-  },
+  headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
+  title: { fontSize: 16, color: '#fff', fontStyle: 'italic' },
+  searchContainer: { paddingHorizontal: 20, marginBottom: 5 },
   searchInput: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -395,14 +364,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  filterContainer: {
-    paddingHorizontal: 20,
-  },
-  filterBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 2,
-  },
+  filterContainer: { paddingHorizontal: 20 },
+  filterBar: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
   filterButton: {
     paddingHorizontal: 12,
     paddingVertical: 8,
@@ -412,14 +375,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#3A837B',
   },
-  filterActive: {
-    backgroundColor: '#3A837B',
-  },
-  filterText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
+  filterActive: { backgroundColor: '#3A837B' },
+  filterText: { fontSize: 14, fontWeight: '500', color: '#333' },
   filterTextActive: { color: '#fff' },
   sortTouchableOpacity: {
     paddingHorizontal: 12,
@@ -430,11 +387,7 @@ const styles = StyleSheet.create({
     width: 120,
     marginHorizontal: 4,
   },
-  sortText: {
-    fontWeight: 'bold',
-    color: '#333',
-    alignSelf: 'center',
-  },
+  sortText: { fontWeight: 'bold', color: '#333', alignSelf: 'center' },
   contentContainer: {
     maxHeight: windowHeight - 510,
     backgroundColor: '#fff',
@@ -444,13 +397,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     elevation: 5,
   },
-  listContent: {
-    paddingHorizontal: 5,
-    marginTop: 10,
-  },
+  listContent: { paddingHorizontal: 5, marginTop: 10 },
   emptyText: {
     textAlign: 'center',
-    alignItems: 'center',
     fontSize: 16,
     color: '#999',
     paddingBottom: 10,
@@ -481,19 +430,6 @@ const styles = StyleSheet.create({
     borderColor: '#429690',
     margin: 3,
   },
-  chipSelected: {
-    backgroundColor: '#429690',
-  },
-  chipText: {
-    marginLeft: 5,
-    color: '#429690',
-    fontWeight: '600',
-  },
-  inputLabel: {
-    fontSize: 14,
-    color: '#429690',
-    fontWeight: 'bold',
-    marginHorizontal: 16,
-    marginTop: 8,
-  },
+  chipSelected: { backgroundColor: '#429690' },
+  chipText: { marginLeft: 5, color: '#429690', fontWeight: '600' },
 });

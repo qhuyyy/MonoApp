@@ -14,8 +14,12 @@ export type EditTransactionFormValues = {
 };
 
 export const useEditTransactionForm = (transaction: Transaction) => {
-  const updateTransaction = useTransactionStore(state => state.updateTransaction);
-  const deleteTransaction = useTransactionStore(state => state.deleteTransaction);
+  const updateTransaction = useTransactionStore(
+    state => state.updateTransaction,
+  );
+  const deleteTransaction = useTransactionStore(
+    state => state.deleteTransaction,
+  );
 
   const form = useForm<EditTransactionFormValues>({
     defaultValues: {
@@ -45,5 +49,9 @@ export const useEditTransactionForm = (transaction: Transaction) => {
     await deleteTransaction(transaction.id);
   };
 
-  return { form, handleUpdate, handleDelete };
+  return {
+    ...form, // chứa watch, setValue, trigger, formState, handleSubmit...
+    handleUpdate,
+    handleDelete,
+  };
 };

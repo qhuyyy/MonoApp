@@ -32,10 +32,14 @@ const EditTransactionScreen = ({ navigation, route }: Props) => {
   const [incomeCategories, setIncomeCategories] = useState<Category[]>([]);
   const currency = useUserStore(state => state.currency);
 
-  const { form, handleUpdate, handleDelete } =
-    useEditTransactionForm(transaction);
-
-  const { control, handleSubmit, setValue, watch } = form;
+  const {
+    watch,
+    setValue,
+    handleSubmit,
+    handleUpdate,
+    handleDelete,
+    formState,
+  } = useEditTransactionForm(transaction);
 
   const selectedDate = watch('date');
 
@@ -59,21 +63,17 @@ const EditTransactionScreen = ({ navigation, route }: Props) => {
   };
 
   const confirmDelete = () => {
-    Alert.alert(
-      'Delete Transaction',
-      'Are you sure you want to delete this transaction?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            await handleDelete();
-            navigation.navigate('History');
-          },
+    Alert.alert('Delete Transaction', 'Are you sure you want to delete?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          await handleDelete();
+          navigation.navigate('History');
         },
-      ],
-    );
+      },
+    ]);
   };
 
   useEffect(() => {
@@ -92,7 +92,6 @@ const EditTransactionScreen = ({ navigation, route }: Props) => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Edit Transaction</Text>
       </View>
-
       <View style={styles.form}>
         {/* Status */}
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
@@ -109,89 +108,77 @@ const EditTransactionScreen = ({ navigation, route }: Props) => {
           </Text>
         </View>
 
-        <Controller
-          control={control}
-          name="amount"
-          render={({ field: { onChange, value }, fieldState: { error } }) => (
-            <FormInput
-              value={String(value)}
-              placeholder={`Enter amount (${currency})`}
-              title="Amount"
-              keyboardType="numeric"
-              onChangeText={onChange}
-              error={error?.message}
-            />
-          )}
+        {/* Amount */}
+        <FormInput
+          value={String(watch('amount') || '')}
+          placeholder={`Enter amount (${currency})`}
+          title="Amount"
+          keyboardType="numeric"
+          onChangeText={text => setValue('amount', Number(text))}
+          error={formState.errors.amount?.message}
         />
 
-        <Controller
-          control={control}
-          name="description"
-          render={({ field: { onChange, value }, fieldState: { error } }) => (
-            <FormInput
-              value={value}
-              placeholder="Enter a description"
-              title="Description"
-              onChangeText={onChange}
-              error={error?.message}
-            />
-          )}
+        {/* Description */}
+        <FormInput
+          value={watch('description') || ''}
+          placeholder="Enter a description"
+          title="Description"
+          onChangeText={text => setValue('description', text)}
+          error={formState.errors.description?.message}
         />
 
-        <Controller
-          control={control}
-          name="category"
-          render={({ field: { value, onChange }, fieldState: { error } }) => (
-            <View>
-              <Text style={styles.inputLabel}>Category</Text>
-              <Dropdown
-                style={styles.dropdown}
-                data={incomeCategories.map(cat => ({
-                  label: cat.name,
-                  value: cat.id,
-                  icon: cat.icon,
-                }))}
-                labelField="label"
-                valueField="value"
-                value={value?.id}
-                renderItem={item => {
-                  const category = incomeCategories.find(
-                    cat => cat.id === item.value,
-                  );
-                  return (
-                    <View style={styles.dropdownItem}>
-                      <Ionicons
-                        name={item.icon}
-                        size={20}
-                        color={category?.color || '#429690'}
-                        style={{ marginRight: 10 }}
-                      />
-                      <Text>{item.label}</Text>
-                    </View>
-                  );
-                }}
-                renderLeftIcon={() => (
+        {/* Category */}
+        <View>
+          <Text style={styles.inputLabel}>Category</Text>
+          <Dropdown
+            style={styles.dropdown}
+            data={incomeCategories.map(cat => ({
+              label: cat.name,
+              value: cat.id,
+              icon: cat.icon,
+            }))}
+            labelField="label"
+            valueField="value"
+            value={watch('category')?.id}
+            renderItem={item => {
+              const category = incomeCategories.find(
+                cat => cat.id === item.value,
+              );
+              return (
+                <View style={styles.dropdownItem}>
                   <Ionicons
-                    name={value?.icon || 'folder-outline'}
+                    name={item.icon}
                     size={20}
-                    color={value?.color || '#429690'}
+                    color={category?.color || '#429690'}
                     style={{ marginRight: 10 }}
                   />
-                )}
-                onChange={item => {
-                  const selected = incomeCategories.find(
-                    cat => cat.id === item.value,
-                  );
-                  if (selected) onChange(selected);
-                }}
+                  <Text>{item.label}</Text>
+                </View>
+              );
+            }}
+            renderLeftIcon={() => (
+              <Ionicons
+                name={watch('category')?.icon || 'folder-outline'}
+                size={20}
+                color={watch('category')?.color || '#429690'}
+                style={{ marginRight: 10 }}
               />
-              {error?.message && (
-                <Text style={styles.errorText}>{error.message}</Text>
-              )}
-            </View>
+            )}
+            onChange={item => {
+              const selected = incomeCategories.find(
+                cat => cat.id === item.value,
+              );
+              if (selected) setValue('category', selected);
+            }}
+          />
+          {formState.errors.category?.message && (
+            <Text style={styles.errorText}>
+              {formState.errors.category.message}
+            </Text>
           )}
-        />
+        </View>
 
+        {/* Date */}
         <Text style={styles.inputLabel}>Date</Text>
         <Pressable onPress={() => setOpenPicker(true)} style={styles.dateInput}>
           <Text style={styles.dateText}>
