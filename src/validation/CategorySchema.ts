@@ -10,4 +10,6 @@ export const categorySchema = yup.object().shape({
     .mixed<'income' | 'expense'>()
     .oneOf(['income', 'expense'], 'Invalid status')
     .required('Status is required'),
+  color: yup.string().required('Color is required'),
+  icon: yup.string().required('Icon is required'),
 });

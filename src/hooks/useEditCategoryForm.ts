@@ -2,38 +2,42 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { categorySchema } from '../validation/CategorySchema';
 import { useCategoryStore } from '../stores/useCategoryStore';
+import { Category } from '../types/types';
 
-export interface EditCategoryFormData {
+export interface EditCategoryFormValues {
   name: string;
   status: 'income' | 'expense';
+  color: string;
+  icon: string;
 }
 
-export const useEditCategoryForm = (
-  category: { id: string; name: string; status: 'income' | 'expense' },
-  color: string,
-  icon: string,
-  onSuccess: () => void
-) => {
+export const useEditCategoryForm = (category: Category) => {
   const updateCategory = useCategoryStore(state => state.updateCategory);
+  const deleteCategory = useCategoryStore(state => state.deleteCategory);
 
-  const form = useForm<EditCategoryFormData>({
+  const form = useForm<EditCategoryFormValues>({
     defaultValues: {
       name: category.name,
       status: category.status,
+      color: category.color,
+      icon: category.icon,
     },
     resolver: yupResolver(categorySchema),
   });
 
-  const onSubmit = form.handleSubmit(values => {
+  const handleUpdate = (values: EditCategoryFormValues) => {
     updateCategory({
       id: category.id,
       name: values.name,
       status: values.status,
-      color,
-      icon,
+      color: values.color,
+      icon: values.icon,
     });
-    onSuccess();
-  });
+  };
 
-  return { ...form, onSubmit };
+  const handleDelete = async () => {
+    await deleteCategory(category.id);
+  };
+
+  return { ...form, handleUpdate, handleDelete };
 };

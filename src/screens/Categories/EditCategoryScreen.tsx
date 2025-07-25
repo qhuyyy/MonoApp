@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import ButtonCustom from '../../components/ButtonCustom';
 import OutlineButtonCustom from '../../components/OutlineButtonCustom';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -14,7 +14,6 @@ import { CategoriesStackParamList } from '../../navigations/CategoriesStack';
 import Rectangle from '../../assets/svg/Rectangle';
 import { Picker } from '@react-native-picker/picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useCategoryStore } from '../../stores/useCategoryStore';
 import { useEditCategoryForm } from '../../hooks/useEditCategoryForm';
 import { COLORS, ICONS } from '../../constants/Category';
 
@@ -25,17 +24,30 @@ type EditCategoryScreenProps = NativeStackScreenProps<
 
 const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
   const { category } = route.params;
-  const deleteCategory = useCategoryStore(state => state.deleteCategory);
-  const [color, setColor] = useState(category.color);
-  const [icon, setIcon] = useState(category.icon);
 
-  const form = useEditCategoryForm(category, color, icon, () =>
+  const {
+    watch,
+    setValue,
+    trigger,
+    formState,
+    handleSubmit,
+    handleUpdate,
+    handleDelete,
+  } = useEditCategoryForm(category);
+
+  const onSubmit = (values: {
+    name: string;
+    status: 'income' | 'expense';
+    color: string;
+    icon: string;
+  }) => {
+    handleUpdate(values);
     Alert.alert('Success', 'Category updated successfully', [
       { text: 'OK', onPress: () => navigation.goBack() },
-    ]),
-  );
+    ]);
+  };
 
-  const handleDelete = async () => {
+  const confirmDelete = () => {
     Alert.alert(
       'Delete Category',
       'Are you sure you want to delete this category?',
@@ -45,7 +57,7 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
-            await deleteCategory(category.id);
+            await handleDelete();
             navigation.goBack();
           },
         },
@@ -72,8 +84,8 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
         <Text style={styles.label}>Category Type</Text>
         <View style={styles.pickerContainer}>
           <Picker
-            selectedValue={form.watch('status')}
-            onValueChange={value => form.setValue('status', value)}
+            selectedValue={watch('status')}
+            onValueChange={value => setValue('status', value)}
           >
             <Picker.Item label="Income" value="income" />
             <Picker.Item label="Expense" value="expense" />
@@ -84,14 +96,12 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
         <TextInput
           style={styles.input}
           placeholder="Enter name..."
-          value={form.watch('name')}
-          onChangeText={text => form.setValue('name', text)}
-          onBlur={() => form.trigger('name')}
+          value={watch('name')}
+          onChangeText={text => setValue('name', text)}
+          onBlur={() => trigger('name')}
         />
-        {form.formState.errors.name && (
-          <Text style={{ color: 'red' }}>
-            {form.formState.errors.name.message}
-          </Text>
+        {formState.errors.name && (
+          <Text style={{ color: 'red' }}>{formState.errors.name.message}</Text>
         )}
 
         <Text style={styles.label}>Choose Color</Text>
@@ -103,11 +113,11 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
                 styles.colorItem,
                 {
                   backgroundColor: c,
-                  borderWidth: c === color ? 3 : 1,
-                  borderColor: c === color ? '#333' : '#ccc',
+                  borderWidth: watch('color') === c ? 3 : 1,
+                  borderColor: watch('color') === c ? '#333' : '#ccc',
                 },
               ]}
-              onPress={() => setColor(c)}
+              onPress={() => setValue('color', c)}
             />
           ))}
         </View>
@@ -120,22 +130,23 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
               style={[
                 styles.colorItem,
                 {
-                  backgroundColor: icon === i ? color : '#ccc',
+                  backgroundColor:
+                    watch('icon') === i ? watch('color') : '#ccc',
                   justifyContent: 'center',
                   alignItems: 'center',
-                  borderWidth: icon === i ? 3 : 1,
-                  borderColor: icon === i ? '#333' : '#ccc',
+                  borderWidth: watch('icon') === i ? 3 : 1,
+                  borderColor: watch('icon') === i ? '#333' : '#ccc',
                 },
               ]}
-              onPress={() => setIcon(i)}
+              onPress={() => setValue('icon', i)}
             >
               <Ionicons name={i} size={24} color="#fff" />
             </TouchableOpacity>
           ))}
         </View>
 
-        <ButtonCustom text="Update" onPress={form.onSubmit} />
-        <OutlineButtonCustom text="Delete" onPress={handleDelete} />
+        <ButtonCustom text="Update" onPress={handleSubmit(onSubmit)} />
+        <OutlineButtonCustom text="Delete" onPress={confirmDelete} />
       </View>
     </View>
   );
@@ -144,15 +155,8 @@ const EditCategoryScreen = ({ navigation, route }: EditCategoryScreenProps) => {
 export default EditCategoryScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#E9F3F2',
-  },
-  header: {
-    padding: 20,
-    paddingTop: 0,
-    height: 100,
-  },
+  container: { flex: 1, backgroundColor: '#E9F3F2' },
+  header: { padding: 20, paddingTop: 0, height: 100 },
   form: {
     flex: 1,
     backgroundColor: '#fff',
@@ -168,21 +172,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     top: 50,
   },
-  backButton: {
-    position: 'absolute',
-    left: 0,
-    padding: 8,
-  },
-  headerTitle: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '700',
-  },
-  label: {
-    fontWeight: 'bold',
-    marginTop: 12,
-    color: '#429690',
-  },
+  backButton: { position: 'absolute', left: 0, padding: 8 },
+  headerTitle: { color: '#fff', fontSize: 24, fontWeight: '700' },
+  label: { fontWeight: 'bold', marginTop: 12, color: '#429690' },
   input: {
     borderWidth: 1,
     borderColor: '#429690',
@@ -201,29 +193,17 @@ const styles = StyleSheet.create({
     marginTop: 5,
     overflow: 'hidden',
   },
-  picker: {
-    height: 55,
-    width: '100%',
-  },
   colorList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
     marginVertical: 8,
   },
-  colorItem: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
+  colorItem: { width: 40, height: 40, borderRadius: 20 },
   iconList: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
     marginVertical: 8,
-  },
-  iconItem: {
-    padding: 10,
-    borderRadius: 12,
   },
 });

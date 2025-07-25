@@ -34,7 +34,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
       onPress={onPress ? () => onPress(transaction) : undefined}
     >
       <View style={styles.iconContainer}>
-        <Ionicons name={category.icon} size={32} color={category.color} />
+        <Ionicons name={category.icon} size={30} color={category.color} />
       </View>
 
       <View style={styles.infoContainer}>
@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
   iconContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 50,
-    height: 50,
+    width: 35,
+    height: 35,
     borderRadius: 10,
   },
   infoContainer: {

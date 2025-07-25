@@ -366,7 +366,7 @@ export default HistoryScreen;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FA' },
   header: {
-    height: 80,
+    height: 60,
     justifyContent: 'flex-end',
     paddingHorizontal: 20,
     marginBottom: 10,
@@ -384,7 +384,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: 20,
-    marginBottom: 10,
+    marginBottom: 5,
   },
   searchInput: {
     backgroundColor: '#fff',
@@ -436,7 +436,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   contentContainer: {
-    maxHeight: windowHeight - 500,
+    maxHeight: windowHeight - 510,
     backgroundColor: '#fff',
     borderWidth: 1,
     marginTop: 10,
