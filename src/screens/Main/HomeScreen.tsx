@@ -9,6 +9,7 @@ import {
   FlatList,
   Animated,
   Alert,
+  Pressable,
   RefreshControl,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -100,7 +101,7 @@ export default function HomeScreen() {
               ]}
               onPress={() =>
                 navigation.navigate('HistoryStack', {
-                  screen: 'EditTransaction',
+                  screen: 'TransactionEdit',
                   params: { transaction: item },
                 })
               }
@@ -165,21 +166,18 @@ export default function HomeScreen() {
       </View>
 
       {/* Balance */}
-      <View style={styles.balanceCard}>
+      <Pressable style={styles.balanceCard}>
         <View>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
             <Text style={styles.balanceCardText}>Total Balance</Text>
             <Ionicons name="chevron-up-outline" size={16} color="#fff" />
           </View>
-          <Text
-            style={[
-              styles.balanceCardText,
-              { fontSize: 30, fontWeight: 'bold' },
-            ]}
-          >
-            $ {totalBalance.toFixed(2)}
-          </Text>
         </View>
+        <Text
+          style={[styles.balanceCardText, { fontSize: 30, fontWeight: 'bold' }]}
+        >
+          $ {totalBalance.toFixed(2)}
+        </Text>
 
         <View style={styles.incomeExpense}>
           <View>
@@ -219,7 +217,7 @@ export default function HomeScreen() {
             </Text>
           </View>
         </View>
-      </View>
+      </Pressable>
 
       {/* Transactions */}
       <View style={styles.transactionContainer}>
@@ -233,7 +231,9 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Transactions History</Text>
           <TouchableOpacity
             onPress={() =>
-              navigation.navigate('HistoryStack', { screen: 'History' })
+              navigation.navigate('HistoryStack', {
+                screen: 'TransactionsHistory',
+              })
             }
           >
             <Text style={{ fontStyle: 'italic' }}>See all</Text>
