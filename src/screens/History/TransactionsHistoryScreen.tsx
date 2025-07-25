@@ -33,14 +33,12 @@ import { PAGE_SIZE } from '../../constants/Category';
 
 type HistoryScreenProps = NativeStackScreenProps<
   HistoryStackParamList,
-  'History'
+  'TransactionsHistory'
 >;
 
-const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
+const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const { transactions, duplicateTransaction, loadTransactions } =
     useTransactionStore();
-
-  const [loadingCategories, setLoadingCategories] = useState(true);
   
   const {
     search,
@@ -199,7 +197,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
                 { backgroundColor: '#FFA500' },
               ]}
               onPress={() =>
-                navigation.navigate('EditTransaction', { transaction: item })
+                navigation.navigate('TransactionEdit', { transaction: item })
               }
             >
               <Ionicons name="pencil-outline" size={24} color="#fff" />
@@ -341,7 +339,7 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   );
 };
 
-export default HistoryScreen;
+export default TransactionsHistoryScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8F9FA' },

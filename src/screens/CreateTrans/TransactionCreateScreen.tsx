@@ -18,10 +18,10 @@ import ExpenseTab from './ExpenseTab';
 
 type CreateTransNavigationProp = NativeStackNavigationProp<
   MainBottomTabsParamList,
-  'CreateTransactionScreen'
+  'TransactionCreate'
 >;
 
-export default function CreateTransactionScreen() {
+export default function TransactionCreateScreen() {
   const [activeTab, setActiveTab] = useState<'Income' | 'Expense'>('Income');
   const navigation = useNavigation<CreateTransNavigationProp>();
 

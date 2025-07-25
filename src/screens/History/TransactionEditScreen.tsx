@@ -24,9 +24,9 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useEditTransactionForm } from '../../hooks/useEditTransForm';
 
-type Props = NativeStackScreenProps<HistoryStackParamList, 'EditTransaction'>;
+type Props = NativeStackScreenProps<HistoryStackParamList, 'TransactionEdit'>;
 
-const EditTransactionScreen = ({ navigation, route }: Props) => {
+const TransactionEditScreen = ({ navigation, route }: Props) => {
   const { transaction } = route.params;
   const [openPicker, setOpenPicker] = useState(false);
   const [incomeCategories, setIncomeCategories] = useState<Category[]>([]);
@@ -58,7 +58,7 @@ const EditTransactionScreen = ({ navigation, route }: Props) => {
   const onSubmit = async (data: any) => {
     await handleUpdate(data);
     Alert.alert('Success', 'Transaction updated successfully', [
-      { text: 'OK', onPress: () => navigation.navigate('History') },
+      { text: 'OK', onPress: () => navigation.navigate('TransactionsHistory') },
     ]);
   };
 
@@ -70,7 +70,7 @@ const EditTransactionScreen = ({ navigation, route }: Props) => {
         style: 'destructive',
         onPress: async () => {
           await handleDelete();
-          navigation.navigate('History');
+          navigation.navigate('TransactionsHistory');
         },
       },
     ]);
@@ -85,7 +85,7 @@ const EditTransactionScreen = ({ navigation, route }: Props) => {
       <Rectangle style={StyleSheet.absoluteFillObject} />
       <View style={styles.headerContent}>
         <TouchableOpacity
-          onPress={() => navigation.navigate('History')}
+          onPress={() => navigation.navigate('TransactionsHistory')}
           style={styles.backButton}
         >
           <Ionicons name="chevron-back-outline" size={24} color="#fff" />
@@ -209,7 +209,7 @@ const EditTransactionScreen = ({ navigation, route }: Props) => {
   );
 };
 
-export default EditTransactionScreen;
+export default TransactionEditScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#E9F3F2' },

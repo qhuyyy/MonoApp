@@ -58,7 +58,7 @@ function IncomeTab() {
         {
           text: 'OK',
           onPress: () =>
-            navigation.navigate('HistoryStack', { screen: 'History' }),
+            navigation.navigate('HistoryStack', { screen: 'TransactionsHistory' }),
         },
       ]);
 

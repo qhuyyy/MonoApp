@@ -20,7 +20,7 @@ import { useCreateTransForm } from '../../hooks/useCreateTransForm';
 
 type CreateTransNavigationProp = NativeStackNavigationProp<
   MainBottomTabsParamList,
-  'CreateTransactionScreen'
+  'TransactionCreate'
 >;
 
 function ExpenseTab() {
@@ -57,7 +57,7 @@ function ExpenseTab() {
         {
           text: 'OK',
           onPress: () =>
-            navigation.navigate('HistoryStack', { screen: 'History' }),
+            navigation.navigate('HistoryStack', { screen: 'TransactionsHistory' }),
         },
       ]);
       form.reset();

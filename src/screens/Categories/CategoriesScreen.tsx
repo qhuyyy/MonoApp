@@ -49,7 +49,7 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
 
         <TouchableOpacity
           style={styles.addIcon}
-          onPress={() => navigation.navigate('CreateCategory')}
+          onPress={() => navigation.navigate('CategoryCreate')}
         >
           <Ionicons name="add-circle-outline" size={30} color="#fff" />
         </TouchableOpacity>
@@ -70,7 +70,7 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
                 key={item.id ?? index}
                 category={item}
                 onPress={() =>
-                  navigation.navigate('EditCategory', { category: item })
+                  navigation.navigate('CategoryEdit', { category: item })
                 }
               />
             ))}
@@ -90,7 +90,7 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
                 key={item.id ?? index}
                 category={item}
                 onPress={() =>
-                  navigation.navigate('EditCategory', { category: item })
+                  navigation.navigate('CategoryEdit', { category: item })
                 }
               />
             ))}

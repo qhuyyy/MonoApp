@@ -9,8 +9,9 @@ import { useUserStore } from '../../stores/useUserStore';
 import ButtonCustom from '../../components/ButtonCustom';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigations/RootStack';
+import { WelcomeStackParamList } from '../../navigations/WelcomeStack';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'WelcomeStack'>;
+type Props = NativeStackScreenProps<WelcomeStackParamList, 'GetStarted'>;
 
 const GetStartedScreen = ({ navigation }: Props) => {
   const {
@@ -97,7 +98,7 @@ const GetStartedScreen = ({ navigation }: Props) => {
       <View style={{ marginTop: 20 }}>
         <ButtonCustom
           text="Go to Home Screen"
-          onPress={() => navigation.navigate('MainBottomTabs')}
+          onPress={() => navigation.getParent()?.navigate('MainBottomTabs')}
         />
       </View>
     </LinearGradient>
