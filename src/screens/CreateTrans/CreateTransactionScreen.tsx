@@ -4,30 +4,15 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  Dimensions,
-  Image,
   TouchableOpacity,
-  Alert,
 } from 'react-native';
 import Rectangle from '../../assets/svg/Rectangle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import FormInput from '../../components/FormInput';
-import { Picker } from '@react-native-picker/picker';
-import { format } from 'date-fns';
-import DatePicker from 'react-native-date-picker';
-
-import { Category } from '../../types/types';
-import { useUserStore } from '../../stores/useUserStore';
-import ButtonCustom from '../../components/ButtonCustom';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTransactionStore } from '../../stores/useTransactionStore';
-import uuid from 'react-native-uuid';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainBottomTabsParamList } from '../../navigations/MainBottomTabs';
 import { useNavigation } from '@react-navigation/native';
 
 import { windowWidth } from '../../utils/Dimensions';
-import { useCreateTransForm } from '../../hooks/useCreateTransForm';
 import IncomeTab from './IncomeTab';
 import ExpenseTab from './ExpenseTab';
 

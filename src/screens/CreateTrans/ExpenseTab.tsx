@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import { View, Text, Pressable, StyleSheet, Alert } from 'react-native';
 import FormInput from '../../components/FormInput';
 import { Picker } from '@react-native-picker/picker';
 import { format } from 'date-fns';
@@ -38,41 +32,6 @@ function ExpenseTab() {
   const currency = useUserStore(state => state.currency);
   const addTransaction = useTransactionStore(state => state.addTransaction);
 
-  useEffect(() => {
-    const fetchIncomeCategories = async () => {
-      try {
-        const storedData = await AsyncStorage.getItem('category-storage');
-        if (storedData) {
-          const parsed = JSON.parse(storedData);
-          const allCategories: Category[] = parsed.state?.categories || [];
-          const expenseOnly = allCategories.filter(
-            cat => cat.status === 'expense',
-          );
-
-          setExpenseCategories(expenseOnly);
-
-          if (expenseOnly.length > 0) {
-            const defaultCat = expenseOnly[0];
-            setInitialCategory(defaultCat);
-
-            form.reset({
-              amount: '',
-              description: '',
-              category: defaultCat,
-              date: new Date(),
-              type: 'expense',
-              image: '',
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load income categories:', error);
-      }
-    };
-
-    fetchIncomeCategories();
-  }, []);
-
   const form = useCreateTransForm(
     {
       amount: '',
@@ -83,6 +42,7 @@ function ExpenseTab() {
       image: '',
     },
     async values => {
+      const now = new Date().toISOString();
       await addTransaction({
         id: uuid.v4().toString(),
         amount: parseFloat(values.amount),
@@ -90,6 +50,8 @@ function ExpenseTab() {
         image: values.image,
         category: values.category,
         date: values.date.toISOString(),
+        created_at: now,
+        updated_at: now,
       });
       Alert.alert('Success', 'Transaction created successfully', [
         {
@@ -101,6 +63,41 @@ function ExpenseTab() {
       form.reset();
     },
   );
+
+  const fetchIncomeCategories = async () => {
+    try {
+      const storedData = await AsyncStorage.getItem('category-storage');
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        const allCategories: Category[] = parsed.state?.categories || [];
+        const expenseOnly = allCategories.filter(
+          cat => cat.status === 'expense',
+        );
+
+        setExpenseCategories(expenseOnly);
+
+        if (expenseOnly.length > 0) {
+          const defaultCat = expenseOnly[0];
+          setInitialCategory(defaultCat);
+
+          form.reset({
+            amount: '',
+            description: '',
+            category: defaultCat,
+            date: new Date(),
+            type: 'expense',
+            image: '',
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load income categories:', error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchIncomeCategories();
+  }, []);
 
   if (!initialCategory)
     return <Text style={{ padding: 20 }}>Loading categories...</Text>;

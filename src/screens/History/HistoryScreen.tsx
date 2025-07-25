@@ -28,13 +28,12 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HistoryStackParamList } from '../../navigations/HistoryStack';
 import { windowHeight } from '../../utils/Dimensions';
 import { useFocusEffect } from '@react-navigation/native';
+import { PAGE_SIZE } from '../../constants/Category';
 
 type HistoryScreenProps = NativeStackScreenProps<
   HistoryStackParamList,
   'History'
 >;
-
-const PAGE_SIZE = 5;
 
 const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const transactions = useTransactionStore(state => state.transactions);
@@ -50,7 +49,9 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>(
     'all',
   );
-  const [sortBy, setSortBy] = useState<'date' | 'amount'>('date');
+  const [sortBy, setSortBy] = useState<'date' | 'amount' | 'updated'>(
+    'updated',
+  );
   const [page, setPage] = useState(1);
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -101,12 +102,18 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
       );
     }
 
+    // ---- Sort logic ----
     if (sortBy === 'date') {
       result.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
       );
-    } else {
+    } else if (sortBy === 'amount') {
       result.sort((a, b) => b.amount - a.amount);
+    } else if (sortBy === 'updated') {
+      result.sort(
+        (a, b) =>
+          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+      );
     }
 
     return result;
@@ -272,7 +279,15 @@ const HistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
           <TouchableOpacity
             style={styles.sortTouchableOpacity}
-            onPress={() => setSortBy(sortBy === 'date' ? 'amount' : 'date')}
+            onPress={() =>
+              setSortBy(prev =>
+                prev === 'date'
+                  ? 'amount'
+                  : prev === 'amount'
+                  ? 'updated'
+                  : 'date',
+              )
+            }
           >
             <Text style={styles.sortText}>Sort: {sortBy}</Text>
           </TouchableOpacity>
@@ -412,7 +427,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFD54F',
     borderRadius: 20,
     marginLeft: 'auto',
-    width: 110,
+    width: 120,
     marginHorizontal: 4,
   },
   sortText: {

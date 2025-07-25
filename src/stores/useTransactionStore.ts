@@ -9,7 +9,7 @@ type TransactionState = {
   addTransaction: (transaction: Transaction) => void;
   updateTransaction: (updatedTransaction: Transaction) => void;
   deleteTransaction: (id: string) => void;
-  duplicateTransaction: (id: string) => void; // thêm
+  duplicateTransaction: (id: string) => void;
   loadTransactions: () => Promise<void>;
   loadRecentTransactions: () => Transaction[];
 };
@@ -21,13 +21,20 @@ export const useTransactionStore = create<TransactionState>()(
 
       addTransaction: transaction =>
         set(state => ({
-          transactions: [...state.transactions, transaction],
+          transactions: [
+            ...state.transactions,
+            {
+              ...transaction,
+            },
+          ],
         })),
 
       updateTransaction: updatedTransaction =>
         set(state => ({
           transactions: state.transactions.map(t =>
-            t.id === updatedTransaction.id ? updatedTransaction : t,
+            t.id === updatedTransaction.id
+              ? { ...updatedTransaction, updated_at: new Date().toISOString() }
+              : t,
           ),
         })),
 
@@ -44,7 +51,6 @@ export const useTransactionStore = create<TransactionState>()(
         const newTransaction = {
           ...original,
           id: uuid.v4().toString(),
-          // date: new Date().toISOString(),
         };
 
         set(state => ({
@@ -59,7 +65,12 @@ export const useTransactionStore = create<TransactionState>()(
             const parsed = JSON.parse(storedData);
             const allTransactions: Transaction[] =
               parsed.state?.transactions || [];
-            set({ transactions: allTransactions });
+            const sorted = allTransactions.sort(
+              (a, b) =>
+                new Date(b.updated_at).getTime() -
+                new Date(a.updated_at).getTime(),
+            );
+            set({ transactions: sorted });
           } else {
             set({ transactions: [] });
           }
@@ -75,7 +86,9 @@ export const useTransactionStore = create<TransactionState>()(
         const { transactions } = get();
         return [...transactions]
           .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+            (a, b) =>
+              new Date(b.updated_at).getTime() -
+              new Date(a.updated_at).getTime(),
           )
           .slice(0, 5);
       },

@@ -15,7 +15,6 @@ import { useTransactionStore } from '../../stores/useTransactionStore';
 import uuid from 'react-native-uuid';
 import { useNavigation } from '@react-navigation/native';
 
-import { windowWidth } from '../../utils/Dimensions';
 import { useCreateTransForm } from '../../hooks/useCreateTransForm';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainBottomTabsParamList } from '../../navigations/MainBottomTabs';
@@ -34,41 +33,6 @@ function IncomeTab() {
   const currency = useUserStore(state => state.currency);
   const addTransaction = useTransactionStore(state => state.addTransaction);
 
-  useEffect(() => {
-    const fetchIncomeCategories = async () => {
-      try {
-        const storedData = await AsyncStorage.getItem('category-storage');
-        if (storedData) {
-          const parsed = JSON.parse(storedData);
-          const allCategories: Category[] = parsed.state?.categories || [];
-          const incomeOnly = allCategories.filter(
-            cat => cat.status === 'income',
-          );
-
-          setIncomeCategories(incomeOnly);
-
-          if (incomeOnly.length > 0) {
-            const defaultCat = incomeOnly[0];
-            setInitialCategory(defaultCat);
-
-            form.reset({
-              amount: '',
-              description: '',
-              category: defaultCat,
-              date: new Date(),
-              type: 'income',
-              image: '',
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load income categories:', error);
-      }
-    };
-
-    fetchIncomeCategories();
-  }, []);
-
   const form = useCreateTransForm(
     {
       amount: '',
@@ -79,6 +43,7 @@ function IncomeTab() {
       image: '',
     },
     async values => {
+      const now = new Date().toISOString();
       await addTransaction({
         id: uuid.v4().toString(),
         amount: parseFloat(values.amount),
@@ -86,6 +51,8 @@ function IncomeTab() {
         image: values.image,
         category: values.category,
         date: values.date.toISOString(),
+        created_at: now,
+        updated_at: now,
       });
       Alert.alert('Success', 'Transaction created successfully', [
         {
@@ -94,9 +61,44 @@ function IncomeTab() {
             navigation.navigate('HistoryStack', { screen: 'History' }),
         },
       ]);
+
       form.reset();
     },
   );
+  
+  const fetchIncomeCategories = async () => {
+    try {
+      const storedData = await AsyncStorage.getItem('category-storage');
+      if (storedData) {
+        const parsed = JSON.parse(storedData);
+        const allCategories: Category[] = parsed.state?.categories || [];
+        const incomeOnly = allCategories.filter(cat => cat.status === 'income');
+
+        setIncomeCategories(incomeOnly);
+
+        if (incomeOnly.length > 0) {
+          const defaultCat = incomeOnly[0];
+          setInitialCategory(defaultCat);
+
+          // Reset lại form với category mặc định
+          form.reset({
+            amount: '',
+            description: '',
+            category: defaultCat,
+            date: new Date(),
+            type: 'income',
+            image: '',
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load income categories:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchIncomeCategories();
+  }, []);
 
   if (!initialCategory)
     return <Text style={{ padding: 20 }}>Loading categories...</Text>;
@@ -155,13 +157,15 @@ function IncomeTab() {
       <Text style={styles.inputLabel}>Date</Text>
       <Pressable onPress={() => setOpenPicker(true)} style={styles.dateInput}>
         <Text style={styles.dateText}>
-          {format(form.watch('date'), 'yyyy-MM-dd')}
+          {form.watch('date')
+            ? format(new Date(form.watch('date')), 'yyyy-MM-dd')
+            : ''}
         </Text>
       </Pressable>
       <DatePicker
         modal
         open={openPicker}
-        date={form.watch('date')}
+        date={form.watch('date') || new Date()}
         mode="date"
         maximumDate={new Date()}
         onConfirm={selectedDate => {
@@ -220,46 +224,6 @@ const styles = StyleSheet.create({
   },
   dateText: {
     color: '#333',
-    fontSize: 16,
-  },
-  imagePicker: {
-    marginTop: 4,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 6,
-    alignItems: 'center',
-  },
-  image: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-  },
-  imageContainer: {
-    alignSelf: 'center',
-    marginBottom: 8,
-  },
-  imagePlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#ccc',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  imageText: {
-    color: '#fff',
-    fontSize: 12,
-  },
-  submitButton: {
-    marginTop: 10,
-    backgroundColor: '#2A7C76',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  submitText: {
-    color: '#fff',
     fontSize: 16,
   },
   errorText: {

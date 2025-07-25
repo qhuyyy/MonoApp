@@ -14,16 +14,22 @@ export type EditTransactionFormValues = {
 };
 
 export const useEditTransactionForm = (transaction: Transaction) => {
-  const updateTransaction = useTransactionStore(state => state.updateTransaction);
-  const deleteTransaction = useTransactionStore(state => state.deleteTransaction);
-  const duplicateTransaction = useTransactionStore(state => state.duplicateTransaction);
+  const updateTransaction = useTransactionStore(
+    state => state.updateTransaction,
+  );
+  const deleteTransaction = useTransactionStore(
+    state => state.deleteTransaction,
+  );
+  const duplicateTransaction = useTransactionStore(
+    state => state.duplicateTransaction,
+  );
 
   const form = useForm<EditTransactionFormValues>({
     defaultValues: {
       amount: transaction.amount,
       description: transaction.description,
       category: transaction.category,
-      date: new Date(transaction.date),
+      date: new Date(transaction.date), 
       type: transaction.category.status,
       image: transaction.image,
     },

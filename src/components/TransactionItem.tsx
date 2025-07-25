@@ -12,29 +12,35 @@ type TransactionItemProps = {
 const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
   if (!transaction) return null;
 
-  const { amount, category, description, date } = transaction;
+  const { amount, category, description, date, created_at } = transaction;
 
-  const parsedDate = new Date(date);
-  const displayDate = isToday(parsedDate)
-    ? 'Today'
-    : isYesterday(parsedDate)
-    ? 'Yesterday'
-    : format(parsedDate, 'dd MMM yyyy');
+  let displayDate = '';
+  if (created_at) {
+    const parsedDate = new Date(created_at);
+    displayDate = isToday(parsedDate)
+      ? 'Today'
+      : isYesterday(parsedDate)
+      ? 'Yesterday'
+      : format(parsedDate, 'dd MMM yyyy');
+  }
+
+  const formattedDate = date ? format(new Date(date), 'dd/MM/yyyy') : '';
 
   const isIncome = category.status === 'income';
 
   return (
-    <TouchableOpacity style={[styles.container, {borderColor: category.color || '#ccc'}]} onPress={onPress ? () => onPress(transaction) : undefined}>
+    <TouchableOpacity
+      style={[styles.container, { borderColor: category.color || '#ccc' }]}
+      onPress={onPress ? () => onPress(transaction) : undefined}
+    >
       <View style={styles.iconContainer}>
-        <Ionicons
-          name={category.icon}
-          size={32}
-          color={category.color}
-        />
+        <Ionicons name={category.icon} size={32} color={category.color} />
       </View>
 
       <View style={styles.infoContainer}>
-        <Text style={styles.categoryName}>{category.name}</Text>
+        <Text style={styles.categoryName}>
+          {category.name} ({formattedDate})
+        </Text>
         <Text
           style={styles.descriptionText}
           numberOfLines={1}
@@ -42,7 +48,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
         >
           {description ? description : 'No description yet'}
         </Text>
-        <Text>{displayDate}</Text>
+        <Text style={styles.timeText}>Last update: {displayDate}</Text>
       </View>
 
       <View style={styles.amountContainer}>
@@ -62,8 +68,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginBottom: 15,
-    // backgroundColor: 'pink',
+    marginBottom: 10,
     borderWidth: 2,
     borderRadius: 10,
   },
@@ -83,15 +88,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  descriptionContainer: {
-    justifyContent: 'center',
-    paddingHorizontal: 4,
+  dateText: {
+    fontSize: 14,
+    maxWidth: 150,
   },
   descriptionText: {
-    fontStyle: 'italic',
-    color: '#888',
-    fontSize: 13,
+    fontSize: 14,
     maxWidth: 150,
+  },
+  timeText: {
+    color: '#888',
+    fontStyle: 'italic',
   },
   amountContainer: {
     alignItems: 'center',

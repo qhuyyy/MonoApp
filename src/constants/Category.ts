@@ -31,3 +31,5 @@ export const ICONS = [
   'barbell-outline',
   'heart-circle-outline',
 ];
+
+export const PAGE_SIZE = 5;
