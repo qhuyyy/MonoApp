@@ -17,10 +17,8 @@ export const useCategoryStore = create<CategoryState>()(
     (set, get) => ({
       categories: [],
 
-      addCategory: category =>
-        set(state => ({
-          categories: [...state.categories, category],
-        })),
+      addCategory: (category: Category) => 
+        set(state => ({ categories: [...state.categories, category] })),
 
       updateCategory: updatedCategory =>
         set(state => ({

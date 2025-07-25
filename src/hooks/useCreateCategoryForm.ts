@@ -7,22 +7,24 @@ import uuid from 'react-native-uuid';
 export interface CategoryFormData {
   name: string;
   status: 'income' | 'expense';
+  color: string;
+  icon: string;
 }
 
 export const useCreateCategoryForm = (
   onSuccess: () => void,
   color: string,
-  icon: string
+  icon: string,
 ) => {
-  const addCategory = useCategoryStore(state => state.addCategory);
+  const createCategory = useCategoryStore(state => state.addCategory);
 
   const form = useForm<CategoryFormData>({
-    defaultValues: { name: '', status: 'income' },
+    defaultValues: { name: '', status: 'income', color, icon },
     resolver: yupResolver(categorySchema),
   });
 
   const onSubmit = form.handleSubmit(values => {
-    addCategory({
+    createCategory({
       id: uuid.v4() as string,
       name: values.name,
       status: values.status,
