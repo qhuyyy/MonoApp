@@ -39,7 +39,7 @@ type HistoryScreenProps = NativeStackScreenProps<
 const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const { transactions, duplicateTransaction, loadTransactions } =
     useTransactionStore();
-  
+
   const {
     search,
     filterType,
@@ -387,15 +387,10 @@ const styles = StyleSheet.create({
   },
   sortText: { fontWeight: 'bold', color: '#333', alignSelf: 'center' },
   contentContainer: {
-    maxHeight: windowHeight - 510,
-    backgroundColor: '#fff',
-    borderWidth: 1,
+    maxHeight: windowHeight - 450,
     marginTop: 10,
-    borderRadius: 12,
-    marginHorizontal: 15,
-    elevation: 5,
   },
-  listContent: { paddingHorizontal: 5, marginTop: 10 },
+  listContent: { marginTop: 10 },
   emptyText: {
     textAlign: 'center',
     fontSize: 16,
@@ -404,10 +399,11 @@ const styles = StyleSheet.create({
   },
   actionContainer: {
     flexDirection: 'row',
-    width: 180,
+    width: 160,
     height: 68,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingRight: 20,
   },
   actionTouchableOpacity: {
     justifyContent: 'center',

@@ -1,9 +1,9 @@
 /* eslint-disable react/no-unstable-nested-components */
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HomeScreen from '../screens/Main/HomeScreen';
+import HomeScreen from '../screens/Home/HomeScreen';
 import HistoryStack, { HistoryStackParamList } from './HistoryStack';
 import CategoriesStack from './CategoriesStack';
-import StatisticsScreen from '../screens/Main/StatisticsScreen';
+import StatisticsScreen from '../screens/Statistics/StatisticsScreen';
 import CustomBottomTabBar from '../components/CustomBottomTabBar';
 import TransactionCreateScreen from '../screens/CreateTrans/TransactionCreateScreen';
 import { NavigatorScreenParams } from '@react-navigation/native';

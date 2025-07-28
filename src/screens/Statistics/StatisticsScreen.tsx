@@ -11,11 +11,12 @@ import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 import { Picker } from '@react-native-picker/picker';
 import Rectangle from '../../assets/svg/Rectangle';
 import { useTransactionStore } from '../../stores/useTransactionStore';
-
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import ViewShot from 'react-native-view-shot';
 import Share from 'react-native-share';
 import RNFS from 'react-native-fs';
 import Papa from 'papaparse';
+import { windowHeight } from '../../utils/Dimensions';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -27,7 +28,7 @@ const chartConfig = {
 
 const StatisticsScreen = () => {
   const [chartType, setChartType] = useState<'bar' | 'line' | 'pie'>('bar');
-  const [period, setPeriod] = useState<'month' | '3months' | 'year'>('month');
+  const [period, setPeriod] = useState<'month' | '3months' | 'year'>('3months');
   const { transactions } = useTransactionStore();
   const chartRef = useRef<ViewShot>(null);
 
@@ -189,7 +190,7 @@ const StatisticsScreen = () => {
     }
   };
 
-  // --- Export CSV (dùng file thật, không base64) ---
+  // --- Export CSV ---
   const exportCSV = async () => {
     try {
       const csv = Papa.unparse(
@@ -216,10 +217,18 @@ const StatisticsScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ flexGrow: 1 }}
+    >
       <Rectangle style={styles.rectangleBackground} />
-      <View style={styles.contentContainer}>
+      <View style={styles.headerContainer}>
+        <TouchableOpacity style={styles.backButton}>
+          <Ionicons name="chevron-back-outline" size={24} color="#fff" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Statistics & Report</Text>
+      </View>
+      <View style={styles.contentContainer}>
         <View style={styles.switchContainer}>
           <View style={styles.pickerContainer}>
             <Picker
@@ -236,101 +245,106 @@ const StatisticsScreen = () => {
           <TouchableOpacity style={styles.sortButton} onPress={cyclePeriod}>
             <Text style={styles.sortText}>
               {period === 'month'
-                ? 'This Month'
+                ? 'Time: This Month'
                 : period === '3months'
-                ? 'Last 3 Months'
-                : 'This Year'}
+                ? 'Time: Last 3 Months'
+                : 'Time: This Year'}
             </Text>
           </TouchableOpacity>
         </View>
 
         {/* Export buttons */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
           <TouchableOpacity onPress={shareChart} style={styles.exportButton}>
-            <Text style={styles.exportButtonText}>Share the graph</Text>
+            <Text style={styles.exportButtonText}>Share Graph</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={exportCSV} style={styles.exportButton}>
             <Text style={styles.exportButtonText}>Export CSV</Text>
           </TouchableOpacity>
         </View>
 
-        <ViewShot ref={chartRef} options={{ format: 'png', quality: 0.9 }}>
-          {chartType === 'bar' && (
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>Monthly Expenses Bar Chart</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <BarChart
-                  data={barData}
-                  width={Math.max(screenWidth - 40, barData.labels.length * 60)}
-                  height={260}
-                  fromZero
-                  yAxisLabel="$"
-                  yAxisSuffix=""
-                  chartConfig={chartConfig}
-                  style={styles.chart}
-                />
-              </ScrollView>
-            </View>
-          )}
-
-          {chartType === 'line' && (
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>
-                Income & Expense Trend Line Chart
-              </Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <LineChart
-                  data={lineData}
-                  width={Math.max(
-                    screenWidth - 40,
-                    lineData.labels.length * 60,
-                  )}
-                  height={260}
-                  chartConfig={chartConfig}
-                  yAxisLabel="$"
-                  bezier
-                  style={styles.chart}
-                />
-              </ScrollView>
-            </View>
-          )}
-
-          {chartType === 'pie' && (
-            <>
+        <ScrollView style={{ minHeight: windowHeight - 140 }}>
+          <ViewShot ref={chartRef} options={{ format: 'png', quality: 0.9 }}>
+            {chartType === 'bar' && (
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>Income by Category</Text>
-                <PieChart
-                  data={incomePieData}
-                  width={200}
-                  height={180}
-                  chartConfig={chartConfig}
-                  accessor="population"
-                  backgroundColor="transparent"
-                  paddingLeft="50"
-                  hasLegend={false}
-                  absolute
-                />
-                <PieLegend data={incomePieData} />
+                <Text style={styles.cardTitle}>Monthly Expenses Bar Chart</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <BarChart
+                    data={barData}
+                    width={Math.max(
+                      screenWidth - 40,
+                      barData.labels.length * 60,
+                    )}
+                    height={260}
+                    fromZero
+                    yAxisLabel="$"
+                    yAxisSuffix=""
+                    chartConfig={chartConfig}
+                    style={styles.chart}
+                  />
+                </ScrollView>
               </View>
+            )}
 
+            {chartType === 'line' && (
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>Expense by Category</Text>
-                <PieChart
-                  data={expensePieData}
-                  width={200}
-                  height={180}
-                  chartConfig={chartConfig}
-                  accessor="population"
-                  backgroundColor="transparent"
-                  paddingLeft="50"
-                  hasLegend={false}
-                  absolute
-                />
-                <PieLegend data={expensePieData} />
+                <Text style={styles.cardTitle}>
+                  Income & Expense Trend Line Chart
+                </Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <LineChart
+                    data={lineData}
+                    width={Math.max(
+                      screenWidth - 40,
+                      lineData.labels.length * 60,
+                    )}
+                    height={260}
+                    chartConfig={chartConfig}
+                    yAxisLabel="$"
+                    bezier
+                    style={styles.chart}
+                  />
+                </ScrollView>
               </View>
-            </>
-          )}
-        </ViewShot>
+            )}
+
+            {chartType === 'pie' && (
+              <>
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>Income by Category</Text>
+                  <PieChart
+                    data={incomePieData}
+                    width={200}
+                    height={180}
+                    chartConfig={chartConfig}
+                    accessor="population"
+                    backgroundColor="transparent"
+                    paddingLeft="50"
+                    hasLegend={false}
+                    absolute
+                  />
+                  <PieLegend data={incomePieData} />
+                </View>
+
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>Expense by Category</Text>
+                  <PieChart
+                    data={expensePieData}
+                    width={200}
+                    height={180}
+                    chartConfig={chartConfig}
+                    accessor="population"
+                    backgroundColor="transparent"
+                    paddingLeft="50"
+                    hasLegend={false}
+                    absolute
+                  />
+                  <PieLegend data={expensePieData} />
+                </View>
+              </>
+            )}
+          </ViewShot>
+        </ScrollView>
       </View>
     </ScrollView>
   );
@@ -347,7 +361,21 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: -1,
   },
-  headerTitle: { color: '#fff', fontSize: 24, fontWeight: '700' },
+  headerContainer: {
+    flexDirection: 'row',
+    top: 75,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    left: 20,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '700',
+  },
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -359,12 +387,21 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     backgroundColor: '#FFD54F',
     borderRadius: 20,
+    width: 160,
+    justifyContent: 'center',
   },
-  sortText: { fontWeight: 'bold', color: '#333' },
-  contentContainer: { paddingHorizontal: 20, top: 50 },
+  sortText: { fontWeight: 'bold', color: '#333', alignSelf: 'center' },
+  contentContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+    top: 150,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+  },
   pickerContainer: {
     flex: 1,
-    maxWidth: 240,
+    maxWidth: 200,
     borderWidth: 1,
     borderColor: '#429690',
     borderRadius: 20,
@@ -378,8 +415,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ddd',
     padding: 12,
-    marginVertical: 12,
+    marginVertical: 10,
     alignItems: 'center',
+    elevation: 10,
   },
   cardTitle: { fontSize: 16, fontWeight: '600', marginBottom: 10 },
   chart: { borderRadius: 12 },
@@ -388,8 +426,9 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     marginVertical: 10,
+    width: 125,
   },
-  exportButtonText: { color: '#fff', fontWeight: '600' },
+  exportButtonText: { color: '#fff', fontWeight: '600', alignSelf: 'center' },
   legendContainer: {
     marginTop: 10,
     width: '90%',
