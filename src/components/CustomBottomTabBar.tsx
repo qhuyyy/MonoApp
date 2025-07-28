@@ -4,6 +4,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '@react-navigation/native';
 
 const getIconName = (routeName: string, focused: boolean) => {
   switch (routeName) {
@@ -25,8 +26,10 @@ const CustomBottomTabBar = ({
   descriptors,
   navigation,
 }: BottomTabBarProps) => {
+  const { colors } = useTheme();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const isFocused = state.index === index;
@@ -58,7 +61,7 @@ const CustomBottomTabBar = ({
         style={styles.fabButton}
         onPress={() => navigation.navigate('TransactionCreate')}
       >
-        <Ionicons name="add" size={32} color="#fff" />
+        <Ionicons name="add" size={32} color={colors.background} />
       </TouchableOpacity>
     </View>
   );

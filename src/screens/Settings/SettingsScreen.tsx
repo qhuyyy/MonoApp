@@ -59,7 +59,6 @@ export default SettingsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F7F7',
   },
   header: {
     padding: 20,

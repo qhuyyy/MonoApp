@@ -342,7 +342,7 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
 export default TransactionsHistoryScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8F9FA' },
+  container: { flex: 1 },
   header: {
     height: 60,
     justifyContent: 'flex-end',
@@ -389,6 +389,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     maxHeight: windowHeight - 450,
     marginTop: 10,
+    paddingBottom: 10,
   },
   listContent: { marginTop: 10 },
   emptyText: {

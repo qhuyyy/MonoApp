@@ -12,7 +12,7 @@ import CategoryItem from '../../components/CategoryItem';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CategoriesStackParamList } from '../../navigations/CategoriesStack';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useTheme } from '@react-navigation/native';
 import { useCategoryStore } from '../../stores/useCategoryStore';
 
 type CategoriesScreenProps = NativeStackScreenProps<
@@ -21,6 +21,7 @@ type CategoriesScreenProps = NativeStackScreenProps<
 >;
 
 const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
+  const { colors } = useTheme();
   const { categories, loadCategories } = useCategoryStore();
 
   useEffect(() => {
@@ -41,7 +42,7 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
 
       <View style={styles.titleContainer}>
         <View>
-          <Text style={styles.title}>Categories</Text>
+          <Text style={[styles.title]}>Categories</Text>
           <Text style={styles.subTitle}>
             Press into the category to edit or delete!
           </Text>
@@ -57,7 +58,9 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Income</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Income
+          </Text>
           {categories.filter(c => c.status === 'income').length === 0 && (
             <Text style={styles.emptyText}>
               There is no Income's categories
@@ -77,7 +80,9 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
         </View>
 
         <View style={styles.sectionContainer}>
-          <Text style={styles.sectionTitle}>Expense</Text>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            Expense
+          </Text>
           {categories.filter(c => c.status === 'expense').length === 0 && (
             <Text style={styles.emptyText}>
               There is no Expense's categories
@@ -105,7 +110,6 @@ export default CategoriesScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F7F7',
   },
   header: {
     padding: 20,

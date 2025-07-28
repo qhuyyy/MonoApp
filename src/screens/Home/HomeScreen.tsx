@@ -21,7 +21,7 @@ import { useUserStore } from '../../stores/useUserStore';
 import { useTransactionStore } from '../../stores/useTransactionStore';
 import { MainBottomTabsParamList } from '../../navigations/MainBottomTabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useTheme } from '@react-navigation/native';
 import { Transaction } from '../../types/types';
 import { ScrollView, Swipeable } from 'react-native-gesture-handler';
 
@@ -31,6 +31,7 @@ type NavigationProp = NativeStackNavigationProp<MainBottomTabsParamList>;
 
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
+  const { colors } = useTheme();
   const fullName = useUserStore(state => state.fullName);
 
   const transactions = useTransactionStore(state => state.transactions);
@@ -219,8 +220,8 @@ export default function HomeScreen() {
           <View style={styles.header}>
             <Rectangle style={StyleSheet.absoluteFillObject} />
             <View style={{ paddingTop: 60, paddingHorizontal: 10 }}>
-              <Text style={styles.welcome}>Good afternoon,</Text>
-              <Text style={styles.name}>{fullName || 'User'}</Text>
+              <Text style={[styles.welcome]}>Good afternoon</Text>
+              <Text style={[styles.name]}>{fullName || 'User'}</Text>
             </View>
             <TouchableOpacity
               style={{ position: 'absolute', top: 70, right: 60 }}
@@ -250,7 +251,7 @@ export default function HomeScreen() {
             <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
             >
-              <Text style={styles.balanceCardText}>Total Balance</Text>
+              <Text style={[styles.balanceCardText]}>Total Balance</Text>
               <Ionicons name="chevron-up-outline" size={16} color="#fff" />
             </View>
             <Text
@@ -271,12 +272,15 @@ export default function HomeScreen() {
                     size={20}
                     color="#fff"
                   />
-                  <Text style={styles.balanceCardText}>Income</Text>
+                  <Text style={[styles.balanceCardText]}>Income</Text>
                 </View>
                 <Text
                   style={[
                     styles.balanceCardText,
-                    { fontWeight: 'bold', fontSize: 20 },
+                    {
+                      fontWeight: 'bold',
+                      fontSize: 20,
+                    },
                   ]}
                 >
                   $ {income.toFixed(2)}
@@ -291,12 +295,15 @@ export default function HomeScreen() {
                     size={20}
                     color="#fff"
                   />
-                  <Text style={styles.balanceCardText}>Expense</Text>
+                  <Text style={[styles.balanceCardText]}>Expense</Text>
                 </View>
                 <Text
                   style={[
                     styles.balanceCardText,
-                    { fontWeight: 'bold', fontSize: 20 },
+                    {
+                      fontWeight: 'bold',
+                      fontSize: 20,
+                    },
                   ]}
                 >
                   $ {expense.toFixed(2)}
@@ -308,18 +315,24 @@ export default function HomeScreen() {
           {/* Quick stats */}
           <View style={styles.quickStats}>
             <View style={[styles.quickCard, { backgroundColor: '#EB9486' }]}>
-              <Text style={styles.quickLabel}>Today Expense:</Text>
-              <Text style={styles.quickValue}>${todayExpense.toFixed(2)}</Text>
+              <Text style={[styles.quickLabel]}>Today Expense:</Text>
+              <Text style={[styles.quickValue]}>
+                ${todayExpense.toFixed(2)}
+              </Text>
             </View>
             <View style={[styles.quickCard, { backgroundColor: '#FF9F1C' }]}>
-              <Text style={styles.quickLabel}>This Month Expense:</Text>
-              <Text style={styles.quickValue}>${monthExpense.toFixed(2)}</Text>
+              <Text style={[styles.quickLabel]}>This Month Expense:</Text>
+              <Text style={[styles.quickValue]}>
+                ${monthExpense.toFixed(2)}
+              </Text>
             </View>
           </View>
 
           {/* Mini chart */}
           <View style={styles.chartCard}>
-            <Text style={styles.sectionTitle}>7-day Expense Trend</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              7-day Expense Trend
+            </Text>
             <LineChart
               data={chartData}
               width={screenWidth - 40}
@@ -346,7 +359,9 @@ export default function HomeScreen() {
               marginTop: 20,
             }}
           >
-            <Text style={styles.sectionTitle}>Transactions History</Text>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              Transactions History
+            </Text>
             <TouchableOpacity
               onPress={() =>
                 navigation.navigate('HistoryStack', {
@@ -354,13 +369,17 @@ export default function HomeScreen() {
                 })
               }
             >
-              <Text style={{ fontStyle: 'italic' }}>See all</Text>
+              <Text style={{ fontStyle: 'italic', color: colors.text }}>
+                See all
+              </Text>
             </TouchableOpacity>
           </View>
         </>
       }
       ListEmptyComponent={
-        <Text style={{ textAlign: 'center', marginTop: 20 }}>
+        <Text
+          style={{ textAlign: 'center', marginTop: 20, color: colors.text }}
+        >
           No transactions found.
         </Text>
       }
@@ -371,7 +390,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   header: { padding: 20, paddingTop: 0, height: 287 },
-  welcome: { color: '#fff', fontSize: 16 },
+  welcome: { fontSize: 16, color: '#fff' },
   name: { color: '#fff', fontSize: 20, fontWeight: 'bold' },
   balanceCard: {
     backgroundColor: '#3A837B',
@@ -403,8 +422,8 @@ const styles = StyleSheet.create({
     padding: 15,
     alignItems: 'center',
   },
-  quickLabel: { fontSize: 14, color: '#333' },
-  quickValue: { fontSize: 18, fontWeight: 'bold', marginTop: 5 },
+  quickLabel: { fontSize: 14, color: '#fff' },
+  quickValue: { fontSize: 18, fontWeight: 'bold', marginTop: 5, color: '#fff' },
   chartCard: { marginTop: 20, paddingHorizontal: 20 },
   transactionContainer: { padding: 20 },
   sectionTitle: { fontSize: 18, fontWeight: '600' },

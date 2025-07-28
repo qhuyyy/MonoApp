@@ -17,6 +17,7 @@ import Share from 'react-native-share';
 import RNFS from 'react-native-fs';
 import Papa from 'papaparse';
 import { windowHeight } from '../../utils/Dimensions';
+import { useTheme } from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -31,7 +32,7 @@ const StatisticsScreen = () => {
   const [period, setPeriod] = useState<'month' | '3months' | 'year'>('3months');
   const { transactions } = useTransactionStore();
   const chartRef = useRef<ViewShot>(null);
-
+  const { colors } = useTheme();
   const cyclePeriod = () => {
     setPeriod(prev =>
       prev === 'month' ? '3months' : prev === '3months' ? 'year' : 'month',
@@ -228,9 +229,14 @@ const StatisticsScreen = () => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Statistics & Report</Text>
       </View>
-      <View style={styles.contentContainer}>
+      <View
+        style={[
+          styles.contentContainer,
+          { backgroundColor: colors.background },
+        ]}
+      >
         <View style={styles.switchContainer}>
-          <View style={styles.pickerContainer}>
+          <View style={[styles.pickerContainer]}>
             <Picker
               selectedValue={chartType}
               style={styles.picker}
@@ -353,7 +359,7 @@ const StatisticsScreen = () => {
 export default StatisticsScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F7F7' },
+  container: { flex: 1 },
   rectangleBackground: {
     position: 'absolute',
     top: 0,
@@ -407,6 +413,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginRight: 10,
     overflow: 'hidden',
+    backgroundColor: '#fff',
   },
   picker: { height: 52, width: '100%', color: '#333' },
   card: {

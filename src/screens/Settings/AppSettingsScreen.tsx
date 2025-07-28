@@ -14,7 +14,7 @@ const AppSettingsScreen = ({ navigation }: Props) => {
   const { colors } = useTheme();
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container]}>
       {/* Header */}
       <View style={styles.header}>
         <Rectangle style={StyleSheet.absoluteFillObject} />
@@ -56,7 +56,7 @@ const AppSettingsScreen = ({ navigation }: Props) => {
 export default AppSettingsScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F2F7F7' },
+  container: { flex: 1 },
   header: { padding: 20, paddingTop: 0, height: 50 },
   titleContainer: {
     flexDirection: 'row',

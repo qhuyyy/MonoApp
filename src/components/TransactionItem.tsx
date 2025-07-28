@@ -3,6 +3,7 @@ import React from 'react';
 import { isToday, isYesterday, format } from 'date-fns';
 import { Transaction } from '../types/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '@react-navigation/native';
 
 type TransactionItemProps = {
   transaction: Transaction;
@@ -11,6 +12,8 @@ type TransactionItemProps = {
 
 const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
   if (!transaction) return null;
+
+  const { colors } = useTheme();
 
   const { amount, category, description, date, created_at } = transaction;
 
@@ -38,11 +41,11 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
       </View>
 
       <View style={styles.infoContainer}>
-        <Text style={styles.categoryName}>
+        <Text style={[styles.categoryName, { color: colors.text }]}>
           {category.name} ({formattedDate})
         </Text>
         <Text
-          style={styles.descriptionText}
+          style={[styles.descriptionText, { color: colors.text }]}
           numberOfLines={1}
           ellipsizeMode="tail"
         >

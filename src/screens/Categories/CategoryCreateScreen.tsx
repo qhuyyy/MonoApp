@@ -126,7 +126,6 @@ export default CategoryCreateScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#E9F3F2',
   },
   header: {
     padding: 20,
@@ -145,6 +144,7 @@ const styles = StyleSheet.create({
   label: {
     fontWeight: 'bold',
     marginTop: 12,
+    color: '#429690',
   },
   input: {
     borderWidth: 1,

@@ -91,7 +91,6 @@ export default function TransactionCreateScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F9FA',
   },
   header: {
     height: 100,

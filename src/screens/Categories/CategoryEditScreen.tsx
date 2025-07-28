@@ -155,7 +155,7 @@ const CategoryEditScreen = ({ navigation, route }: EditCategoryScreenProps) => {
 export default CategoryEditScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#E9F3F2' },
+  container: { flex: 1 },
   header: { padding: 20, paddingTop: 0, height: 100 },
   form: {
     flex: 1,

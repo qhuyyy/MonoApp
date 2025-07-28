@@ -23,11 +23,13 @@ import { HistoryStackParamList } from '../../navigations/HistoryStack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useEditTransactionForm } from '../../hooks/useEditTransForm';
+import { useTheme } from '@react-navigation/native';
 
 type Props = NativeStackScreenProps<HistoryStackParamList, 'TransactionEdit'>;
 
 const TransactionEditScreen = ({ navigation, route }: Props) => {
   const { transaction } = route.params;
+  const { colors } = useTheme();
   const [openPicker, setOpenPicker] = useState(false);
   const [incomeCategories, setIncomeCategories] = useState<Category[]>([]);
   const currency = useUserStore(state => state.currency);
@@ -212,7 +214,7 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
 export default TransactionEditScreen;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#E9F3F2' },
+  container: { flex: 1 },
   form: {
     flex: 1,
     backgroundColor: '#fff',

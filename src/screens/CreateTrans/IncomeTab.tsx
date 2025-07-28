@@ -21,7 +21,7 @@ import { MainBottomTabsParamList } from '../../navigations/MainBottomTabs';
 
 type CreateTransNavigationProp = NativeStackNavigationProp<
   MainBottomTabsParamList,
-  'CreateTransactionScreen'
+  'TransactionCreate'
 >;
 
 function IncomeTab() {
