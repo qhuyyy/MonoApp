@@ -189,25 +189,30 @@ const StatisticsScreen = () => {
     }
   };
 
-  // --- Export CSV ---
+  // --- Export CSV (dùng file thật, không base64) ---
   const exportCSV = async () => {
-    const csv = Papa.unparse(
-      filtered.map(t => ({
-        Date: t.date,
-        Category: t.category?.name || '',
-        Type: t.category?.status || '',
-        Amount: t.amount,
-      })),
-    );
+    try {
+      const csv = Papa.unparse(
+        filtered.map(t => ({
+          Date: t.date,
+          Category: t.category?.name || '',
+          Type: t.category?.status || '',
+          Amount: t.amount,
+        })),
+      );
 
-    const path = `${RNFS.DocumentDirectoryPath}/transactions.csv`;
-    await RNFS.writeFile(path, csv, 'utf8');
+      const path = `${RNFS.CachesDirectoryPath}/transactions.csv`;
+      await RNFS.writeFile(path, csv, 'utf8');
 
-    await Share.open({
-      url: `file://${path}`,
-      type: 'text/csv',
-      failOnCancel: false,
-    });
+      await Share.open({
+        title: 'Transactions CSV',
+        url: `file://${path}`,
+        type: 'text/csv',
+        failOnCancel: false,
+      });
+    } catch (error) {
+      console.error('Share error:', error);
+    }
   };
 
   return (
@@ -242,10 +247,10 @@ const StatisticsScreen = () => {
         {/* Export buttons */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           <TouchableOpacity onPress={shareChart} style={styles.exportButton}>
-            <Text style={styles.exportButtonText}>Chia sẻ biểu đồ</Text>
+            <Text style={styles.exportButtonText}>Share the graph</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={exportCSV} style={styles.exportButton}>
-            <Text style={styles.exportButtonText}>Xuất CSV</Text>
+            <Text style={styles.exportButtonText}>Export CSV</Text>
           </TouchableOpacity>
         </View>
 
