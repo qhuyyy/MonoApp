@@ -229,6 +229,14 @@ export default function HomeScreen() {
             </TouchableOpacity>
             <TouchableOpacity
               style={{ position: 'absolute', top: 70, right: 30 }}
+              onPress={() =>
+                navigation.navigate('HomeStack', {
+                  screen: 'SettingsStack',
+                  params: {
+                    screen: 'Settings',
+                  },
+                })
+              }
             >
               <Ionicons name="settings-outline" size={24} color="#fff" />
             </TouchableOpacity>
@@ -300,11 +308,11 @@ export default function HomeScreen() {
           {/* Quick stats */}
           <View style={styles.quickStats}>
             <View style={[styles.quickCard, { backgroundColor: '#EB9486' }]}>
-              <Text style={styles.quickLabel}>Today Expense</Text>
+              <Text style={styles.quickLabel}>Today Expense:</Text>
               <Text style={styles.quickValue}>${todayExpense.toFixed(2)}</Text>
             </View>
             <View style={[styles.quickCard, { backgroundColor: '#FF9F1C' }]}>
-              <Text style={styles.quickLabel}>Month Expense</Text>
+              <Text style={styles.quickLabel}>This Month Expense:</Text>
               <Text style={styles.quickValue}>${monthExpense.toFixed(2)}</Text>
             </View>
           </View>

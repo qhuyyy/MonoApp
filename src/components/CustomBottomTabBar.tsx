@@ -7,7 +7,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const getIconName = (routeName: string, focused: boolean) => {
   switch (routeName) {
-    case 'Home':
+    case 'HomeStack':
       return focused ? 'home' : 'home-outline';
     case 'HistoryStack':
       return focused ? 'book' : 'book-outline';

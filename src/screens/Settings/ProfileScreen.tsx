@@ -6,14 +6,15 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import { windowWidth } from '../../utils/Dimensions';
 import FormInput from '../../components/FormInput';
 import { useUserStore } from '../../stores/useUserStore';
-import ButtonCustom from '../../components/ButtonCustom';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigations/RootStack';
-import { WelcomeStackParamList } from '../../navigations/WelcomeStack';
+import { SettingsStackParamList } from '../../navigations/SettingStack';
+import Rectangle from '../../assets/svg/Rectangle';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import ButtonCustom from '../../components/ButtonCustom';
 
-type Props = NativeStackScreenProps<WelcomeStackParamList, 'GetStarted'>;
+type Props = NativeStackScreenProps<SettingsStackParamList, 'Profile'>;
 
-const GetStartedScreen = ({ navigation }: Props) => {
+const ProfileScreen = ({ navigation }: Props) => {
   const {
     fullName,
     email,
@@ -45,16 +46,23 @@ const GetStartedScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <LinearGradient
-      colors={['#429690', '#2A7C76']}
-      style={styles.linearGradient}
-    >
-      <Text style={styles.title}>Let's Get Started!</Text>
-      <Text style={styles.subTitle}>
-        We gonna need some of your information first
-      </Text>
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Rectangle style={StyleSheet.absoluteFillObject} />
+      </View>
+
+      <View style={styles.titleContainer}>
+        <TouchableOpacity
+          style={styles.backIcon}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-back-outline" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.title}>Profile</Text>
+      </View>
 
       <View style={styles.formContainer}>
+        <Text style={styles.inputLabel}>Avatar:</Text>
         <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
           {avatar ? (
             <Image source={{ uri: avatar }} style={styles.avatar} />
@@ -93,45 +101,49 @@ const GetStartedScreen = ({ navigation }: Props) => {
             <Picker.Item label="JPY - Japanese Yen" value="JPY" />
           </Picker>
         </View>
-      </View>
 
-      <View style={{ marginTop: 20 }}>
-        <ButtonCustom
-          text="Go to Home Screen"
-          onPress={() => navigation.getParent()?.navigate('MainBottomTabs')}
-        />
+        <View style={{ marginTop: 20 }}>
+          <ButtonCustom text="OK" onPress={() => navigation.goBack()} />
+        </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 };
 
-export default GetStartedScreen;
+export default ProfileScreen;
 
 const styles = StyleSheet.create({
-  linearGradient: {
+  container: {
     flex: 1,
-    alignItems: 'center',
+    backgroundColor: '#F2F7F7',
+  },
+  header: {
+    padding: 20,
+    paddingTop: 0,
+    height: 50,
+  },
+  titleContainer: {
+    flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
+    height: 60,
+    marginBottom: 10,
+    position: 'relative',
   },
   title: {
     color: 'white',
+    fontSize: 26,
     fontWeight: 'bold',
-    fontSize: 30,
-    marginBottom: 10,
-  },
-  subTitle: {
-    color: 'white',
-    fontStyle: 'italic',
-    fontSize: 16,
-    marginBottom: 20,
+    alignSelf: 'center',
   },
   formContainer: {
+    alignSelf: 'center',
     backgroundColor: 'white',
     width: windowWidth - 55,
-    aspectRatio: 3 / 4,
     borderRadius: 30,
     padding: 20,
     justifyContent: 'center',
+    elevation: 10,
   },
   inputLabel: {
     marginBottom: 6,
@@ -170,5 +182,9 @@ const styles = StyleSheet.create({
   avatarText: {
     color: '#fff',
     fontSize: 12,
+  },
+  backIcon: {
+    position: 'absolute',
+    left: 20,
   },
 });
