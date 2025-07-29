@@ -7,6 +7,7 @@ import LottieView from 'lottie-react-native';
 import ButtonCustom from '../../components/ButtonCustom';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { WelcomeStackParamList } from '../../navigations/WelcomeStack';
+import { useTranslation } from 'react-i18next';
 
 type OnboardingScreenProps = NativeStackScreenProps<
   WelcomeStackParamList,
@@ -25,21 +26,21 @@ const CustomDot = ({ selected }: { selected: boolean }) => (
   />
 );
 
-const SkipButton = ({
-  ...props
-}: {
-  onPress: () => void;
-  [key: string]: any;
-}) => (
-  <TouchableOpacity style={{ marginLeft: 16 }} {...props}>
-    <Text style={styles.onboardAction}>Skip</Text>
-  </TouchableOpacity>
-);
+const SkipButton = ({ ...props }: { onPress: () => void; [key: string]: any }) => {
+  const { t } = useTranslation();
+  return (
+    <TouchableOpacity style={{ marginLeft: 16 }} {...props}>
+      <Text style={styles.onboardAction}>{t('skip')}</Text>
+    </TouchableOpacity>
+  );
+};
 
 // Ẩn nút Next và Done bằng cách trả về null
 const HiddenButton = () => null;
 
 export default function OnboardingScreen({ navigation }: OnboardingScreenProps) {
+  const { t } = useTranslation();
+
   const onboardingPages = [
     {
       backgroundColor: '#fff',
@@ -53,12 +54,8 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
           />
         </View>
       ),
-      title: <Text style={styles.title}>Welcome to Mono App</Text>,
-      subtitle: (
-        <Text style={styles.subtitle}>
-          Easily manage your personal expenses and take control of your finances.
-        </Text>
-      ),
+      title: <Text style={styles.title}>{t('welcome-to-mono-app')}</Text>,
+      subtitle: <Text style={styles.subtitle}>{t('welcome-subtitle')}</Text>,
     },
     {
       backgroundColor: '#fff',
@@ -72,11 +69,9 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
           />
         </View>
       ),
-      title: <Text style={styles.title}>Track Income & Expenses</Text>,
+      title: <Text style={styles.title}>{t('track-income-expenses')}</Text>,
       subtitle: (
-        <Text style={styles.subtitle}>
-          Record every transaction and monitor your daily spending habits.
-        </Text>
+        <Text style={styles.subtitle}>{t('track-income-expenses-subtitle')}</Text>
       ),
     },
     {
@@ -91,11 +86,9 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
           />
         </View>
       ),
-      title: <Text style={styles.title}>Financial Insights</Text>,
+      title: <Text style={styles.title}>{t('financial-insights')}</Text>,
       subtitle: (
-        <Text style={styles.subtitle}>
-          Visualize your financial data with clear and insightful reports.
-        </Text>
+        <Text style={styles.subtitle}>{t('financial-insights-subtitle')}</Text>
       ),
     },
     {
@@ -110,11 +103,11 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
           />
         </View>
       ),
-      title: <Text style={styles.title}>Spend Smarter Save More</Text>,
+      title: <Text style={styles.title}>{t('spend-smarter-save-more')}</Text>,
       subtitle: (
         <View style={{ marginTop: 30 }}>
           <ButtonCustom
-            text="Get Started"
+            text={t('get-started')}
             onPress={() => navigation.navigate('GetStarted')}
           />
         </View>

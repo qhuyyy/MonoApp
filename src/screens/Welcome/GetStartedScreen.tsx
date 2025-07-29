@@ -8,8 +8,8 @@ import FormInput from '../../components/FormInput';
 import { useUserStore } from '../../stores/useUserStore';
 import ButtonCustom from '../../components/ButtonCustom';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigations/RootStack';
 import { WelcomeStackParamList } from '../../navigations/WelcomeStack';
+import { useTranslation } from 'react-i18next';
 
 type Props = NativeStackScreenProps<WelcomeStackParamList, 'GetStarted'>;
 
@@ -25,6 +25,8 @@ const GetStartedScreen = ({ navigation }: Props) => {
     setAvatar,
   } = useUserStore();
 
+  const { t } = useTranslation();
+
   const pickImage = () => {
     launchImageLibrary(
       {
@@ -32,11 +34,7 @@ const GetStartedScreen = ({ navigation }: Props) => {
         selectionLimit: 1,
       },
       response => {
-        if (
-          !response.didCancel &&
-          response.assets &&
-          response.assets.length > 0
-        ) {
+        if (!response.didCancel && response.assets && response.assets.length > 0) {
           const uri = response.assets[0].uri;
           if (uri) setAvatar(uri);
         }
@@ -45,14 +43,9 @@ const GetStartedScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <LinearGradient
-      colors={['#429690', '#2A7C76']}
-      style={styles.linearGradient}
-    >
-      <Text style={styles.title}>Let's Get Started!</Text>
-      <Text style={styles.subTitle}>
-        We gonna need some of your information first
-      </Text>
+    <LinearGradient colors={['#429690', '#2A7C76']} style={styles.linearGradient}>
+      <Text style={styles.title}>{t('lets-get-started')}</Text>
+      <Text style={styles.subTitle}>{t('we-need-your-information')}</Text>
 
       <View style={styles.formContainer}>
         <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
@@ -60,44 +53,39 @@ const GetStartedScreen = ({ navigation }: Props) => {
             <Image source={{ uri: avatar }} style={styles.avatar} />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Text style={styles.avatarText}>Pick Avatar</Text>
+              <Text style={styles.avatarText}>{t('pick-avatar')}</Text>
             </View>
           )}
         </TouchableOpacity>
 
         <FormInput
-          title="Full Name:"
-          placeholder="Enter your full name"
+          title={t('full-name')}
+          placeholder={t('enter-full-name')}
           value={fullName}
           onChangeText={setFullName}
         />
 
         <FormInput
-          title="Email:"
-          placeholder="Enter your email"
+          title={t('email')}
+          placeholder={t('enter-email')}
           value={email}
           onChangeText={setEmail}
         />
 
-        <Text style={styles.inputLabel}>Preferred Currency:</Text>
-
+        <Text style={styles.inputLabel}>{t('preferred-currency')}</Text>
         <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={currency}
-            onValueChange={setCurrency}
-            style={styles.picker}
-          >
-            <Picker.Item label="VND - Vietnamese Dong" value="VND" />
-            <Picker.Item label="USD - US Dollar" value="USD" />
-            <Picker.Item label="EUR - Euro" value="EUR" />
-            <Picker.Item label="JPY - Japanese Yen" value="JPY" />
+          <Picker selectedValue={currency} onValueChange={setCurrency} style={styles.picker}>
+            <Picker.Item label={t('vnd-vietnamese-dong')} value="VND" />
+            <Picker.Item label={t('usd-us-dollar')} value="USD" />
+            <Picker.Item label={t('eur-euro')} value="EUR" />
+            <Picker.Item label={t('jpy-japanese-yen')} value="JPY" />
           </Picker>
         </View>
       </View>
 
       <View style={{ marginTop: 20 }}>
         <ButtonCustom
-          text="Go to Home Screen"
+          text={t('go-to-home-screen')}
           onPress={() => navigation.getParent()?.navigate('MainBottomTabs')}
         />
       </View>
