@@ -13,6 +13,9 @@ type TransactionState = {
   duplicateTransaction: (id: string) => void;
   loadTransactions: () => Promise<void>;
   loadRecentTransactions: () => Transaction[];
+  exportJson: () => Promise<string>;
+  importJson: (jsonString: string) => Promise<void>;
+  clearAll: () => Promise<void>;
 };
 
 export const useTransactionStore = create<TransactionState>()(
@@ -22,12 +25,7 @@ export const useTransactionStore = create<TransactionState>()(
       recentTransactions: [],
       addTransaction: transaction =>
         set(state => ({
-          transactions: [
-            ...state.transactions,
-            {
-              ...transaction,
-            },
-          ],
+          transactions: [...state.transactions, { ...transaction }],
         })),
 
       updateTransaction: updatedTransaction =>
@@ -93,7 +91,50 @@ export const useTransactionStore = create<TransactionState>()(
           )
           .slice(0, 5);
       },
+
+      exportJson: async () => {
+        const raw = await AsyncStorage.getItem('transaction-storage');
+        return raw ?? JSON.stringify({ state: { transactions: [] } });
+      },
+
+      importJson: async (jsonString: string) => {
+        try {
+          const parsed = JSON.parse(jsonString);
+          const newTransactions: Transaction[] = Array.isArray(parsed)
+            ? parsed
+            : parsed.state?.transactions || [];
+
+          const currentRaw = await AsyncStorage.getItem('transaction-storage');
+          let currentTransactions: Transaction[] = [];
+          if (currentRaw) {
+            const currentParsed = JSON.parse(currentRaw);
+            currentTransactions = currentParsed.state?.transactions || [];
+          }
+
+          const merged = [
+            ...currentTransactions,
+            ...newTransactions.filter(
+              nt => !currentTransactions.some(ct => ct.id === nt.id),
+            ),
+          ];
+
+          await AsyncStorage.setItem(
+            'transaction-storage',
+            JSON.stringify({ state: { transactions: merged } }),
+          );
+          set({ transactions: merged });
+        } catch (e) {
+          console.error('Import failed:', e);
+          throw e;
+        }
+      },
+
+      clearAll: async () => {
+        await AsyncStorage.removeItem('transaction-storage');
+        set({ transactions: [] });
+      },
     }),
+    
     {
       name: 'transaction-storage',
       storage: {
