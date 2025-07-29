@@ -6,7 +6,7 @@ import ButtonCustom from '../../components/ButtonCustom';
 import SettingItem from '../../components/SettingItem';
 import Rectangle from '../../assets/svg/Rectangle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { SettingsStackParamList } from '../../navigations/SettingStack';
+import { SettingsStackParamList } from '../../navigations/SettingsStack';
 import { useTranslation } from 'react-i18next';
 
 type SettingsScreenProp = NativeStackScreenProps<
@@ -46,7 +46,7 @@ const SettingsScreen = ({ navigation }: SettingsScreenProp) => {
         />
         <SettingItem
           title={t('data-management')}
-          onPress={() => navigation.navigate('DataManagement')}
+          onPress={() => navigation.navigate('DataManagementStack')}
         />
         <SettingItem
           title={t('about')}

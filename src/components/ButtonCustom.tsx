@@ -10,6 +10,7 @@ type ButtonCustomProps = {
   text: string;
   onPress?: () => void;
   disabled?: boolean;
+  active?: boolean;
 };
 
 const ButtonCustom = ({ text, ...rest }: ButtonCustomProps) => {

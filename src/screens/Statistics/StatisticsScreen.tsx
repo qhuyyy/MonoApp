@@ -21,7 +21,8 @@ import { useTheme } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { MainBottomTabsParamList } from '../../navigations/MainBottomTabs';
 import { useTranslation } from 'react-i18next';
-
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
 const screenWidth = Dimensions.get('window').width;
 
 const chartConfig = {
@@ -30,12 +31,13 @@ const chartConfig = {
   color: (opacity = 1) => `rgba(63, 81, 181, ${opacity})`,
 };
 
-type StatisticsScreenProp = NativeStackScreenProps<
+type StatisticsScreenProp = BottomTabScreenProps<
   MainBottomTabsParamList,
   'Statistics'
 >;
 
-const StatisticsScreen = ({ navigation }: StatisticsScreenProp) => {
+const StatisticsScreen = () => {
+  const navigation = useNavigation();
   const [chartType, setChartType] = useState<'bar' | 'line' | 'pie'>('bar');
   const [period, setPeriod] = useState<'month' | '3months' | 'year'>('3months');
   const { transactions } = useTransactionStore();

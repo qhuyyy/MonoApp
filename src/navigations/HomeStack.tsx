@@ -1,4 +1,4 @@
-import SettingsStack, { SettingsStackParamList } from './SettingStack';
+import SettingsStack, { SettingsStackParamList } from './SettingsStack';
 import HomeScreen from '../screens/Home/HomeScreen';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigatorScreenParams } from '@react-navigation/native';

@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View, Switch } from 'react-native';
 import Rectangle from '../../assets/svg/Rectangle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { SettingsStackParamList } from '../../navigations/SettingStack';
+import { SettingsStackParamList } from '../../navigations/SettingsStack';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { useTheme } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +24,11 @@ const AppSettingsScreen = ({ navigation }: Props) => {
       <View style={styles.titleContainer}>
         <TouchableOpacity
           style={styles.backIcon}
-          onPress={() => navigation.goBack()}
+          onPress={() =>
+            navigation
+              .getParent()
+              ?.navigate('SettingsStack', { screen: 'Settings' })
+          }
         >
           <Ionicons name="chevron-back-outline" size={24} color="#fff" />
         </TouchableOpacity>

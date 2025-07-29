@@ -112,5 +112,34 @@
   "vnd-vietnamese-dong": "VND - Việt Nam Đồng",
   "usd-us-dollar": "USD - Đô la Mỹ",
   "eur-euro": "EUR - Euro",
-  "jpy-japanese-yen": "JPY - Yên Nhật bản"
+  "jpy-japanese-yen": "JPY - Yên Nhật bản",
+
+  "export-data-json": "Xuất dữ liệu (.json)",
+  "import-data-json": "Nhập dữ liệu (.json)",
+  "delete-all-data": "Xoá toàn bộ dữ liệu",
+  "confirm": "Xác nhận",
+  "are-you-sure-you-want-to-delete-all-data?": "Bạn có chắc muốn xoá toàn bộ dữ liệu?",
+  "all-data-has-been-deleted!": "Đã xoá toàn bộ dữ liệu!",
+
+  "data-has-been-exported-successfully!": "Dữ liệu đã được xuất thành công!",
+  "data-has-been-exported-unsucessfully!": "Xuất dữ liệu thất bại!",
+  "error": "Lỗi",
+  "export-data": "Xuất dữ liệu",
+  "include-transactions": "Bao gồm các Giao dịch",
+  "include-categories": "Bao gồm các Danh mục",
+  "from-date": "Từ ngày",
+  "to-date": "Đến ngày",
+  "export-json": "Xuất dữ liệu (.json)",
+
+  "preview-loaded": "Dữ liệu xem trước",
+  "transaction-count": "Có {{count}} giao dịch",
+  "error-pick-file": "Không thể chọn file",
+  "there-is-no-data-to-import!": "Không có dữ liệu để nhập!",
+  "import-data-successfully!": "Nhập dữ liệu thành công!",
+  "import-data": "Nhập dữ liệu",
+  "choose-json-file": "Chọn file .json",
+  "replace-data": "Thay thế với dữ liệu hiện tại",
+  "merge-data": "Gộp với dữ liệu hiện tại",
+  "and-more-transactions": "... và {{count}} giao dịch khác",
+  "import-json": "Nhập dữ liệu (.json)"
 }
