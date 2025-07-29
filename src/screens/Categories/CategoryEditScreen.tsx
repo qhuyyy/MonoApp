@@ -16,6 +16,7 @@ import { Picker } from '@react-native-picker/picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useEditCategoryForm } from '../../hooks/useEditCategoryForm';
 import { COLORS, ICONS } from '../../constants/Category';
+import { useTranslation } from 'react-i18next';
 
 type EditCategoryScreenProps = NativeStackScreenProps<
   CategoriesStackParamList,
@@ -24,6 +25,7 @@ type EditCategoryScreenProps = NativeStackScreenProps<
 
 const CategoryEditScreen = ({ navigation, route }: EditCategoryScreenProps) => {
   const { category } = route.params;
+  const { t } = useTranslation();
 
   const {
     watch,
@@ -42,19 +44,19 @@ const CategoryEditScreen = ({ navigation, route }: EditCategoryScreenProps) => {
     icon: string;
   }) => {
     handleUpdate(values);
-    Alert.alert('Success', 'Category updated successfully', [
+    Alert.alert(t('success'), t('category-updated-successfully!'), [
       { text: 'OK', onPress: () => navigation.goBack() },
     ]);
   };
 
   const confirmDelete = () => {
     Alert.alert(
-      'Delete Category',
-      'Are you sure you want to delete this category?',
+      t('delete-category'),
+      t('are-you-sure-you-want-to-delete-this-category?'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: async () => {
             await handleDelete();
@@ -76,27 +78,31 @@ const CategoryEditScreen = ({ navigation, route }: EditCategoryScreenProps) => {
           >
             <Ionicons name="chevron-back-outline" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Edit Category</Text>
+          <Text style={styles.headerTitle}>{t('edit-category')}</Text>
         </View>
       </View>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Category Type</Text>
+        <Text style={styles.label}>{t('category-type')}</Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={watch('status')}
             onValueChange={value => setValue('status', value)}
           >
-            <Picker.Item label="Income" value="income" />
-            <Picker.Item label="Expense" value="expense" />
+            <Picker.Item label={t('income')} value="income" />
+            <Picker.Item label={t('expense')} value="expense" />
           </Picker>
         </View>
 
-        <Text style={styles.label}>Category Name</Text>
+        <Text style={styles.label}>{t('category-name')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Enter name..."
-          value={watch('name')}
+          placeholder={t('enter_name')}
+          value={
+            watch('name')
+              ? t(watch('name')!.toLowerCase(), { defaultValue: watch('name') })
+              : ''
+          }
           onChangeText={text => setValue('name', text)}
           onBlur={() => trigger('name')}
         />
@@ -104,7 +110,7 @@ const CategoryEditScreen = ({ navigation, route }: EditCategoryScreenProps) => {
           <Text style={{ color: 'red' }}>{formState.errors.name.message}</Text>
         )}
 
-        <Text style={styles.label}>Choose Color</Text>
+        <Text style={styles.label}>{t('choose-color')}</Text>
         <View style={styles.colorList}>
           {COLORS.map(c => (
             <TouchableOpacity
@@ -122,7 +128,7 @@ const CategoryEditScreen = ({ navigation, route }: EditCategoryScreenProps) => {
           ))}
         </View>
 
-        <Text style={styles.label}>Choose Icon</Text>
+        <Text style={styles.label}>{t('choose-icon')}</Text>
         <View style={styles.iconList}>
           {ICONS.map(i => (
             <TouchableOpacity
@@ -145,8 +151,8 @@ const CategoryEditScreen = ({ navigation, route }: EditCategoryScreenProps) => {
           ))}
         </View>
 
-        <ButtonCustom text="Update" onPress={handleSubmit(onSubmit)} />
-        <OutlineButtonCustom text="Delete" onPress={confirmDelete} />
+        <ButtonCustom text={t('update')} onPress={handleSubmit(onSubmit)} />
+        <OutlineButtonCustom text={t('delete')} onPress={confirmDelete} />
       </View>
     </View>
   );

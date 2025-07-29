@@ -14,6 +14,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CategoriesStackParamList } from '../../navigations/CategoriesStack';
 import { useFocusEffect, useTheme } from '@react-navigation/native';
 import { useCategoryStore } from '../../stores/useCategoryStore';
+import { useTranslation } from 'react-i18next';
 
 type CategoriesScreenProps = NativeStackScreenProps<
   CategoriesStackParamList,
@@ -22,6 +23,7 @@ type CategoriesScreenProps = NativeStackScreenProps<
 
 const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const { categories, loadCategories } = useCategoryStore();
 
   useEffect(() => {
@@ -42,9 +44,9 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
 
       <View style={styles.titleContainer}>
         <View>
-          <Text style={[styles.title]}>Categories</Text>
+          <Text style={[styles.title]}>{t('categories')}</Text>
           <Text style={styles.subTitle}>
-            Press into the category to edit or delete!
+            {t('press-into-the-categories-to-edit-or-delete!')}
           </Text>
         </View>
 
@@ -59,12 +61,10 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.sectionContainer}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Income
+            {t('income')}
           </Text>
           {categories.filter(c => c.status === 'income').length === 0 && (
-            <Text style={styles.emptyText}>
-              There is no Income's categories
-            </Text>
+            <Text style={styles.emptyText}>{t('no-income')}</Text>
           )}
           {categories
             .filter(cat => cat.status === 'income')
@@ -81,12 +81,10 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
 
         <View style={styles.sectionContainer}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            Expense
+            {t('expense')}
           </Text>
           {categories.filter(c => c.status === 'expense').length === 0 && (
-            <Text style={styles.emptyText}>
-              There is no Expense's categories
-            </Text>
+            <Text style={styles.emptyText}>{t('no-expense')}</Text>
           )}
           {categories
             .filter(cat => cat.status === 'expense')

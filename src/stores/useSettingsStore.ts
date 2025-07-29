@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import i18n from '../config/i18n';
 
 type SettingsState = {
   theme: 'light' | 'dark';
@@ -19,6 +20,7 @@ export const useSettingsStore = create<
   },
   setLanguage: async language => {
     await AsyncStorage.setItem('language', language);
+    i18n.changeLanguage(language);
     set({ language });
   },
   loadSettings: async () => {

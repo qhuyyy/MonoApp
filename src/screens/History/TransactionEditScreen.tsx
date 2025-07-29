@@ -24,12 +24,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useEditTransactionForm } from '../../hooks/useEditTransForm';
 import { useTheme } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 type Props = NativeStackScreenProps<HistoryStackParamList, 'TransactionEdit'>;
 
 const TransactionEditScreen = ({ navigation, route }: Props) => {
   const { transaction } = route.params;
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [openPicker, setOpenPicker] = useState(false);
   const [incomeCategories, setIncomeCategories] = useState<Category[]>([]);
   const currency = useUserStore(state => state.currency);
@@ -59,16 +61,16 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
 
   const onSubmit = async (data: any) => {
     await handleUpdate(data);
-    Alert.alert('Success', 'Transaction updated successfully', [
+    Alert.alert(t('success'), t('transaction-updated-successfully!'), [
       { text: 'OK', onPress: () => navigation.navigate('TransactionsHistory') },
     ]);
   };
 
   const confirmDelete = () => {
-    Alert.alert('Delete Transaction', 'Are you sure you want to delete?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('delete-transaction'), t('are-you-sure-you-want-to-delete-this-transaction?'), [
+      { text: t('cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('delete'),
         style: 'destructive',
         onPress: async () => {
           await handleDelete();
@@ -92,12 +94,12 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
         >
           <Ionicons name="chevron-back-outline" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Edit Transaction</Text>
+        <Text style={styles.headerTitle}>{t('edit-transaction')}</Text>
       </View>
       <View style={styles.form}>
         {/* Status */}
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
-          <Text style={styles.inputLabel}>Status:</Text>
+          <Text style={styles.inputLabel}>{t('status')}:</Text>
           <Text
             style={[
               styles.statusText,
@@ -106,15 +108,15 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
                 : styles.expense,
             ]}
           >
-            {transaction.category?.status?.toUpperCase()}
+            {t(transaction.category?.status ?? 'unknown').toUpperCase()}
           </Text>
         </View>
 
         {/* Amount */}
         <FormInput
           value={String(watch('amount') || '')}
-          placeholder={`Enter amount (${currency})`}
-          title="Amount"
+          placeholder={`${t('enter-amount')} (${currency})`}
+          title={t('amount')}
           keyboardType="numeric"
           onChangeText={text => setValue('amount', Number(text))}
           error={formState.errors.amount?.message}
@@ -123,19 +125,19 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
         {/* Description */}
         <FormInput
           value={watch('description') || ''}
-          placeholder="Enter a description"
-          title="Description"
+          placeholder={`${t('enter-description')}`}
+          title={t('description-optional')}
           onChangeText={text => setValue('description', text)}
           error={formState.errors.description?.message}
         />
 
         {/* Category */}
         <View>
-          <Text style={styles.inputLabel}>Category</Text>
+          <Text style={styles.inputLabel}>{t('category')}</Text>
           <Dropdown
             style={styles.dropdown}
             data={incomeCategories.map(cat => ({
-              label: cat.name,
+              label: t(cat.name.toLocaleLowerCase()),
               value: cat.id,
               icon: cat.icon,
             }))}
@@ -181,10 +183,12 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
         </View>
 
         {/* Date */}
-        <Text style={styles.inputLabel}>Date</Text>
-        <Pressable onPress={() => setOpenPicker(true)} style={styles.dateInput}>
+        <Text style={{ color: '#429690', fontWeight: 'bold' }}>
+          {t('date')}
+        </Text>
+        <Pressable onPress={() => setOpenPicker(true)} style={styles.dropdown}>
           <Text style={styles.dateText}>
-            {format(selectedDate ?? new Date(), 'yyyy-MM-dd')}
+            {format(selectedDate ?? new Date(), 'dd/MM/yyyy')}
           </Text>
         </Pressable>
         <DatePicker
@@ -201,10 +205,10 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
         />
 
         <View style={{ marginTop: 10 }}>
-          <ButtonCustom text="Update" onPress={handleSubmit(onSubmit)} />
+          <ButtonCustom text={t('update')} onPress={handleSubmit(onSubmit)} />
         </View>
         <View style={{ marginTop: 10 }}>
-          <OutlineButtonCustom text="Delete" onPress={confirmDelete} />
+          <OutlineButtonCustom text={t('delete')} onPress={confirmDelete} />
         </View>
       </View>
     </View>

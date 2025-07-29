@@ -4,6 +4,7 @@ import { isToday, isYesterday, format } from 'date-fns';
 import { Transaction } from '../types/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 type TransactionItemProps = {
   transaction: Transaction;
@@ -14,20 +15,20 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
   if (!transaction) return null;
 
   const { colors } = useTheme();
-
-  const { amount, category, description, date, created_at } = transaction;
+  const { t } = useTranslation();
+  const { amount, category, description, date, updated_at } = transaction;
 
   let displayDate = '';
-  if (created_at) {
-    const parsedDate = new Date(created_at);
+  if (updated_at) {
+    const parsedDate = new Date(updated_at);
     displayDate = isToday(parsedDate)
-      ? 'Today'
+      ? t('today')
       : isYesterday(parsedDate)
-      ? 'Yesterday'
-      : format(parsedDate, 'dd MMM yyyy');
+      ? t('yesterday')
+      : format(parsedDate, 'dd/MM/yyyy');
   }
 
-  const formattedDate = date ? format(new Date(date), 'MMMM dd, yyyy') : '';
+  const formattedDate = date ? format(new Date(date), 'dd/MM/yyyy') : '';
 
   const isIncome = category.status === 'income';
 
@@ -42,16 +43,16 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
 
       <View style={styles.infoContainer}>
         <Text style={[styles.categoryName, { color: colors.text }]}>
-          {category.name} ({formattedDate})
+          {t(category.name.toLocaleLowerCase())} ({formattedDate})
         </Text>
         <Text
           style={[styles.descriptionText, { color: colors.text }]}
           numberOfLines={1}
           ellipsizeMode="tail"
         >
-          {description ? description : 'No description yet'}
+          {description ? description : t('no-description-yet')}
         </Text>
-        <Text style={styles.timeText}>Last update: {displayDate}</Text>
+        <Text style={styles.timeText}>{t('last-updated')} {displayDate}</Text>
       </View>
 
       <View style={styles.amountContainer}>

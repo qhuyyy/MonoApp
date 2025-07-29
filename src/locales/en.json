@@ -1,0 +1,31 @@
+{
+  "app_settings": "App Settings",
+  "dark_mode": "Dark Mode",
+  "language": "Language",
+  "english": "English",
+  "vietnamese": "Tiếng Việt",
+
+  "hello": "Hello",
+  "user": "User",
+  "total_balance": "Total Balance",
+  "income": "Income",
+  "expense": "Expense",
+  "today_expense": "Today Expense",
+  "month_expense": "This Month Expense",
+  "seven_day_expense_trend": "7-day Expense Trend",
+  "transactions_history": "Transactions History",
+  "see_all": "See all",
+  "no_transactions_found": "No transactions found.",
+
+  "categories": "Categories",
+  "press-into-the-categories-to-edit-or-delete!": "Press into the category to edit or delete!",
+  "no-income": "There is no Income's categories",
+  "no-expense": "There is no Expense's categories",
+
+  "add-a-new-category": "Add a new Category",
+  "category-type": "Category Type",
+  "category-name": "Category Name",
+  "choose-color": "Choose Color",
+  "choose-icon": "Choose Icon",
+  "save": "Save"
+}

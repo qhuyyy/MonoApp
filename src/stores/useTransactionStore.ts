@@ -6,6 +6,7 @@ import uuid from 'react-native-uuid';
 
 type TransactionState = {
   transactions: Transaction[];
+  recentTransactions: Transaction[];
   addTransaction: (transaction: Transaction) => void;
   updateTransaction: (updatedTransaction: Transaction) => void;
   deleteTransaction: (id: string) => void;
@@ -18,7 +19,7 @@ export const useTransactionStore = create<TransactionState>()(
   persist(
     (set, get) => ({
       transactions: [],
-
+      recentTransactions: [],
       addTransaction: transaction =>
         set(state => ({
           transactions: [

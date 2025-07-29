@@ -24,6 +24,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation, useTheme } from '@react-navigation/native';
 import { Transaction } from '../../types/types';
 import { ScrollView, Swipeable } from 'react-native-gesture-handler';
+import { useTranslation } from 'react-i18next';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -32,6 +33,8 @@ type NavigationProp = NativeStackNavigationProp<MainBottomTabsParamList>;
 export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
+  const { t } = useTranslation();
+
   const fullName = useUserStore(state => state.fullName);
 
   const transactions = useTransactionStore(state => state.transactions);
@@ -112,10 +115,10 @@ export default function HomeScreen() {
   }, [transactions]);
 
   const handleDelete = (id: string) => {
-    Alert.alert('Delete', 'Are you sure you want to delete this transaction?', [
-      { text: 'Cancel', style: 'cancel' },
+    Alert.alert(t('delete'), t('are-you-sure-you-want-to-delete-this-transaction?'), [
+      { text: t('cancel'), style: 'cancel' },
       {
-        text: 'Delete',
+        text: t('delete'),
         style: 'destructive',
         onPress: () => deleteTransaction(id),
       },
@@ -220,8 +223,8 @@ export default function HomeScreen() {
           <View style={styles.header}>
             <Rectangle style={StyleSheet.absoluteFillObject} />
             <View style={{ paddingTop: 60, paddingHorizontal: 10 }}>
-              <Text style={[styles.welcome]}>Good afternoon</Text>
-              <Text style={[styles.name]}>{fullName || 'User'}</Text>
+              <Text style={[styles.welcome]}>{t('hello')},</Text>
+              <Text style={[styles.name]}>{fullName || t('user')}</Text>
             </View>
             <TouchableOpacity
               style={{ position: 'absolute', top: 70, right: 60 }}
@@ -251,7 +254,7 @@ export default function HomeScreen() {
             <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
             >
-              <Text style={[styles.balanceCardText]}>Total Balance</Text>
+              <Text style={[styles.balanceCardText]}>{t('total_balance')}</Text>
               <Ionicons name="chevron-up-outline" size={16} color="#fff" />
             </View>
             <Text
@@ -272,15 +275,12 @@ export default function HomeScreen() {
                     size={20}
                     color="#fff"
                   />
-                  <Text style={[styles.balanceCardText]}>Income</Text>
+                  <Text style={[styles.balanceCardText]}>{t('income')}</Text>
                 </View>
                 <Text
                   style={[
                     styles.balanceCardText,
-                    {
-                      fontWeight: 'bold',
-                      fontSize: 20,
-                    },
+                    { fontWeight: 'bold', fontSize: 20 },
                   ]}
                 >
                   $ {income.toFixed(2)}
@@ -295,15 +295,12 @@ export default function HomeScreen() {
                     size={20}
                     color="#fff"
                   />
-                  <Text style={[styles.balanceCardText]}>Expense</Text>
+                  <Text style={[styles.balanceCardText]}>{t('expense')}</Text>
                 </View>
                 <Text
                   style={[
                     styles.balanceCardText,
-                    {
-                      fontWeight: 'bold',
-                      fontSize: 20,
-                    },
+                    { fontWeight: 'bold', fontSize: 20 },
                   ]}
                 >
                   $ {expense.toFixed(2)}
@@ -315,13 +312,13 @@ export default function HomeScreen() {
           {/* Quick stats */}
           <View style={styles.quickStats}>
             <View style={[styles.quickCard, { backgroundColor: '#EB9486' }]}>
-              <Text style={[styles.quickLabel]}>Today Expense:</Text>
+              <Text style={[styles.quickLabel]}>{t('today_expense')}</Text>
               <Text style={[styles.quickValue]}>
                 ${todayExpense.toFixed(2)}
               </Text>
             </View>
             <View style={[styles.quickCard, { backgroundColor: '#FF9F1C' }]}>
-              <Text style={[styles.quickLabel]}>This Month Expense:</Text>
+              <Text style={[styles.quickLabel]}>{t('month_expense')}</Text>
               <Text style={[styles.quickValue]}>
                 ${monthExpense.toFixed(2)}
               </Text>
@@ -331,22 +328,9 @@ export default function HomeScreen() {
           {/* Mini chart */}
           <View style={styles.chartCard}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              7-day Expense Trend
+              {t('seven_day_expense_trend')}
             </Text>
-            <LineChart
-              data={chartData}
-              width={screenWidth - 40}
-              height={180}
-              withDots
-              withInnerLines={false}
-              chartConfig={{
-                backgroundGradientFrom: '#fff',
-                backgroundGradientTo: '#fff',
-                color: (opacity = 1) => `rgba(255, 112, 67, ${opacity})`,
-              }}
-              bezier
-              style={{ borderRadius: 10, marginTop: 10 }}
-            />
+            {/* ...existing code... */}
           </View>
 
           {/* Title */}
@@ -360,7 +344,7 @@ export default function HomeScreen() {
             }}
           >
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Transactions History
+              {t('transactions_history')}
             </Text>
             <TouchableOpacity
               onPress={() =>
@@ -370,7 +354,7 @@ export default function HomeScreen() {
               }
             >
               <Text style={{ fontStyle: 'italic', color: colors.text }}>
-                See all
+                {t('see_all')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -380,7 +364,7 @@ export default function HomeScreen() {
         <Text
           style={{ textAlign: 'center', marginTop: 20, color: colors.text }}
         >
-          No transactions found.
+          {t('no_transactions_found')}
         </Text>
       }
     />

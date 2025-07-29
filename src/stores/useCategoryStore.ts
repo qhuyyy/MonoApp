@@ -3,12 +3,13 @@ import { persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Category, Transaction } from '../types/types';
 import { Alert } from 'react-native';
+import i18n from '../config/i18n';
 
 type CategoryState = {
   categories: Category[];
   addCategory: (category: Category) => void;
   updateCategory: (updatedCategory: Category) => void;
-  deleteCategory: (id: string) => void;
+  deleteCategory: (id: string) => Promise<void>;
   loadCategories: () => Promise<void>;
 };
 
@@ -17,7 +18,7 @@ export const useCategoryStore = create<CategoryState>()(
     (set, get) => ({
       categories: [],
 
-      addCategory: (category: Category) => 
+      addCategory: (category: Category) =>
         set(state => ({ categories: [...state.categories, category] })),
 
       updateCategory: updatedCategory =>
@@ -38,11 +39,11 @@ export const useCategoryStore = create<CategoryState>()(
           const used = transactions.some(
             (t: Transaction) => t.category?.id === id,
           );
-          
+
           if (used) {
             Alert.alert(
-              'Cannot Delete',
-              'This category is being used in a transaction.',
+              i18n.t('cannot-delete'),
+              i18n.t('this-category-is-being-used-in-a-transaction'),
             );
             return;
           }

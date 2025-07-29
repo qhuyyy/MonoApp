@@ -15,6 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import { windowWidth } from '../../utils/Dimensions';
 import IncomeTab from './IncomeTab';
 import ExpenseTab from './ExpenseTab';
+import { useTranslation } from 'react-i18next';
 
 type CreateTransNavigationProp = NativeStackNavigationProp<
   MainBottomTabsParamList,
@@ -23,6 +24,7 @@ type CreateTransNavigationProp = NativeStackNavigationProp<
 
 export default function TransactionCreateScreen() {
   const [activeTab, setActiveTab] = useState<'Income' | 'Expense'>('Income');
+  const { t } = useTranslation();
   const navigation = useNavigation<CreateTransNavigationProp>();
 
   return (
@@ -38,7 +40,7 @@ export default function TransactionCreateScreen() {
             <Ionicons name="chevron-back-outline" size={24} color="#fff" />
           </TouchableOpacity>
 
-          <Text style={styles.headerTitle}>Add a new Transaction</Text>
+          <Text style={styles.headerTitle}>{t('add-a-new-transaction')}</Text>
         </View>
       </View>
 
@@ -57,7 +59,7 @@ export default function TransactionCreateScreen() {
                 activeTab === 'Income' && { color: '#fff', fontWeight: 'bold' },
               ]}
             >
-              Income
+              {t('income')}
             </Text>
           </Pressable>
 
@@ -77,7 +79,7 @@ export default function TransactionCreateScreen() {
                 },
               ]}
             >
-              Expense
+              {t('expense')}
             </Text>
           </Pressable>
         </View>

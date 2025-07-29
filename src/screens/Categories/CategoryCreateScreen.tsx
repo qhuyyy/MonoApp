@@ -15,6 +15,7 @@ import { Picker } from '@react-native-picker/picker';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useCreateCategoryForm } from '../../hooks/useCreateCategoryForm';
 import { COLORS, ICONS } from '../../constants/Category';
+import { useTranslation } from 'react-i18next';
 
 type CreateCategoryScreenProps = NativeStackScreenProps<
   CategoriesStackParamList,
@@ -24,6 +25,8 @@ type CreateCategoryScreenProps = NativeStackScreenProps<
 const CategoryCreateScreen = ({ navigation }: CreateCategoryScreenProps) => {
   const [color, setColor] = useState(COLORS[0]);
   const [icon, setIcon] = useState(ICONS[0]);
+
+  const { t } = useTranslation();
 
   const form = useCreateCategoryForm(
     () =>
@@ -45,23 +48,23 @@ const CategoryCreateScreen = ({ navigation }: CreateCategoryScreenProps) => {
           >
             <Ionicons name="chevron-back-outline" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Add a new Category</Text>
+          <Text style={styles.headerTitle}>{t('add-a-new-category')}</Text>
         </View>
       </View>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Category Type</Text>
+        <Text style={styles.label}>{t('category-type')}</Text>
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={form.watch('status')}
             onValueChange={value => form.setValue('status', value)}
           >
-            <Picker.Item label="Income" value="income" />
-            <Picker.Item label="Expense" value="expense" />
+            <Picker.Item label={t('income')} value="income" />
+            <Picker.Item label={t('expense')} value="expense" />
           </Picker>
         </View>
 
-        <Text style={styles.label}>Category Name</Text>
+        <Text style={styles.label}>{t('category-name')}</Text>
         <TextInput
           style={styles.input}
           placeholder="Enter name..."
@@ -75,7 +78,7 @@ const CategoryCreateScreen = ({ navigation }: CreateCategoryScreenProps) => {
           </Text>
         )}
 
-        <Text style={styles.label}>Choose Color</Text>
+        <Text style={styles.label}>{t('choose-color')}</Text>
         <View style={styles.colorList}>
           {COLORS.map(c => (
             <TouchableOpacity
@@ -93,7 +96,7 @@ const CategoryCreateScreen = ({ navigation }: CreateCategoryScreenProps) => {
           ))}
         </View>
 
-        <Text style={styles.label}>Choose Icon</Text>
+        <Text style={styles.label}>{t('choose-icon')}</Text>
         <View style={styles.iconList}>
           {ICONS.map(i => (
             <TouchableOpacity
@@ -115,7 +118,7 @@ const CategoryCreateScreen = ({ navigation }: CreateCategoryScreenProps) => {
           ))}
         </View>
 
-        <ButtonCustom text="Save" onPress={form.onSubmit} />
+        <ButtonCustom text={t('save')} onPress={form.onSubmit} />
       </View>
     </View>
   );

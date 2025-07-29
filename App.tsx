@@ -6,6 +6,7 @@ import { StatusBar } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSettingsStore } from './src/stores/useSettingsStore';
 import { darkTheme, lightTheme } from './src/constants/Theme';
+import './src/config/i18n';
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);

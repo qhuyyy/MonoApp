@@ -30,6 +30,7 @@ import { HistoryStackParamList } from '../../navigations/HistoryStack';
 import { windowHeight } from '../../utils/Dimensions';
 import { useFocusEffect } from '@react-navigation/native';
 import { PAGE_SIZE } from '../../constants/Category';
+import { useTranslation } from 'react-i18next';
 
 type HistoryScreenProps = NativeStackScreenProps<
   HistoryStackParamList,
@@ -57,6 +58,8 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
   const swipeableRefs = useRef<Record<string, Swipeable | null>>({});
   const [refreshing, setRefreshing] = useState(false);
+
+  const { t } = useTranslation();
 
   // Load categories từ AsyncStorage
   useEffect(() => {
@@ -121,25 +124,33 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
   };
 
   const handleDelete = (id: string) => {
-    Alert.alert('Delete', 'Are you sure you want to delete this transaction?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => useTransactionStore.getState().deleteTransaction(id),
-      },
-    ]);
+    Alert.alert(
+      t('delete'),
+      t('are-you-sure-you-want-to-delete-this-transaction?'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('delete'),
+          style: 'destructive',
+          onPress: () => useTransactionStore.getState().deleteTransaction(id),
+        },
+      ],
+    );
   };
 
   const handleDuplicate = (id: string) => {
-    Alert.alert('Duplicate', 'Do you want to duplicate this transaction?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Duplicate',
-        style: 'default',
-        onPress: () => duplicateTransaction(id),
-      },
-    ]);
+    Alert.alert(
+      t('duplicate'),
+      t('do-you-want-to-duplicate-this-transcation?'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('duplicate'),
+          style: 'default',
+          onPress: () => duplicateTransaction(id),
+        },
+      ],
+    );
   };
 
   const handleSwipeableOpen = (id: string) => {
@@ -216,13 +227,13 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Rectangle style={StyleSheet.absoluteFillObject} />
-        <Text style={styles.headerTitle}>Transactions History</Text>
+        <Text style={styles.headerTitle}>{t('transactions-history')}</Text>
       </View>
 
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search description..."
+          placeholder={t('search-description')}
           placeholderTextColor="#999"
           value={search}
           onChangeText={setSearch}
@@ -230,7 +241,7 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
       </View>
 
       <View style={styles.filterContainer}>
-        <Text style={styles.title}>Status</Text>
+        <Text style={styles.title}>{t('status')}</Text>
         <View style={styles.filterBar}>
           <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
             {['all', 'income', 'expense'].map(type => (
@@ -255,7 +266,7 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
                     filterType === type && styles.filterTextActive,
                   ]}
                 >
-                  {type.toUpperCase()}
+                  {t(type)}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -273,11 +284,13 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
               setSortBy(next);
             }}
           >
-            <Text style={styles.sortText}>Sort: {sortBy}</Text>
+            <Text style={styles.sortText}>
+              {t('sort')}: {t(sortBy)}
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.title}>Categories</Text>
+        <Text style={styles.title}>{t('categories')}</Text>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {categories.map(cat => (
             <TouchableOpacity
@@ -299,7 +312,7 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
                   selectedCategories.includes(cat.id) && { color: '#fff' },
                 ]}
               >
-                {cat.name}
+                {t(cat.name.toLocaleLowerCase())}
               </Text>
             </TouchableOpacity>
           ))}
@@ -362,14 +375,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
-  filterContainer: { paddingHorizontal: 20 },
+  filterContainer: { paddingHorizontal: 20, justifyContent: 'space-around' },
   filterBar: { flexDirection: 'row', alignItems: 'center', marginTop: 2 },
   filterButton: {
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
     backgroundColor: '#eee',
-    marginHorizontal: 2,
+    marginHorizontal: 1,
     borderWidth: 1,
     borderColor: '#3A837B',
   },
@@ -382,7 +395,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFD54F',
     borderRadius: 20,
     marginLeft: 'auto',
-    width: 120,
+    width: 140,
     marginHorizontal: 4,
   },
   sortText: { fontWeight: 'bold', color: '#333', alignSelf: 'center' },

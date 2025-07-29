@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { windowWidth } from '../../utils/Dimensions';
 import { useCreateTransForm } from '../../hooks/useCreateTransForm';
+import { useTranslation } from 'react-i18next';
 
 type CreateTransNavigationProp = NativeStackNavigationProp<
   MainBottomTabsParamList,
@@ -31,6 +32,7 @@ function ExpenseTab() {
   const navigation = useNavigation<CreateTransNavigationProp>();
   const currency = useUserStore(state => state.currency);
   const addTransaction = useTransactionStore(state => state.addTransaction);
+  const { t } = useTranslation();
 
   const form = useCreateTransForm(
     {
@@ -57,7 +59,9 @@ function ExpenseTab() {
         {
           text: 'OK',
           onPress: () =>
-            navigation.navigate('HistoryStack', { screen: 'TransactionsHistory' }),
+            navigation.navigate('HistoryStack', {
+              screen: 'TransactionsHistory',
+            }),
         },
       ]);
       form.reset();
@@ -94,13 +98,13 @@ function ExpenseTab() {
       console.error('Failed to load income categories:', error);
     }
   };
-  
+
   useEffect(() => {
     fetchIncomeCategories();
   }, []);
 
   if (!initialCategory)
-    return <Text style={{ padding: 20 }}>Loading categories...</Text>;
+    return <Text style={{ padding: 20 }}>{t('loading-categories')}</Text>;
 
   return (
     <View style={[styles.formContainer, { borderColor: '#9A031E' }]}>
@@ -113,13 +117,13 @@ function ExpenseTab() {
           marginBottom: 10,
         }}
       >
-        Add Expense
+        {t('add-expense')}
       </Text>
 
       <FormInput
         value={form.watch('amount')}
-        placeholder={`Enter amount (${currency})`}
-        title="Amount"
+        placeholder={`${t('enter-amount')} (${currency})`}
+        title={t('amount')}
         keyboardType="numeric"
         onChangeText={text => form.setValue('amount', text)}
         error={form.formState.errors.amount?.message as string | undefined}
@@ -127,13 +131,13 @@ function ExpenseTab() {
 
       <FormInput
         value={form.watch('description')}
-        placeholder="Enter a description"
-        title="Description (optional)"
+        placeholder={`${t('enter-description')}`}
+        title={t('description-optional')}
         onChangeText={text => form.setValue('description', text)}
         error={form.formState.errors.description?.message as string | undefined}
       />
 
-      <Text style={styles.inputLabel}>Category</Text>
+      <Text style={styles.inputLabel}>{t('category')}</Text>
       <View style={styles.pickerContainer}>
         <Picker
           selectedValue={form.watch('category')?.id}
@@ -143,7 +147,11 @@ function ExpenseTab() {
           }}
         >
           {expenseCategories.map(cat => (
-            <Picker.Item key={cat.id} label={cat.name} value={cat.id} />
+            <Picker.Item
+              key={cat.id}
+              label={t(cat.name.toLocaleLowerCase())}
+              value={cat.id}
+            />
           ))}
         </Picker>
       </View>
@@ -153,10 +161,10 @@ function ExpenseTab() {
         </Text>
       )}
 
-      <Text style={styles.inputLabel}>Date</Text>
+      <Text style={[styles.inputLabel, { marginTop: 10}]}>{t('date')}</Text>
       <Pressable onPress={() => setOpenPicker(true)} style={styles.dateInput}>
         <Text style={styles.dateText}>
-          {format(form.watch('date'), 'yyyy-MM-dd')}
+          {format(form.watch('date'), 'dd-MM-yyyy')}
         </Text>
       </Pressable>
       <DatePicker
@@ -178,7 +186,7 @@ function ExpenseTab() {
       )}
 
       <View style={{ marginTop: 10 }}>
-        <ButtonCustom text="Save Transaction" onPress={form.onSubmit} />
+        <ButtonCustom text={t('save-transaction')} onPress={form.onSubmit} />
       </View>
     </View>
   );
@@ -200,6 +208,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     marginBottom: 6,
+    fontWeight: 'bold',
     fontSize: 14,
     color: '#429690',
   },

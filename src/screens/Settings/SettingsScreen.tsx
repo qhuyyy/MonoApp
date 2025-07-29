@@ -7,6 +7,7 @@ import SettingItem from '../../components/SettingItem';
 import Rectangle from '../../assets/svg/Rectangle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { SettingsStackParamList } from '../../navigations/SettingStack';
+import { useTranslation } from 'react-i18next';
 
 type SettingsScreenProp = NativeStackScreenProps<
   SettingsStackParamList,
@@ -14,6 +15,8 @@ type SettingsScreenProp = NativeStackScreenProps<
 >;
 
 const SettingsScreen = ({ navigation }: SettingsScreenProp) => {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -29,24 +32,24 @@ const SettingsScreen = ({ navigation }: SettingsScreenProp) => {
         >
           <Ionicons name="chevron-back-outline" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={styles.title}>{t('settings')}</Text>
       </View>
 
       <View style={styles.settingContainer}>
         <SettingItem
-          title="Profile"
+          title={t('profile')}
           onPress={() => navigation.navigate('Profile')}
         />
         <SettingItem
-          title="App Settings"
+          title={t('app-settings')}
           onPress={() => navigation.navigate('AppSettings')}
         />
         <SettingItem
-          title="Data Management"
+          title={t('data-management')}
           onPress={() => navigation.navigate('DataManagement')}
         />
         <SettingItem
-          title="About"
+          title={t('about')}
           onPress={() => navigation.navigate('About')}
         />
       </View>

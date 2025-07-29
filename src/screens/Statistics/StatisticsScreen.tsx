@@ -18,6 +18,9 @@ import RNFS from 'react-native-fs';
 import Papa from 'papaparse';
 import { windowHeight } from '../../utils/Dimensions';
 import { useTheme } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { MainBottomTabsParamList } from '../../navigations/MainBottomTabs';
+import { useTranslation } from 'react-i18next';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -27,12 +30,18 @@ const chartConfig = {
   color: (opacity = 1) => `rgba(63, 81, 181, ${opacity})`,
 };
 
-const StatisticsScreen = () => {
+type StatisticsScreenProp = NativeStackScreenProps<
+  MainBottomTabsParamList,
+  'Statistics'
+>;
+
+const StatisticsScreen = ({ navigation }: StatisticsScreenProp) => {
   const [chartType, setChartType] = useState<'bar' | 'line' | 'pie'>('bar');
   const [period, setPeriod] = useState<'month' | '3months' | 'year'>('3months');
   const { transactions } = useTransactionStore();
   const chartRef = useRef<ViewShot>(null);
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const cyclePeriod = () => {
     setPeriod(prev =>
       prev === 'month' ? '3months' : prev === '3months' ? 'year' : 'month',
@@ -125,7 +134,7 @@ const StatisticsScreen = () => {
         { data: incomeArr, color: () => '#4CAF50' },
         { data: expenseArr, color: () => '#FF7043' },
       ],
-      legend: ['Income', 'Expense'],
+      legend: [t('income'), t('expense')],
     };
   }, [filtered, period]);
 
@@ -135,6 +144,7 @@ const StatisticsScreen = () => {
     const expenseMap: Record<string, number> = {};
     const incomeColor: Record<string, string> = {};
     const expenseColor: Record<string, string> = {};
+
     filtered.forEach(t => {
       if (!t.category) return;
       if (t.category.status === 'income') {
@@ -147,24 +157,35 @@ const StatisticsScreen = () => {
         expenseColor[t.category.name] = t.category.color;
       }
     });
-    return {
-      incomePieData: Object.keys(incomeMap).map(key => ({
-        name: key,
-        population: incomeMap[key],
-        color: incomeColor[key] || '#ccc',
-        legendFontColor: '#7F7F7F',
-        legendFontSize: 12,
-      })),
-      expensePieData: Object.keys(expenseMap).map(key => ({
-        name: key,
-        population: expenseMap[key],
-        color: expenseColor[key] || '#ccc',
-        legendFontColor: '#7F7F7F',
-        legendFontSize: 12,
-      })),
-    };
-  }, [filtered]);
 
+    const totalIncome = Object.values(incomeMap).reduce((a, b) => a + b, 0);
+    const totalExpense = Object.values(expenseMap).reduce((a, b) => a + b, 0);
+
+    return {
+      incomePieData: Object.keys(incomeMap).map(key => {
+        const percent = totalIncome ? (incomeMap[key] / totalIncome) * 100 : 0;
+        return {
+          name: `${t(key.toLowerCase())} (${percent.toFixed(1)}%)`,
+          population: incomeMap[key],
+          color: incomeColor[key] || '#ccc',
+          legendFontColor: '#7F7F7F',
+          legendFontSize: 12,
+        };
+      }),
+      expensePieData: Object.keys(expenseMap).map(key => {
+        const percent = totalExpense
+          ? (expenseMap[key] / totalExpense) * 100
+          : 0;
+        return {
+          name: `${t(key.toLowerCase())} (${percent.toFixed(1)}%)`,
+          population: expenseMap[key],
+          color: expenseColor[key] || '#ccc',
+          legendFontColor: '#7F7F7F',
+          legendFontSize: 12,
+        };
+      }),
+    };
+  }, [filtered, t]);
   const PieLegend = ({ data }: { data: any[] }) => (
     <View style={styles.legendContainer}>
       {data.map(item => (
@@ -224,10 +245,13 @@ const StatisticsScreen = () => {
     >
       <Rectangle style={styles.rectangleBackground} />
       <View style={styles.headerContainer}>
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
           <Ionicons name="chevron-back-outline" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Statistics & Report</Text>
+        <Text style={styles.headerTitle}>{t('statistics-report')}</Text>
       </View>
       <View
         style={[
@@ -243,18 +267,18 @@ const StatisticsScreen = () => {
               onValueChange={itemValue => setChartType(itemValue)}
               dropdownIconColor="#429690"
             >
-              <Picker.Item label="Monthly Expenses" value="bar" />
-              <Picker.Item label="Income vs Expense Trend" value="line" />
-              <Picker.Item label="Category Breakdown" value="pie" />
+              <Picker.Item label={t('monthly-expenses')} value="bar" />
+              <Picker.Item label={t('income-vs-expense-trend')} value="line" />
+              <Picker.Item label={t('categories-breakdown')} value="pie" />
             </Picker>
           </View>
           <TouchableOpacity style={styles.sortButton} onPress={cyclePeriod}>
             <Text style={styles.sortText}>
               {period === 'month'
-                ? 'Time: This Month'
+                ? t('time-this-month')
                 : period === '3months'
-                ? 'Time: Last 3 Months'
-                : 'Time: This Year'}
+                ? t('time-last-3-months')
+                : t('time-this-year')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -262,10 +286,10 @@ const StatisticsScreen = () => {
         {/* Export buttons */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
           <TouchableOpacity onPress={shareChart} style={styles.exportButton}>
-            <Text style={styles.exportButtonText}>Share Graph</Text>
+            <Text style={styles.exportButtonText}>{t('share-graph')}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={exportCSV} style={styles.exportButton}>
-            <Text style={styles.exportButtonText}>Export CSV</Text>
+            <Text style={styles.exportButtonText}>{t('export-csv')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -273,7 +297,9 @@ const StatisticsScreen = () => {
           <ViewShot ref={chartRef} options={{ format: 'png', quality: 0.9 }}>
             {chartType === 'bar' && (
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>Monthly Expenses Bar Chart</Text>
+                <Text style={styles.cardTitle}>
+                  {t('monthly-expenses-bar-chart')}
+                </Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <BarChart
                     data={barData}
@@ -295,7 +321,7 @@ const StatisticsScreen = () => {
             {chartType === 'line' && (
               <View style={styles.card}>
                 <Text style={styles.cardTitle}>
-                  Income & Expense Trend Line Chart
+                  {t('income-vs-expense-trend-line-chart')}
                 </Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                   <LineChart
@@ -317,7 +343,9 @@ const StatisticsScreen = () => {
             {chartType === 'pie' && (
               <>
                 <View style={styles.card}>
-                  <Text style={styles.cardTitle}>Income by Category</Text>
+                  <Text style={styles.cardTitle}>
+                    {t('income-by-category')}
+                  </Text>
                   <PieChart
                     data={incomePieData}
                     width={200}
@@ -333,7 +361,9 @@ const StatisticsScreen = () => {
                 </View>
 
                 <View style={styles.card}>
-                  <Text style={styles.cardTitle}>Expense by Category</Text>
+                  <Text style={styles.cardTitle}>
+                    {t('expense-by-category')}
+                  </Text>
                   <PieChart
                     data={expensePieData}
                     width={200}

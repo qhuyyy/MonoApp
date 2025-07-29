@@ -11,6 +11,7 @@ import { SettingsStackParamList } from '../../navigations/SettingStack';
 import Rectangle from '../../assets/svg/Rectangle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ButtonCustom from '../../components/ButtonCustom';
+import { useTranslation } from 'react-i18next';
 
 type Props = NativeStackScreenProps<SettingsStackParamList, 'Profile'>;
 
@@ -45,6 +46,8 @@ const ProfileScreen = ({ navigation }: Props) => {
     );
   };
 
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -58,36 +61,36 @@ const ProfileScreen = ({ navigation }: Props) => {
         >
           <Ionicons name="chevron-back-outline" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.title}>Profile</Text>
+        <Text style={styles.title}>{t('profile')}</Text>
       </View>
 
       <View style={styles.formContainer}>
-        <Text style={styles.inputLabel}>Avatar:</Text>
+        <Text style={styles.inputLabel}>{t('avatar')}:</Text>
         <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
           {avatar ? (
             <Image source={{ uri: avatar }} style={styles.avatar} />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Text style={styles.avatarText}>Pick Avatar</Text>
+              <Text style={styles.avatarText}>{t('pick-avatar')}</Text>
             </View>
           )}
         </TouchableOpacity>
 
         <FormInput
-          title="Full Name:"
-          placeholder="Enter your full name"
+          title={t('fullname')}
+          placeholder={t('enter-your-fullname')}
           value={fullName}
           onChangeText={setFullName}
         />
 
         <FormInput
-          title="Email:"
-          placeholder="Enter your email"
+          title={t('email')}
+          placeholder={t('enter-your-email')}
           value={email}
           onChangeText={setEmail}
         />
 
-        <Text style={styles.inputLabel}>Preferred Currency:</Text>
+        <Text style={styles.inputLabel}>{t('preferred-currency')}</Text>
 
         <View style={styles.pickerContainer}>
           <Picker
@@ -95,10 +98,10 @@ const ProfileScreen = ({ navigation }: Props) => {
             onValueChange={setCurrency}
             style={styles.picker}
           >
-            <Picker.Item label="VND - Vietnamese Dong" value="VND" />
-            <Picker.Item label="USD - US Dollar" value="USD" />
-            <Picker.Item label="EUR - Euro" value="EUR" />
-            <Picker.Item label="JPY - Japanese Yen" value="JPY" />
+            <Picker.Item label={t('vnd-vietnamese-dong')} value="VND" />
+            <Picker.Item label={t('usd-us-dollar')} value="USD" />
+            <Picker.Item label={t('eur-euro')} value="EUR" />
+            <Picker.Item label={t('jpy-japanese-yen')} value="JPY" />
           </Picker>
         </View>
 
