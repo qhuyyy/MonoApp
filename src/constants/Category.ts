@@ -32,4 +32,3 @@ export const ICONS = [
   'heart-circle-outline',
 ];
 
-export const PAGE_SIZE = 6;

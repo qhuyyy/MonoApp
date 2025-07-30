@@ -192,5 +192,7 @@
   "date-future": "Date cannot be in the future",
   "date-required": "Please select a date",
   "type-invalid": "Invalid transaction type",
-  "type-required": "Please select a transaction type"
+  "type-required": "Please select a transaction type",
+
+  "clear-history": "Clear History"
 }

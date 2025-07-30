@@ -236,17 +236,20 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
           <Text style={{ color: '#429690', fontWeight: 'bold' }}>
             {t('pick-image-optional')}
           </Text>
-          <TouchableOpacity
-            style={{
-              marginRight: 5,
-              alignItems: 'center',
-            }}
-            onPress={() => {
-              setValue('image', '');
-            }}
-          >
-            <Ionicons name="close-circle-outline" size={20} color="red" />
-          </TouchableOpacity>
+
+          { watch('image') ? ( // <-- chỉ hiển thị khi có ảnh
+            <TouchableOpacity
+              style={{
+                marginRight: 5,
+                alignItems: 'center',
+              }}
+              onPress={() => {
+                setValue('image', '');
+              }}
+            >
+              <Ionicons name="close-circle-outline" size={20} color="red" />
+            </TouchableOpacity>
+          ) : null}
         </View>
 
         <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>

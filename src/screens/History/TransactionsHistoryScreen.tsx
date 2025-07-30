@@ -16,6 +16,7 @@ import {
   TouchableOpacity,
   Animated,
   RefreshControl,
+  Keyboard,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,8 +30,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HistoryStackParamList } from '../../navigations/HistoryStack';
 import { windowHeight } from '../../utils/Dimensions';
 import { useFocusEffect } from '@react-navigation/native';
-import { PAGE_SIZE } from '../../constants/Category';
 import { useTranslation } from 'react-i18next';
+import { MAX_HISTORY, PAGE_SIZE } from '../../constants/Transactions';
 
 type HistoryScreenProps = NativeStackScreenProps<
   HistoryStackParamList,
@@ -60,6 +61,25 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const [refreshing, setRefreshing] = useState(false);
 
   const { t } = useTranslation();
+
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('search-history').then(stored => {
+      if (stored) setSearchHistory(JSON.parse(stored));
+    });
+  }, []);
+
+  const addSearchHistory = async (keyword: string) => {
+    if (!keyword.trim()) return;
+    const updated = [
+      keyword,
+      ...searchHistory.filter(k => k !== keyword),
+    ].slice(0, MAX_HISTORY);
+    setSearchHistory(updated);
+    await AsyncStorage.setItem('search-history', JSON.stringify(updated));
+  };
 
   // Load categories từ AsyncStorage
   useEffect(() => {
@@ -231,13 +251,50 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
       </View>
 
       <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder={t('search-description')}
-          placeholderTextColor="#999"
-          value={search}
-          onChangeText={setSearch}
-        />
+        <View style={{ position: 'relative' }}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder={t('search-description')}
+            placeholderTextColor="#999"
+            value={search}
+            onChangeText={text => setSearch(text)}
+            onFocus={() => setShowDropdown(true)}
+            onSubmitEditing={() => {
+              addSearchHistory(search);
+              setShowDropdown(false);
+              Keyboard.dismiss();
+            }}
+          />
+          {showDropdown && !search && searchHistory.length > 0 && (
+            <View style={styles.dropdownContainer}>
+              {searchHistory.map((item, idx) => (
+                <TouchableOpacity
+                  key={idx}
+                  style={styles.dropdownItem}
+                  onPress={() => {
+                    setSearch(item);
+                    setShowDropdown(false);
+                  }}
+                >
+                  <Text style={styles.dropdownText}>{item}</Text>
+                </TouchableOpacity>
+              ))}
+
+              <TouchableOpacity
+                style={styles.dropdownClearButton}
+                onPress={async () => {
+                  await AsyncStorage.removeItem('search-history');
+                  setSearchHistory([]);
+                  setShowDropdown(false);
+                }}
+              >
+                <Text style={styles.dropdownClearText}>
+                  {t('clear-history')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
       </View>
 
       <View style={styles.filterContainer}>
@@ -440,4 +497,36 @@ const styles = StyleSheet.create({
   },
   chipSelected: { backgroundColor: '#429690' },
   chipText: { marginLeft: 5, color: '#429690', fontWeight: '600' },
+  dropdownContainer: {
+    position: 'absolute',
+    top: 44,
+    left: 0,
+    right: 0,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    paddingVertical: 4,
+    zIndex: 100,
+    elevation: 5,
+  },
+  dropdownItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  dropdownClearButton: {
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderTopWidth: 1,
+    borderColor: '#ccc',
+  },
+  dropdownClearText: {
+    fontSize: 14,
+    color: '#d00',
+    fontWeight: 'bold',
+  },
 });

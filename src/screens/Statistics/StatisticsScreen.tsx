@@ -307,11 +307,11 @@ const StatisticsScreen = () => {
                     data={barData}
                     width={Math.max(
                       screenWidth - 40,
-                      barData.labels.length * 60,
+                      barData.labels.length * 60 + 50,
                     )}
                     height={260}
                     fromZero
-                    yAxisLabel="$"
+                    yAxisLabel=""
                     yAxisSuffix=""
                     chartConfig={chartConfig}
                     style={styles.chart}
@@ -334,7 +334,7 @@ const StatisticsScreen = () => {
                     )}
                     height={260}
                     chartConfig={chartConfig}
-                    yAxisLabel="$"
+                    yAxisLabel=""
                     bezier
                     style={styles.chart}
                   />

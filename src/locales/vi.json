@@ -192,5 +192,7 @@
   "date-future": "Ngày không thể ở tương lai",
   "date-required": "Vui lòng chọn ngày",
   "type-invalid": "Loại giao dịch không hợp lệ",
-  "type-required": "Vui lòng chọn loại giao dịch"
+  "type-required": "Vui lòng chọn loại giao dịch",
+
+  "clear-history": "Xoá lịch sử"
 }
