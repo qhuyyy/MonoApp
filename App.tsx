@@ -15,13 +15,13 @@ const App = () => {
 
   useEffect(() => {
     loadSettings();
-    // const timer = setTimeout(() => setIsLoading(false), 3000);
-    // return () => clearTimeout(timer);
+    const timer = setTimeout(() => setIsLoading(false), 3000);
+    return () => clearTimeout(timer);
   }, []);
 
-  // if (isLoading) {
-  //   return <SplashScreen />; // giữ splash screen
-  // }
+  if (isLoading) {
+    return <SplashScreen />;
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

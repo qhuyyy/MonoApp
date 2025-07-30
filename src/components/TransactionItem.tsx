@@ -5,6 +5,8 @@ import { Transaction } from '../types/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { useUserStore } from '../stores/useUserStore';
+import { currencySymbols } from '../constants/Transactions';
 
 type TransactionItemProps = {
   transaction: Transaction;
@@ -16,6 +18,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
 
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { currency } = useUserStore();
   const { amount, category, description, date, updated_at } = transaction;
 
   let displayDate = '';
@@ -29,8 +32,9 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
   }
 
   const formattedDate = date ? format(new Date(date), 'dd/MM/yyyy') : '';
-
   const isIncome = category.status === 'income';
+
+  const currencySymbol = currencySymbols[currency] || currency;
 
   return (
     <TouchableOpacity
@@ -52,12 +56,14 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
         >
           {description ? description : t('no-description-yet')}
         </Text>
-        <Text style={styles.timeText}>{t('last-updated')} {displayDate}</Text>
+        <Text style={styles.timeText}>
+          {t('last-updated')} {displayDate}
+        </Text>
       </View>
 
       <View style={styles.amountContainer}>
         <Text style={[styles.amount, { color: isIncome ? 'green' : 'red' }]}>
-          {isIncome ? '+' : '-'} ${amount.toFixed(2)}
+          {isIncome ? '+' : '-'} {amount.toFixed(2)} {currencySymbol}
         </Text>
       </View>
     </TouchableOpacity>

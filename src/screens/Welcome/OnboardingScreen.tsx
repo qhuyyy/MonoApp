@@ -26,7 +26,12 @@ const CustomDot = ({ selected }: { selected: boolean }) => (
   />
 );
 
-const SkipButton = ({ ...props }: { onPress: () => void; [key: string]: any }) => {
+const SkipButton = ({
+  ...props
+}: {
+  onPress: () => void;
+  [key: string]: any;
+}) => {
   const { t } = useTranslation();
   return (
     <TouchableOpacity style={{ marginLeft: 16 }} {...props}>
@@ -38,7 +43,9 @@ const SkipButton = ({ ...props }: { onPress: () => void; [key: string]: any }) =
 // Ẩn nút Next và Done bằng cách trả về null
 const HiddenButton = () => null;
 
-export default function OnboardingScreen({ navigation }: OnboardingScreenProps) {
+export default function OnboardingScreen({
+  navigation,
+}: OnboardingScreenProps) {
   const { t } = useTranslation();
 
   const onboardingPages = [
@@ -71,7 +78,9 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
       ),
       title: <Text style={styles.title}>{t('track-income-expenses')}</Text>,
       subtitle: (
-        <Text style={styles.subtitle}>{t('track-income-expenses-subtitle')}</Text>
+        <Text style={styles.subtitle}>
+          {t('track-income-expenses-subtitle')}
+        </Text>
       ),
     },
     {
@@ -119,8 +128,11 @@ export default function OnboardingScreen({ navigation }: OnboardingScreenProps) 
     <View style={styles.container}>
       <Onboarding
         pages={onboardingPages}
-        SkipButtonComponent={(props) => (
-          <SkipButton {...props} onPress={() => navigation.navigate('GetStarted')} />
+        SkipButtonComponent={props => (
+          <SkipButton
+            {...props}
+            onPress={() => navigation.navigate('GetStarted')}
+          />
         )}
         NextButtonComponent={HiddenButton}
         DoneButtonComponent={HiddenButton}

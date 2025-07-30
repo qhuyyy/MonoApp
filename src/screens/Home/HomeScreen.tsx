@@ -14,7 +14,7 @@ import {
   Dimensions,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { LineChart } from 'react-native-chart-kit';
+import { BarChart, LineChart } from 'react-native-chart-kit';
 import Rectangle from '../../assets/svg/Rectangle';
 import TransactionItem from '../../components/TransactionItem';
 import { useUserStore } from '../../stores/useUserStore';
@@ -25,6 +25,8 @@ import { useNavigation, useTheme } from '@react-navigation/native';
 import { Transaction } from '../../types/types';
 import { ScrollView, Swipeable } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
+import { Line } from 'react-native-svg';
+import { currencySymbols } from '../../constants/Transactions';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -34,7 +36,9 @@ export default function HomeScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { currency } = useUserStore();
 
+  const currencySymbol = currencySymbols[currency] || currency;
   const fullName = useUserStore(state => state.fullName);
 
   const transactions = useTransactionStore(state => state.transactions);
@@ -64,7 +68,6 @@ export default function HomeScreen() {
 
   const totalBalance = income - expense;
 
-  // Chi tiêu hôm nay
   const todayExpense = useMemo(() => {
     const today = new Date().toDateString();
     return transactions
@@ -115,14 +118,18 @@ export default function HomeScreen() {
   }, [transactions]);
 
   const handleDelete = (id: string) => {
-    Alert.alert(t('delete'), t('are-you-sure-you-want-to-delete-this-transaction?'), [
-      { text: t('cancel'), style: 'cancel' },
-      {
-        text: t('delete'),
-        style: 'destructive',
-        onPress: () => deleteTransaction(id),
-      },
-    ]);
+    Alert.alert(
+      t('delete'),
+      t('are-you-sure-you-want-to-delete-this-transaction?'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('delete'),
+          style: 'destructive',
+          onPress: () => deleteTransaction(id),
+        },
+      ],
+    );
   };
 
   const renderRightActions =
@@ -263,7 +270,7 @@ export default function HomeScreen() {
                 { fontSize: 30, fontWeight: 'bold' },
               ]}
             >
-              $ {totalBalance.toFixed(2)}
+              {totalBalance.toFixed(2)} {currencySymbol}  
             </Text>
             <View style={styles.incomeExpense}>
               <View>
@@ -283,7 +290,7 @@ export default function HomeScreen() {
                     { fontWeight: 'bold', fontSize: 20 },
                   ]}
                 >
-                  $ {income.toFixed(2)}
+                  {income.toFixed(2)} {currencySymbol}
                 </Text>
               </View>
               <View>
@@ -303,7 +310,7 @@ export default function HomeScreen() {
                     { fontWeight: 'bold', fontSize: 20 },
                   ]}
                 >
-                  $ {expense.toFixed(2)}
+                  {expense.toFixed(2)} {currencySymbol}
                 </Text>
               </View>
             </View>
@@ -314,13 +321,13 @@ export default function HomeScreen() {
             <View style={[styles.quickCard, { backgroundColor: '#EB9486' }]}>
               <Text style={[styles.quickLabel]}>{t('today_expense')}</Text>
               <Text style={[styles.quickValue]}>
-                ${todayExpense.toFixed(2)}
+                {todayExpense.toFixed(2)} {currencySymbol}
               </Text>
             </View>
             <View style={[styles.quickCard, { backgroundColor: '#FF9F1C' }]}>
               <Text style={[styles.quickLabel]}>{t('month_expense')}</Text>
               <Text style={[styles.quickValue]}>
-                ${monthExpense.toFixed(2)}
+                {monthExpense.toFixed(2)} {currencySymbol}
               </Text>
             </View>
           </View>
@@ -330,7 +337,30 @@ export default function HomeScreen() {
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('seven_day_expense_trend')}
             </Text>
-            {/* ...existing code... */}
+            <LineChart
+              data={chartData}
+              width={screenWidth - 40} // padding left/right = 20
+              height={220}
+              yAxisLabel=""
+              chartConfig={{
+                backgroundColor: '#ffffff',
+                backgroundGradientFrom: '#ffffff',
+                backgroundGradientTo: '#ffffff',
+                decimalPlaces: 2,
+                color: (opacity = 1) => `rgba(255, 112, 67, ${opacity})`, // màu cam
+                labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+                propsForDots: {
+                  r: '5',
+                  strokeWidth: '2',
+                  stroke: '#FF7043',
+                },
+              }}
+              bezier
+              style={{
+                marginVertical: 8,
+                borderRadius: 16,
+              }}
+            />
           </View>
 
           {/* Title */}

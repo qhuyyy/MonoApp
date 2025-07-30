@@ -243,7 +243,7 @@ const StatisticsScreen = () => {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ flexGrow: 1 }}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 50  }}
     >
       <Rectangle style={styles.rectangleBackground} />
       <View style={styles.headerContainer}>
@@ -295,7 +295,7 @@ const StatisticsScreen = () => {
           </TouchableOpacity>
         </View>
 
-        <ScrollView style={{ minHeight: windowHeight - 140 }}>
+        <View style={{ minHeight: windowHeight - 140 }}>
           <ViewShot ref={chartRef} options={{ format: 'png', quality: 0.9 }}>
             {chartType === 'bar' && (
               <View style={styles.card}>
@@ -382,7 +382,7 @@ const StatisticsScreen = () => {
               </>
             )}
           </ViewShot>
-        </ScrollView>
+        </View>
       </View>
     </ScrollView>
   );

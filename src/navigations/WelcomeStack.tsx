@@ -20,7 +20,7 @@ export function WelcomeStack() {
       <Stack.Screen
         name="GetStarted"
         component={GetStartedScreen}
-        // options={{ headerShown: false }}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );

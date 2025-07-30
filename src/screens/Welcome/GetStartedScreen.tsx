@@ -48,6 +48,7 @@ const GetStartedScreen = ({ navigation }: Props) => {
       <Text style={styles.subTitle}>{t('we-need-your-information')}</Text>
 
       <View style={styles.formContainer}>
+        <Text style={styles.inputLabel}>{t('avatar')}</Text>
         <TouchableOpacity onPress={pickImage} style={styles.avatarContainer}>
           {avatar ? (
             <Image source={{ uri: avatar }} style={styles.avatar} />
