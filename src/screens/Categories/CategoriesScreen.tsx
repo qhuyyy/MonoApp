@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -6,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Rectangle from '../../assets/svg/Rectangle';
 import CategoryItem from '../../components/CategoryItem';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -25,80 +26,96 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { categories, loadCategories } = useCategoryStore();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadCategories();
+    const fetchData = async () => {
+      setLoading(true);
+      await loadCategories();
+      setLoading(false);
+    };
+    fetchData();
   }, []);
 
   useFocusEffect(
     useCallback(() => {
-      loadCategories();
+      const fetchFocus = async () => {
+        setLoading(true);
+        await loadCategories();
+        setLoading(false);
+      };
+      fetchFocus();
     }, []),
   );
-
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Rectangle style={StyleSheet.absoluteFillObject} />
-      </View>
-
-      <View style={styles.titleContainer}>
-        <View>
-          <Text style={[styles.title]}>{t('categories')}</Text>
-          <Text style={styles.subTitle}>
-            {t('press-into-the-categories-to-edit-or-delete!')}
-          </Text>
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#fff" />
         </View>
+      ) : (
+        <>
+          <View style={styles.header}>
+            <Rectangle style={StyleSheet.absoluteFillObject} />
+          </View>
+          <View style={styles.titleContainer}>
+            <View>
+              <Text style={[styles.title]}>{t('categories')}</Text>
+              <Text style={styles.subTitle}>
+                {t('press-into-the-categories-to-edit-or-delete!')}
+              </Text>
+            </View>
 
-        <TouchableOpacity
-          style={styles.addIcon}
-          onPress={() => navigation.navigate('CategoryCreate')}
-        >
-          <Ionicons name="add-circle-outline" size={30} color="#fff" />
-        </TouchableOpacity>
-      </View>
+            <TouchableOpacity
+              style={styles.addIcon}
+              onPress={() => navigation.navigate('CategoryCreate')}
+            >
+              <Ionicons name="add-circle-outline" size={30} color="#fff" />
+            </TouchableOpacity>
+          </View>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <View style={styles.sectionContainer}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                {t('income')}
+              </Text>
+              {categories.filter(c => c.status === 'income').length === 0 && (
+                <Text style={styles.emptyText}>{t('no-income')}</Text>
+              )}
+              {categories
+                .filter(cat => cat.status === 'income')
+                .map((item, index) => (
+                  <CategoryItem
+                    key={item.id ?? index}
+                    category={item}
+                    onPress={() =>
+                      navigation.navigate('CategoryEdit', { category: item })
+                    }
+                  />
+                ))}
+            </View>
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            {t('income')}
-          </Text>
-          {categories.filter(c => c.status === 'income').length === 0 && (
-            <Text style={styles.emptyText}>{t('no-income')}</Text>
-          )}
-          {categories
-            .filter(cat => cat.status === 'income')
-            .map((item, index) => (
-              <CategoryItem
-                key={item.id ?? index}
-                category={item}
-                onPress={() =>
-                  navigation.navigate('CategoryEdit', { category: item })
-                }
-              />
-            ))}
-        </View>
-
-        <View style={styles.sectionContainer}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            {t('expense')}
-          </Text>
-          {categories.filter(c => c.status === 'expense').length === 0 && (
-            <Text style={styles.emptyText}>{t('no-expense')}</Text>
-          )}
-          {categories
-            .filter(cat => cat.status === 'expense')
-            .map((item, index) => (
-              <CategoryItem
-                key={item.id ?? index}
-                category={item}
-                onPress={() =>
-                  navigation.navigate('CategoryEdit', { category: item })
-                }
-              />
-            ))}
-        </View>
-      </ScrollView>
+            <View style={styles.sectionContainer}>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                {t('expense')}
+              </Text>
+              {categories.filter(c => c.status === 'expense').length === 0 && (
+                <Text style={styles.emptyText}>{t('no-expense')}</Text>
+              )}
+              {categories
+                .filter(cat => cat.status === 'expense')
+                .map((item, index) => (
+                  <CategoryItem
+                    key={item.id ?? index}
+                    category={item}
+                    onPress={() =>
+                      navigation.navigate('CategoryEdit', { category: item })
+                    }
+                  />
+                ))}
+            </View>
+          </ScrollView>
+        </>
+      )}
     </View>
   );
 };
@@ -175,5 +192,11 @@ const styles = StyleSheet.create({
     color: '#ccc',
     fontSize: 16,
     marginLeft: 5,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#3A837B',
   },
 });

@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import FormInput from '../../components/FormInput';
 import { Picker } from '@react-native-picker/picker';
@@ -44,6 +45,8 @@ function ExpenseTab() {
   const addTransaction = useTransactionStore(state => state.addTransaction);
   const { t } = useTranslation();
 
+  const [submitting, setSubmitting] = useState(false);
+
   const form = useCreateTransForm(
     {
       amount: '',
@@ -54,27 +57,37 @@ function ExpenseTab() {
       image: '',
     },
     async values => {
-      const now = new Date().toISOString();
-      await addTransaction({
-        id: uuid.v4().toString(),
-        amount: parseFloat(values.amount),
-        description: values.description,
-        image: values.image,
-        category: values.category,
-        date: values.date.toISOString(),
-        created_at: now,
-        updated_at: now,
-      });
-      Alert.alert('Success', 'Transaction created successfully', [
-        {
-          text: 'OK',
-          onPress: () =>
-            navigation.navigate('HistoryStack', {
-              screen: 'TransactionsHistory',
-            }),
-        },
-      ]);
-      form.reset();
+      setSubmitting(true);
+      try {
+        const now = new Date().toISOString();
+        await addTransaction({
+          id: uuid.v4().toString(),
+          amount: parseFloat(values.amount),
+          description: values.description,
+          image: values.image || image,
+          category: values.category,
+          date: values.date.toISOString(),
+          created_at: now,
+          updated_at: now,
+        });
+
+        Alert.alert('Success', 'Transaction created successfully', [
+          {
+            text: 'OK',
+            onPress: () =>
+              navigation.navigate('HistoryStack', {
+                screen: 'TransactionsHistory',
+              }),
+          },
+        ]);
+
+        form.reset();
+      } catch (e) {
+        console.error(e);
+        Alert.alert('Error', 'Failed to create transaction');
+      } finally {
+        setSubmitting(false);
+      }
     },
   );
 
@@ -247,7 +260,11 @@ function ExpenseTab() {
       </ScrollView>
 
       <View style={{ marginTop: 10 }}>
-        <ButtonCustom text={t('save-transaction')} onPress={form.onSubmit} />
+        {submitting ? (
+          <ActivityIndicator size="large" color="#429690" />
+        ) : (
+          <ButtonCustom text={t('save-transaction')} onPress={form.onSubmit} />
+        )}
       </View>
     </View>
   );

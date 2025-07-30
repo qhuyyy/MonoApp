@@ -8,9 +8,8 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
-import Rectangle from '../../assets/svg/Rectangle';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import FormInput from '../../components/FormInput';
 import { Picker } from '@react-native-picker/picker';
 import { format } from 'date-fns';
@@ -46,6 +45,8 @@ function IncomeTab() {
   const addTransaction = useTransactionStore(state => state.addTransaction);
   const { t } = useTranslation();
 
+  const [submitting, setSubmitting] = useState(false);
+
   const form = useCreateTransForm(
     {
       amount: '',
@@ -56,29 +57,37 @@ function IncomeTab() {
       image: '',
     },
     async values => {
-      const now = new Date().toISOString();
-      await addTransaction({
-        id: uuid.v4().toString(),
-        amount: parseFloat(values.amount),
-        description: values.description,
-        image: values.image || image,
-        category: values.category,
-        date: values.date.toISOString(),
-        created_at: now,
-        updated_at: now,
-      });
+      setSubmitting(true);
+      try {
+        const now = new Date().toISOString();
+        await addTransaction({
+          id: uuid.v4().toString(),
+          amount: parseFloat(values.amount),
+          description: values.description,
+          image: values.image || image,
+          category: values.category,
+          date: values.date.toISOString(),
+          created_at: now,
+          updated_at: now,
+        });
 
-      Alert.alert('Success', 'Transaction created successfully', [
-        {
-          text: 'OK',
-          onPress: () =>
-            navigation.navigate('HistoryStack', {
-              screen: 'TransactionsHistory',
-            }),
-        },
-      ]);
+        Alert.alert('Success', 'Transaction created successfully', [
+          {
+            text: 'OK',
+            onPress: () =>
+              navigation.navigate('HistoryStack', {
+                screen: 'TransactionsHistory',
+              }),
+          },
+        ]);
 
-      form.reset();
+        form.reset();
+      } catch (e) {
+        console.error(e);
+        Alert.alert('Error', 'Failed to create transaction');
+      } finally {
+        setSubmitting(false);
+      }
     },
   );
 
@@ -243,7 +252,11 @@ function IncomeTab() {
       </ScrollView>
 
       <View style={{ marginTop: 10 }}>
-        <ButtonCustom text={t('save-transaction')} onPress={form.onSubmit} />
+        {submitting ? (
+          <ActivityIndicator size="large" color="#429690" />
+        ) : (
+          <ButtonCustom text={t('save-transaction')} onPress={form.onSubmit} />
+        )}
       </View>
     </View>
   );
