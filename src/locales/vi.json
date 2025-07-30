@@ -170,5 +170,27 @@
   "feature-categorize": "Phân loại giao dịch của bạn",
   "feature-report": "Xem biểu đồ và báo cáo chi tiết",
   "feature-export": "Xuất và nhập dữ liệu dưới dạng JSON",
-  "feature-multi-lang": "Hỗ trợ đa ngôn ngữ"
+  "feature-multi-lang": "Hỗ trợ đa ngôn ngữ",
+
+  "pick-image": "Chọn ảnh",
+  "pick-image-optional": "Chọn ảnh (không bắt buộc)",
+  "name-too-short": "Tên quá ngắn",
+  "name-too-long": "Tên quá dài",
+  "name-required": "Tên là bắt buộc",
+  "status-invalid": "Trạng thái không hợp lệ",
+  "status-required": "Trạng thái là bắt buộc",
+  "color-required": "Màu là bắt buộc",
+  "icon-required": "Biểu tượng là bắt buộc",
+  "amount-number": "Số tiền phải là số",
+  "amount-positive": "Số tiền phải lớn hơn 0",
+  "amount-too-large": "Số tiền quá lớn",
+  "amount-required": "Vui lòng nhập số tiền",
+  "category-required": "Vui lòng chọn danh mục",
+  "category-invalid": "Danh mục đã chọn không hợp lệ",
+  "category-name-required": "Tên danh mục là bắt buộc",
+  "description-too-long": "Mô tả quá dài",
+  "date-future": "Ngày không thể ở tương lai",
+  "date-required": "Vui lòng chọn ngày",
+  "type-invalid": "Loại giao dịch không hợp lệ",
+  "type-required": "Vui lòng chọn loại giao dịch"
 }

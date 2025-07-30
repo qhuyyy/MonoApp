@@ -170,5 +170,27 @@
   "feature-categorize": "Categorize your transactions",
   "feature-report": "View insightful charts and reports",
   "feature-export": "Export and import data as JSON",
-  "feature-multi-lang": "Multi-language support"
+  "feature-multi-lang": "Multi-language support",
+
+  "pick-image": "Pick Image",
+  "pick-image-optional": "Pick Image (optional)",
+  "name-too-short": "Name is too short",
+  "name-too-long": "Name is too long",
+  "name-required": "Name is required",
+  "status-invalid": "Invalid status",
+  "status-required": "Status is required",
+  "color-required": "Color is required",
+  "icon-required": "Icon is required",
+  "amount-number": "Amount must be a number",
+  "amount-positive": "Amount must be greater than 0",
+  "amount-too-large": "Amount is too large",
+  "amount-required": "Please enter the amount",
+  "category-required": "Please select a category",
+  "category-invalid": "Invalid category selected",
+  "category-name-required": "Category name is required",
+  "description-too-long": "Description is too long",
+  "date-future": "Date cannot be in the future",
+  "date-required": "Please select a date",
+  "type-invalid": "Invalid transaction type",
+  "type-required": "Please select a transaction type"
 }

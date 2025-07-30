@@ -41,7 +41,7 @@ export const useEditTransactionForm = (transaction: Transaction) => {
       category: data.category,
       date: data.date.toISOString(),
       updated_at: new Date().toISOString(),
-      image: data.image || '',
+      image: data.image ?? transaction.image ?? '',
     });
   };
 

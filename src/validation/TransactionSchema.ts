@@ -1,24 +1,25 @@
 import * as yup from 'yup';
+import i18n from '../config/i18n';
 
 export const transactionSchema = yup.object({
   amount: yup
     .number()
-    .typeError('Amount must be a number')
-    .positive('Amount must be greater than 0')
-    .max(999999999, 'Amount is too large')
-    .required('Please enter the amount'),
+    .typeError(i18n.t('amount-number'))
+    .positive(i18n.t('amount-positive'))
+    .max(999999999, i18n.t('amount-too-large'))
+    .required(i18n.t('amount-required')),
 
   category: yup
     .object({
-      name: yup.string().required('Category name is required'),
+      name: yup.string().required(i18n.t('category-name-required')),
       status: yup.string().oneOf(['income', 'expense']),
     })
-    .required('Please select a category')
-    .typeError('Invalid category selected'),
+    .required(i18n.t('category-required'))
+    .typeError(i18n.t('category-invalid')),
 
   description: yup
     .string()
-    .max(255, 'Description is too long')
+    .max(255, i18n.t('description-too-long'))
     .optional(),
 
   date: yup
@@ -26,18 +27,13 @@ export const transactionSchema = yup.object({
     .transform((value, originalValue) => {
       return originalValue ? new Date(originalValue) : value;
     })
-    .max(
-      new Date(new Date().setHours(23, 59, 59, 999)),
-      'Date cannot be in the future'
-    )
-    .required('Please select a date'),
+    .max(new Date(new Date().setHours(23, 59, 59, 999)), i18n.t('date-future'))
+    .required(i18n.t('date-required')),
 
   type: yup
     .string()
-    .oneOf(['income', 'expense'], 'Invalid transaction type')
-    .required('Please select a transaction type'),
+    .oneOf(['income', 'expense'], i18n.t('type-invalid'))
+    .required(i18n.t('type-required')),
 
-  image: yup
-    .string()
-    .nullable(),
+  image: yup.string().nullable(),
 });

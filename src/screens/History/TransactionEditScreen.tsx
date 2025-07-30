@@ -6,11 +6,11 @@ import {
   Pressable,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DatePicker from 'react-native-date-picker';
 import { format } from 'date-fns';
-import { Controller } from 'react-hook-form';
 
 import Rectangle from '../../assets/svg/Rectangle';
 import ButtonCustom from '../../components/ButtonCustom';
@@ -25,11 +25,15 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { useEditTransactionForm } from '../../hooks/useEditTransForm';
 import { useTheme } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
+import { ScrollView } from 'react-native-gesture-handler';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { windowWidth } from '../../utils/Dimensions';
 
 type Props = NativeStackScreenProps<HistoryStackParamList, 'TransactionEdit'>;
 
 const TransactionEditScreen = ({ navigation, route }: Props) => {
   const { transaction } = route.params;
+  const [image, setImage] = useState<string | null>(transaction.image || null);
   const { colors } = useTheme();
   const { t } = useTranslation();
   const [openPicker, setOpenPicker] = useState(false);
@@ -67,17 +71,30 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
   };
 
   const confirmDelete = () => {
-    Alert.alert(t('delete-transaction'), t('are-you-sure-you-want-to-delete-this-transaction?'), [
-      { text: t('cancel'), style: 'cancel' },
-      {
-        text: t('delete'),
-        style: 'destructive',
-        onPress: async () => {
-          await handleDelete();
-          navigation.navigate('TransactionsHistory');
+    Alert.alert(
+      t('delete-transaction'),
+      t('are-you-sure-you-want-to-delete-this-transaction?'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('delete'),
+          style: 'destructive',
+          onPress: async () => {
+            await handleDelete();
+            navigation.navigate('TransactionsHistory');
+          },
         },
-      },
-    ]);
+      ],
+    );
+  };
+
+  const pickImage = () => {
+    launchImageLibrary({ mediaType: 'photo', selectionLimit: 1 }, response => {
+      const uri = response.assets?.[0]?.uri;
+      if (!response.didCancel && uri) {
+        setValue('image', uri);
+      }
+    });
   };
 
   useEffect(() => {
@@ -96,7 +113,11 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t('edit-transaction')}</Text>
       </View>
-      <View style={styles.form}>
+      <ScrollView
+        style={styles.form}
+        contentContainerStyle={{ paddingBottom: 40 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Status */}
         <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <Text style={styles.inputLabel}>{t('status')}:</Text>
@@ -183,7 +204,7 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
         </View>
 
         {/* Date */}
-        <Text style={{ color: '#429690', fontWeight: 'bold' }}>
+        <Text style={{ color: '#429690', fontWeight: 'bold', marginBottom: 5 }}>
           {t('date')}
         </Text>
         <Pressable onPress={() => setOpenPicker(true)} style={styles.dropdown}>
@@ -204,13 +225,47 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
           onCancel={() => setOpenPicker(false)}
         />
 
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: 2,
+          }}
+        >
+          <Text style={{ color: '#429690', fontWeight: 'bold' }}>
+            {t('pick-image-optional')}
+          </Text>
+          <TouchableOpacity
+            style={{
+              marginRight: 5,
+              alignItems: 'center',
+            }}
+            onPress={() => {
+              setValue('image', '');
+            }}
+          >
+            <Ionicons name="close-circle-outline" size={20} color="red" />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+          {watch('image') ? (
+            <Image source={{ uri: watch('image') }} style={styles.image} />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Text style={styles.imageText}>{t('pick-image')}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
         <View style={{ marginTop: 10 }}>
           <ButtonCustom text={t('update')} onPress={handleSubmit(onSubmit)} />
         </View>
         <View style={{ marginTop: 10 }}>
           <OutlineButtonCustom text={t('delete')} onPress={confirmDelete} />
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -228,6 +283,7 @@ const styles = StyleSheet.create({
     gap: 10,
     borderWidth: 1,
     marginTop: 90,
+    maxHeight: 700,
   },
   headerContent: {
     position: 'relative',
@@ -272,5 +328,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 8,
+  },
+  imageContainer: {
+    alignSelf: 'center',
+    marginBottom: 5,
+  },
+  image: {
+    width: windowWidth - 70,
+    height: 250,
+    borderRadius: 10,
+    resizeMode: 'cover',
+    borderWidth: 1,
+  },
+  imagePlaceholder: {
+    width: windowWidth - 70,
+    height: 250,
+    borderRadius: 10,
+    backgroundColor: '#ccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageText: {
+    color: '#fff',
+    fontSize: 12,
   },
 });

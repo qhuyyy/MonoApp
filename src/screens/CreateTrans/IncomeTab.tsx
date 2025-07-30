@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Alert,
+  TouchableOpacity,
+  Image,
+  ScrollView,
+} from 'react-native';
 import Rectangle from '../../assets/svg/Rectangle';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import FormInput from '../../components/FormInput';
@@ -19,6 +28,8 @@ import { useCreateTransForm } from '../../hooks/useCreateTransForm';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MainBottomTabsParamList } from '../../navigations/MainBottomTabs';
 import { useTranslation } from 'react-i18next';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { windowWidth } from '../../utils/Dimensions';
 
 type CreateTransNavigationProp = NativeStackNavigationProp<
   MainBottomTabsParamList,
@@ -29,7 +40,7 @@ function IncomeTab() {
   const [openPicker, setOpenPicker] = useState(false);
   const [incomeCategories, setIncomeCategories] = useState<Category[]>([]);
   const [initialCategory, setInitialCategory] = useState<Category | null>(null);
-
+  const [image, setImage] = useState<string | null>(null);
   const navigation = useNavigation<CreateTransNavigationProp>();
   const currency = useUserStore(state => state.currency);
   const addTransaction = useTransactionStore(state => state.addTransaction);
@@ -50,12 +61,13 @@ function IncomeTab() {
         id: uuid.v4().toString(),
         amount: parseFloat(values.amount),
         description: values.description,
-        image: values.image,
+        image: values.image || image,
         category: values.category,
         date: values.date.toISOString(),
         created_at: now,
         updated_at: now,
       });
+
       Alert.alert('Success', 'Transaction created successfully', [
         {
           text: 'OK',
@@ -100,6 +112,25 @@ function IncomeTab() {
     }
   };
 
+  const pickImage = () => {
+    launchImageLibrary(
+      {
+        mediaType: 'photo',
+        selectionLimit: 1,
+      },
+      response => {
+        if (
+          !response.didCancel &&
+          response.assets &&
+          response.assets.length > 0
+        ) {
+          const uri = response.assets[0].uri;
+          if (uri) setImage(uri);
+        }
+      },
+    );
+  };
+
   useEffect(() => {
     fetchIncomeCategories();
   }, []);
@@ -121,72 +152,83 @@ function IncomeTab() {
         {t('add-income')}
       </Text>
 
-      <FormInput
-        value={form.watch('amount')}
-        placeholder={`${t('enter-amount')} (${currency})`}
-        title={t('amount')}
-        keyboardType="numeric"
-        onChangeText={text => form.setValue('amount', text)}
-        error={form.formState.errors.amount?.message as string | undefined}
-      />
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <FormInput
+          value={form.watch('amount')}
+          placeholder={`${t('enter-amount')} (${currency})`}
+          title={t('amount')}
+          keyboardType="numeric"
+          onChangeText={text => form.setValue('amount', text)}
+          error={form.formState.errors.amount?.message as string | undefined}
+        />
 
-      <FormInput
-        value={form.watch('description')}
-        placeholder={`${t('enter-description')}`}
-        title={t('description-optional')}
-        onChangeText={text => form.setValue('description', text)}
-        error={form.formState.errors.description?.message as string | undefined}
-      />
+        <FormInput
+          value={form.watch('description')}
+          placeholder={`${t('enter-description')}`}
+          title={t('description-optional')}
+          onChangeText={text => form.setValue('description', text)}
+          error={
+            form.formState.errors.description?.message as string | undefined
+          }
+        />
 
-      <Text style={styles.inputLabel}>{t('category')}</Text>
-      <View style={styles.pickerContainer}>
-        <Picker
-          selectedValue={form.watch('category')?.id}
-          onValueChange={value => {
-            const selected = incomeCategories.find(cat => cat.id === value);
-            if (selected) form.setValue('category', selected);
+        <Text style={styles.inputLabel}>{t('category')}</Text>
+        <View style={styles.pickerContainer}>
+          <Picker
+            selectedValue={form.watch('category')?.id}
+            onValueChange={value => {
+              const selected = incomeCategories.find(cat => cat.id === value);
+              if (selected) form.setValue('category', selected);
+            }}
+          >
+            {incomeCategories.map(cat => (
+              <Picker.Item
+                key={cat.id}
+                label={t(cat.name.toLocaleLowerCase())}
+                value={cat.id}
+              />
+            ))}
+          </Picker>
+        </View>
+
+        <Text style={[styles.inputLabel, { marginTop: 10 }]}>{t('date')}</Text>
+        <Pressable onPress={() => setOpenPicker(true)} style={styles.dateInput}>
+          <Text style={styles.dateText}>
+            {form.watch('date')
+              ? format(new Date(form.watch('date')), 'dd-MM-yyyy')
+              : ''}
+          </Text>
+        </Pressable>
+
+        <DatePicker
+          modal
+          open={openPicker}
+          date={form.watch('date') || new Date()}
+          mode="date"
+          maximumDate={new Date()}
+          onConfirm={selectedDate => {
+            setOpenPicker(false);
+            form.setValue('date', selectedDate);
           }}
-        >
-          {incomeCategories.map(cat => (
-            <Picker.Item
-              key={cat.id}
-              label={t(cat.name.toLocaleLowerCase())}
-              value={cat.id}
-            />
-          ))}
-        </Picker>
-      </View>
-      {form.formState.errors.category?.message && (
-        <Text style={styles.errorText}>
-          {form.formState.errors.category?.message as string}
-        </Text>
-      )}
+          onCancel={() => setOpenPicker(false)}
+        />
 
-      <Text style={[styles.inputLabel, { marginTop: 10}]}>{t('date')}</Text>
-      <Pressable onPress={() => setOpenPicker(true)} style={styles.dateInput}>
-        <Text style={styles.dateText}>
-          {form.watch('date')
-            ? format(new Date(form.watch('date')), 'dd-MM-yyyy')
-            : ''}
+        <Text style={[styles.inputLabel, { marginTop: 10 }]}>
+          {t('pick-image-optional')}
         </Text>
-      </Pressable>
-      <DatePicker
-        modal
-        open={openPicker}
-        date={form.watch('date') || new Date()}
-        mode="date"
-        maximumDate={new Date()}
-        onConfirm={selectedDate => {
-          setOpenPicker(false);
-          form.setValue('date', selectedDate);
-        }}
-        onCancel={() => setOpenPicker(false)}
-      />
-      {form.formState.errors.date?.message && (
-        <Text style={styles.errorText}>
-          {form.formState.errors.date.message as string}
-        </Text>
-      )}
+        <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+          {image ? (
+            <Image source={{ uri: image }} style={styles.image} />
+          ) : (
+            <View style={styles.imagePlaceholder}>
+              <Text style={styles.imageText}>{t('pick-image')}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
 
       <View style={{ marginTop: 10 }}>
         <ButtonCustom text={t('save-transaction')} onPress={form.onSubmit} />
@@ -239,5 +281,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'red',
     marginTop: 4,
+  },
+  imageContainer: {
+    alignSelf: 'center',
+    marginBottom: 5,
+  },
+  image: {
+    width: windowWidth - 50,
+    height: 150,
+    borderRadius: 10,
+    resizeMode: 'cover',
+  },
+  imagePlaceholder: {
+    width: windowWidth - 50,
+    height: 150,
+    borderRadius: 10,
+    backgroundColor: '#ccc',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imageText: {
+    color: '#fff',
+    fontSize: 12,
   },
 });
