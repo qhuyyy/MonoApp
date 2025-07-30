@@ -221,7 +221,7 @@ function ExpenseTab() {
         )}
 
         <Text style={[styles.inputLabel, { marginTop: 10 }]}>
-          {t('pick-image')}
+          {t('pick-image-optional')}
         </Text>
         <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
           {image ? (
