@@ -172,7 +172,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontStyle: 'italic',
-    color: '#888',
+    color: '#ccc',
+    fontSize: 16,
     marginLeft: 5,
   },
 });

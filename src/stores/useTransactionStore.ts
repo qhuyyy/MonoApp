@@ -129,7 +129,9 @@ export const useTransactionStore = create<TransactionState>()(
         }
 
         if (transactions.length === 0) {
-          throw new Error('Định dạng file đúng nhưng định dạng dữ liệu không chính xác!');
+          throw new Error(
+            'Định dạng file đúng nhưng định dạng dữ liệu không chính xác!',
+          );
         }
 
         return transactions;
@@ -228,7 +230,10 @@ export const useTransactionStore = create<TransactionState>()(
       },
 
       clearAll: async () => {
-        await AsyncStorage.removeItem('transaction-storage');
+        await Promise.all([
+          AsyncStorage.removeItem('transaction-storage'),
+          AsyncStorage.removeItem('category-storage'),
+        ]);
         set({ transactions: [] });
       },
     }),

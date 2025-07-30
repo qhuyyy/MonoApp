@@ -56,6 +56,7 @@ const ImportScreen = ({ navigation }: Props) => {
       return;
     }
     await confirmImportJson(previewData, replace);
+    setPreviewData([]);
     Alert.alert(t('success'), t('import-data-successfully!'));
     navigation.goBack();
   };

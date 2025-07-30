@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ import ButtonCustom from '../../components/ButtonCustom';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTransactionStore } from '../../stores/useTransactionStore';
 import uuid from 'react-native-uuid';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 import { useCreateTransForm } from '../../hooks/useCreateTransForm';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -131,12 +131,24 @@ function IncomeTab() {
     );
   };
 
-  useEffect(() => {
-    fetchIncomeCategories();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchIncomeCategories();
+    }, []),
+  );
 
   if (!initialCategory)
-    return <Text style={{ padding: 20 }}>{t('loading-categories')}</Text>;
+    return (
+      <Text
+        style={{
+          padding: 20,
+          fontSize: 18,
+          color: '#fff',
+        }}
+      >
+        {t('loading-categories')}
+      </Text>
+    );
 
   return (
     <View style={[styles.formContainer, { borderColor: 'green' }]}>

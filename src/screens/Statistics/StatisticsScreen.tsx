@@ -38,7 +38,7 @@ type StatisticsScreenProp = BottomTabScreenProps<
 
 const StatisticsScreen = () => {
   const navigation = useNavigation();
-  const [chartType, setChartType] = useState<'bar' | 'line' | 'pie'>('line');
+  const [chartType, setChartType] = useState<'bar' | 'line' | 'pie'>('bar');
   const [period, setPeriod] = useState<'month' | '3months' | 'year'>('3months');
   const { transactions } = useTransactionStore();
   const chartRef = useRef<ViewShot>(null);
