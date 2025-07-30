@@ -17,6 +17,7 @@ import {
   Animated,
   RefreshControl,
   Keyboard,
+  ActivityIndicator,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,6 +33,7 @@ import { windowHeight } from '../../utils/Dimensions';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { MAX_HISTORY, PAGE_SIZE } from '../../constants/Transactions';
+import { useCategoryStore } from '../../stores/useCategoryStore';
 
 type HistoryScreenProps = NativeStackScreenProps<
   HistoryStackParamList,
@@ -47,18 +49,19 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
     filterType,
     sortBy,
     page,
-    categories,
     selectedCategories,
     setSearch,
     setFilterType,
     setSortBy,
     toggleCategory,
-    setCategories,
     setPage,
   } = useHistoryFilterStore();
 
+  const { categories, loadCategories } = useCategoryStore();
+
   const swipeableRefs = useRef<Record<string, Swipeable | null>>({});
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(true);
 
   const { t } = useTranslation();
 
@@ -81,15 +84,12 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
     await AsyncStorage.setItem('search-history', JSON.stringify(updated));
   };
 
-  // Load categories từ AsyncStorage
   useEffect(() => {
-    AsyncStorage.getItem('category-storage').then(stored => {
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setCategories(parsed.state?.categories || []);
-      }
-    });
-  }, [setCategories]);
+    (async () => {
+      await loadCategories(); // load từ AsyncStorage hoặc API
+      setLoadingCategories(false);
+    })();
+  }, [loadCategories]);
 
   // Refresh khi quay lại màn hình
   useFocusEffect(
@@ -111,7 +111,7 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
     }
     if (selectedCategories.length > 0) {
       result = result.filter(
-        t => t.category && selectedCategories.includes(t.category.id),
+        t => t.category && selectedCategories.includes(t.category.name),
       );
     }
     if (sortBy === 'date') {
@@ -245,166 +245,182 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Rectangle style={StyleSheet.absoluteFillObject} />
-        <Text style={styles.headerTitle}>{t('transactions-history')}</Text>
-      </View>
+      {loadingCategories ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      ) : (
+        <>
+          <View style={styles.header}>
+            <Rectangle style={StyleSheet.absoluteFillObject} />
+            <Text style={styles.headerTitle}>{t('transactions-history')}</Text>
+          </View>
 
-      <View style={styles.searchContainer}>
-        <View style={{ position: 'relative' }}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder={t('search-description')}
-            placeholderTextColor="#999"
-            value={search}
-            onChangeText={text => setSearch(text)}
-            onFocus={() => setShowDropdown(true)}
-            onSubmitEditing={() => {
-              addSearchHistory(search);
-              setShowDropdown(false);
-              Keyboard.dismiss();
-            }}
-          />
-          {showDropdown && !search && searchHistory.length > 0 && (
-            <View style={styles.dropdownContainer}>
-              {searchHistory.map((item, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  style={styles.dropdownItem}
-                  onPress={() => {
-                    setSearch(item);
-                    setShowDropdown(false);
-                  }}
-                >
-                  <Text style={styles.dropdownText}>{item}</Text>
-                </TouchableOpacity>
-              ))}
+          <View style={styles.searchContainer}>
+            <View style={{ position: 'relative' }}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder={t('search-description')}
+                placeholderTextColor="#999"
+                value={search}
+                onChangeText={text => setSearch(text)}
+                onFocus={() => setShowDropdown(true)}
+                onSubmitEditing={() => {
+                  addSearchHistory(search);
+                  setShowDropdown(false);
+                  Keyboard.dismiss();
+                }}
+              />
+              {showDropdown && !search && searchHistory.length > 0 && (
+                <View style={styles.dropdownContainer}>
+                  {searchHistory.map((item, idx) => (
+                    <TouchableOpacity
+                      key={idx}
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setSearch(item);
+                        setShowDropdown(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownText}>{item}</Text>
+                    </TouchableOpacity>
+                  ))}
+
+                  <TouchableOpacity
+                    style={styles.dropdownClearButton}
+                    onPress={async () => {
+                      await AsyncStorage.removeItem('search-history');
+                      setSearchHistory([]);
+                      setShowDropdown(false);
+                    }}
+                  >
+                    <Text style={styles.dropdownClearText}>
+                      {t('clear-history')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.filterContainer}>
+            <Text style={styles.title}>{t('status')}</Text>
+            <View style={styles.filterBar}>
+              <View
+                style={{ flexDirection: 'row', justifyContent: 'flex-start' }}
+              >
+                {['all', 'income', 'expense'].map(type => (
+                  <TouchableOpacity
+                    key={type}
+                    style={[
+                      styles.filterButton,
+                      filterType === type && [
+                        styles.filterActive,
+                        type === 'income'
+                          ? { backgroundColor: '#2E7D32' }
+                          : type === 'expense'
+                          ? { backgroundColor: '#9A031E' }
+                          : { backgroundColor: '#666' },
+                      ],
+                    ]}
+                    onPress={() => setFilterType(type as any)}
+                  >
+                    <Text
+                      style={[
+                        styles.filterText,
+                        filterType === type && styles.filterTextActive,
+                      ]}
+                    >
+                      {t(type)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
               <TouchableOpacity
-                style={styles.dropdownClearButton}
-                onPress={async () => {
-                  await AsyncStorage.removeItem('search-history');
-                  setSearchHistory([]);
-                  setShowDropdown(false);
+                style={styles.sortTouchableOpacity}
+                onPress={() => {
+                  const next =
+                    sortBy === 'date'
+                      ? 'amount'
+                      : sortBy === 'amount'
+                      ? 'updated'
+                      : 'date';
+                  setSortBy(next);
                 }}
               >
-                <Text style={styles.dropdownClearText}>
-                  {t('clear-history')}
+                <Text style={styles.sortText}>
+                  {t('sort')}: {t(sortBy)}
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
-        </View>
-      </View>
 
-      <View style={styles.filterContainer}>
-        <Text style={styles.title}>{t('status')}</Text>
-        <View style={styles.filterBar}>
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-start' }}>
-            {['all', 'income', 'expense'].map(type => (
-              <TouchableOpacity
-                key={type}
-                style={[
-                  styles.filterButton,
-                  filterType === type && [
-                    styles.filterActive,
-                    type === 'income'
-                      ? { backgroundColor: '#2E7D32' }
-                      : type === 'expense'
-                      ? { backgroundColor: '#9A031E' }
-                      : { backgroundColor: '#666' },
-                  ],
-                ]}
-                onPress={() => setFilterType(type as any)}
-              >
-                <Text
+            <Text style={styles.title}>{t('categories')}</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {categories.map(cat => (
+                <TouchableOpacity
+                  key={cat.id}
                   style={[
-                    styles.filterText,
-                    filterType === type && styles.filterTextActive,
+                    styles.chip,
+                    selectedCategories.includes(cat.name) &&
+                      styles.chipSelected,
                   ]}
+                  onPress={() => toggleCategory(cat.name)}
                 >
-                  {t(type)}
-                </Text>
-              </TouchableOpacity>
-            ))}
+                  <Ionicons
+                    name={cat.icon}
+                    size={18}
+                    color={
+                      selectedCategories.includes(cat.name) ? '#fff' : cat.color
+                    }
+                  />
+                  <Text
+                    style={[
+                      styles.chipText,
+                      selectedCategories.includes(cat.name) && { color: '#fff' },
+                    ]}
+                  >
+                    {t(cat.name.toLocaleLowerCase())}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.sortTouchableOpacity}
-            onPress={() => {
-              const next =
-                sortBy === 'date'
-                  ? 'amount'
-                  : sortBy === 'amount'
-                  ? 'updated'
-                  : 'date';
-              setSortBy(next);
-            }}
-          >
-            <Text style={styles.sortText}>
-              {t('sort')}: {t(sortBy)}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <Text style={styles.title}>{t('categories')}</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-          {categories.map(cat => (
-            <TouchableOpacity
-              key={cat.id}
-              style={[
-                styles.chip,
-                selectedCategories.includes(cat.id) && styles.chipSelected,
-              ]}
-              onPress={() => toggleCategory(cat.id)}
-            >
-              <Ionicons
-                name={cat.icon}
-                size={18}
-                color={selectedCategories.includes(cat.id) ? '#fff' : cat.color}
-              />
-              <Text
-                style={[
-                  styles.chipText,
-                  selectedCategories.includes(cat.id) && { color: '#fff' },
-                ]}
-              >
-                {t(cat.name.toLocaleLowerCase())}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View>
-
-      <View style={styles.contentContainer}>
-        <FlatList
-          data={data}
-          keyExtractor={item => item.id}
-          renderItem={({ item }) => (
-            <Swipeable
-              ref={ref => {
-                swipeableRefs.current[item.id] = ref;
-              }}
-              onSwipeableOpen={() => handleSwipeableOpen(item.id)}
-              renderRightActions={renderRightActions(item)}
-              overshootRight={false}
-              rightThreshold={150}
-            >
-              <TransactionItem transaction={item} />
-            </Swipeable>
-          )}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-          }
-          onEndReached={handleLoadMore}
-          onEndReachedThreshold={0.5}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>No transactions found.</Text>
-          }
-        />
-      </View>
+          <View style={styles.contentContainer}>
+            <FlatList
+              data={data}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <Swipeable
+                  ref={ref => {
+                    swipeableRefs.current[item.id] = ref;
+                  }}
+                  onSwipeableOpen={() => handleSwipeableOpen(item.id)}
+                  renderRightActions={renderRightActions(item)}
+                  overshootRight={false}
+                  rightThreshold={150}
+                >
+                  <TransactionItem transaction={item} />
+                </Swipeable>
+              )}
+              refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={handleRefresh}
+                />
+              }
+              onEndReached={handleLoadMore}
+              onEndReachedThreshold={0.5}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>No transactions found.</Text>
+              }
+            />
+          </View>
+        </>
+      )}
     </View>
   );
 };
@@ -528,5 +544,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#d00',
     fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#3A837B',
   },
 });

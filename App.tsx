@@ -7,16 +7,26 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSettingsStore } from './src/stores/useSettingsStore';
 import { darkTheme, lightTheme } from './src/constants/Theme';
 import './src/config/i18n';
+import { useCategoryStore } from './src/stores/useCategoryStore';
+import { useTransactionStore } from './src/stores/useTransactionStore';
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { theme, loadSettings } = useSettingsStore();
+  const { loadCategories } = useCategoryStore();
+  const { loadTransactions } = useTransactionStore();
   const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
 
   useEffect(() => {
-    loadSettings();
-    const timer = setTimeout(() => setIsLoading(false), 3000);
-    return () => clearTimeout(timer);
+    const loadAll = async () => {
+      await Promise.all([
+        loadSettings(),
+        loadCategories(),
+        loadTransactions(),
+      ]);
+      setIsLoading(false);
+    };
+    loadAll();
   }, []);
 
   if (isLoading) {

@@ -29,12 +29,13 @@ export const useHistoryFilterStore = create<HistoryFilterState>(set => ({
   setSearch: search => set({ search }),
   setFilterType: filterType => set({ filterType }),
   setSortBy: sortBy => set({ sortBy }),
-  toggleCategory: id =>
+  toggleCategory: (name: string) =>
     set(state => ({
-      selectedCategories: state.selectedCategories.includes(id)
-        ? state.selectedCategories.filter(c => c !== id)
-        : [...state.selectedCategories, id],
+      selectedCategories: state.selectedCategories.includes(name)
+        ? state.selectedCategories.filter(c => c !== name)
+        : [...state.selectedCategories, name],
     })),
+
   setCategories: categories => set({ categories }),
   setPage: page => set({ page }),
   resetFilters: () =>

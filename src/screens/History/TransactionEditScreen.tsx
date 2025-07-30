@@ -159,15 +159,15 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
             style={styles.dropdown}
             data={incomeCategories.map(cat => ({
               label: t(cat.name.toLocaleLowerCase()),
-              value: cat.id,
+              value: cat.name,
               icon: cat.icon,
             }))}
             labelField="label"
             valueField="value"
-            value={watch('category')?.id}
+            value={watch('category')?.name}
             renderItem={item => {
               const category = incomeCategories.find(
-                cat => cat.id === item.value,
+                cat => cat.name === item.value,
               );
               return (
                 <View style={styles.dropdownItem}>
@@ -191,7 +191,7 @@ const TransactionEditScreen = ({ navigation, route }: Props) => {
             )}
             onChange={item => {
               const selected = incomeCategories.find(
-                cat => cat.id === item.value,
+                cat => cat.name === item.value,
               );
               if (selected) setValue('category', selected);
             }}
