@@ -12,6 +12,7 @@ import {
   Pressable,
   RefreshControl,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { BarChart, LineChart } from 'react-native-chart-kit';
@@ -38,6 +39,8 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const { currency } = useUserStore();
 
+  const [loading, setLoading] = useState(true);
+
   const currencySymbol = currencySymbols[currency] || currency;
   const fullName = useUserStore(state => state.fullName);
 
@@ -55,7 +58,12 @@ export default function HomeScreen() {
   const [openRow, setOpenRow] = useState<Swipeable | null>(null);
 
   useEffect(() => {
-    loadRecentTransactions();
+    const fetchData = async () => {
+      setLoading(true);
+      await loadRecentTransactions();
+      setLoading(false);
+    };
+    fetchData();
   }, [loadRecentTransactions]);
 
   const income = transactions
@@ -213,7 +221,18 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
-  return (
+  return loading ? (
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#3A837B',
+      }}
+    >
+      <ActivityIndicator size="large" color="#fff" />
+    </View>
+  ) : (
     <FlatList
       data={recentTransactions}
       keyExtractor={item => item.id}
@@ -270,7 +289,7 @@ export default function HomeScreen() {
                 { fontSize: 30, fontWeight: 'bold' },
               ]}
             >
-              {totalBalance.toFixed(2)} {currencySymbol}  
+              {totalBalance.toFixed(2)} {currencySymbol}
             </Text>
             <View style={styles.incomeExpense}>
               <View>

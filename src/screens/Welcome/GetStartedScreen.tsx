@@ -1,5 +1,12 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Picker } from '@react-native-picker/picker';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -10,6 +17,7 @@ import ButtonCustom from '../../components/ButtonCustom';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { WelcomeStackParamList } from '../../navigations/WelcomeStack';
 import { useTranslation } from 'react-i18next';
+import { UserSchema } from '../../validation/UserSchema';
 
 type Props = NativeStackScreenProps<WelcomeStackParamList, 'GetStarted'>;
 
@@ -34,7 +42,11 @@ const GetStartedScreen = ({ navigation }: Props) => {
         selectionLimit: 1,
       },
       response => {
-        if (!response.didCancel && response.assets && response.assets.length > 0) {
+        if (
+          !response.didCancel &&
+          response.assets &&
+          response.assets.length > 0
+        ) {
           const uri = response.assets[0].uri;
           if (uri) setAvatar(uri);
         }
@@ -42,8 +54,28 @@ const GetStartedScreen = ({ navigation }: Props) => {
     );
   };
 
+  const handleGoHome = async () => {
+    try {
+      const user = { fullName, email, currency, avatar };
+      await UserSchema.validate(user, { abortEarly: false });
+
+      // Nếu validate thành công -> điều hướng
+      navigation.getParent()?.navigate('MainBottomTabs');
+    } catch (err: any) {
+      if (err.inner) {
+        const messages = err.inner.map((e: any) => e.message).join('\n');
+        Alert.alert('Validation Error', messages);
+      } else {
+        Alert.alert('Error', err.message);
+      }
+    }
+  };
+
   return (
-    <LinearGradient colors={['#429690', '#2A7C76']} style={styles.linearGradient}>
+    <LinearGradient
+      colors={['#429690', '#2A7C76']}
+      style={styles.linearGradient}
+    >
       <Text style={styles.title}>{t('lets-get-started')}</Text>
       <Text style={styles.subTitle}>{t('we-need-your-information')}</Text>
 
@@ -75,7 +107,11 @@ const GetStartedScreen = ({ navigation }: Props) => {
 
         <Text style={styles.inputLabel}>{t('preferred-currency')}</Text>
         <View style={styles.pickerContainer}>
-          <Picker selectedValue={currency} onValueChange={setCurrency} style={styles.picker}>
+          <Picker
+            selectedValue={currency}
+            onValueChange={setCurrency}
+            style={styles.picker}
+          >
             <Picker.Item label={t('vnd-vietnamese-dong')} value="VND" />
             <Picker.Item label={t('usd-us-dollar')} value="USD" />
             <Picker.Item label={t('eur-euro')} value="EUR" />
@@ -85,10 +121,7 @@ const GetStartedScreen = ({ navigation }: Props) => {
       </View>
 
       <View style={{ marginTop: 20 }}>
-        <ButtonCustom
-          text={t('go-to-home-screen')}
-          onPress={() => navigation.getParent()?.navigate('MainBottomTabs')}
-        />
+        <ButtonCustom text={t('go-to-home-screen')} onPress={handleGoHome} />
       </View>
     </LinearGradient>
   );

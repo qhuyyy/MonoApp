@@ -194,5 +194,9 @@
   "type-invalid": "Invalid transaction type",
   "type-required": "Please select a transaction type",
 
-  "clear-history": "Clear History"
+  "clear-history": "Clear History",
+  "full-name-required": "Full name is required",
+  "email-invalid": "Invalid email address",
+  "currency-required": "Currency is required",
+  "currency-invalid": "Invalid currency"
 }

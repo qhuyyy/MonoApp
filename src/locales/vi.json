@@ -194,5 +194,9 @@
   "type-invalid": "Loại giao dịch không hợp lệ",
   "type-required": "Vui lòng chọn loại giao dịch",
 
-  "clear-history": "Xoá lịch sử"
+  "clear-history": "Xoá lịch sử",
+  "full-name-required": "Họ và tên là bắt buộc",
+  "email-invalid": "Email không hợp lệ",
+  "currency-required": "Vui lòng chọn loại tiền tệ",
+  "currency-invalid": "Loại tiền tệ không hợp lệ"
 }
