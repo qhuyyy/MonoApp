@@ -110,9 +110,11 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
       result = result.filter(t => t.category?.status === filterType);
     }
     if (selectedCategories.length > 0) {
-      result = result.filter(
-        t => t.category && selectedCategories.includes(t.category.name),
-      );
+      result = result.filter(t => {
+        if (!t.category) return false;
+        const key = `${t.category.name}:${t.category.status}`;
+        return selectedCategories.includes(key);
+      });
     }
     if (sortBy === 'date') {
       result.sort(
@@ -362,22 +364,28 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
                   key={cat.id}
                   style={[
                     styles.chip,
-                    selectedCategories.includes(cat.name) &&
+                    selectedCategories.includes(`${cat.name}:${cat.status}`) &&
                       styles.chipSelected,
                   ]}
-                  onPress={() => toggleCategory(cat.name)}
+                  onPress={() => toggleCategory(cat.name, cat.status)}
                 >
                   <Ionicons
                     name={cat.icon}
                     size={18}
                     color={
-                      selectedCategories.includes(cat.name) ? '#fff' : cat.color
+                      selectedCategories.includes(`${cat.name}:${cat.status}`)
+                        ? '#fff'
+                        : cat.color
                     }
                   />
                   <Text
                     style={[
                       styles.chipText,
-                      selectedCategories.includes(cat.name) && { color: '#fff' },
+                      selectedCategories.includes(
+                        `${cat.name}:${cat.status}`,
+                      ) && {
+                        color: '#fff',
+                      },
                     ]}
                   >
                     {t(cat.name.toLocaleLowerCase())}

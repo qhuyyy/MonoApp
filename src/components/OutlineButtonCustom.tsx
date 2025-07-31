@@ -1,6 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { windowWidth } from '../utils/Dimensions';
 
 type OutlineButtonCustomProps = {
   text: string;

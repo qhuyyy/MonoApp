@@ -31,7 +31,6 @@ const CustomBottomTabBar = ({
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key];
         const isFocused = state.index === index;
 
         const onPress = () => {

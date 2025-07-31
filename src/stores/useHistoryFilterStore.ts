@@ -12,7 +12,7 @@ type HistoryFilterState = {
   setSearch: (search: string) => void;
   setFilterType: (type: 'all' | 'income' | 'expense') => void;
   setSortBy: (sort: 'date' | 'amount' | 'updated') => void;
-  toggleCategory: (id: string) => void;
+  toggleCategory: (name: string, status: 'income' | 'expense') => void;
   setCategories: (cats: Category[]) => void;
   setPage: (page: number) => void;
   resetFilters: () => void;
@@ -29,12 +29,15 @@ export const useHistoryFilterStore = create<HistoryFilterState>(set => ({
   setSearch: search => set({ search }),
   setFilterType: filterType => set({ filterType }),
   setSortBy: sortBy => set({ sortBy }),
-  toggleCategory: (name: string) =>
-    set(state => ({
-      selectedCategories: state.selectedCategories.includes(name)
-        ? state.selectedCategories.filter(c => c !== name)
-        : [...state.selectedCategories, name],
-    })),
+  toggleCategory: (name: string, status: 'income' | 'expense') =>
+    set(state => {
+      const key = `${name}:${status}`;
+      return {
+        selectedCategories: state.selectedCategories.includes(key)
+          ? state.selectedCategories.filter(c => c !== key)
+          : [...state.selectedCategories, key],
+      };
+    }),
 
   setCategories: categories => set({ categories }),
   setPage: page => set({ page }),

@@ -4,7 +4,6 @@ import i18n from '../config/i18n';
 export const categorySchema = yup.object().shape({
   name: yup
     .string()
-    .min(2, i18n.t('name-too-short'))
     .max(50, i18n.t('name-too-long'))
     .required(i18n.t('name-required')),
   status: yup
