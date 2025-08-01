@@ -120,7 +120,7 @@ const CategoryEditScreen = ({ navigation, route }: EditCategoryScreenProps) => {
                 {
                   backgroundColor: c,
                   borderWidth: watch('color') === c ? 3 : 1,
-                  borderColor: watch('color') === c ? '#333' : '#ccc',
+                  borderColor: watch('color') === c ? '#429690' : '#ccc',
                 },
               ]}
               onPress={() => setValue('color', c)}
@@ -141,7 +141,7 @@ const CategoryEditScreen = ({ navigation, route }: EditCategoryScreenProps) => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderWidth: watch('icon') === i ? 3 : 1,
-                  borderColor: watch('icon') === i ? '#333' : '#ccc',
+                  borderColor: watch('icon') === i ? '#429690' : '#ccc',
                 },
               ]}
               onPress={() => setValue('icon', i)}

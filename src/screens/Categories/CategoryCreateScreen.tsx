@@ -88,7 +88,7 @@ const CategoryCreateScreen = ({ navigation }: CreateCategoryScreenProps) => {
                 {
                   backgroundColor: c,
                   borderWidth: c === color ? 3 : 1,
-                  borderColor: c === color ? '#333' : '#ccc',
+                  borderColor: c === color ? '#429690' : '#ccc',
                 },
               ]}
               onPress={() => setColor(c)}
@@ -108,7 +108,7 @@ const CategoryCreateScreen = ({ navigation }: CreateCategoryScreenProps) => {
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderWidth: icon === i ? 3 : 1,
-                  borderColor: icon === i ? '#333' : '#ccc',
+                  borderColor: icon === i ? '#429690' : '#ccc',
                 },
               ]}
               onPress={() => setIcon(i)}

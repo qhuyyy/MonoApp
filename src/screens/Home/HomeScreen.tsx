@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-native/no-inline-styles */
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from 'react';
 import {
   View,
   Text,
@@ -15,7 +21,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { BarChart, LineChart } from 'react-native-chart-kit';
+import { LineChart } from 'react-native-chart-kit';
 import Rectangle from '../../assets/svg/Rectangle';
 import TransactionItem from '../../components/TransactionItem';
 import { useUserStore } from '../../stores/useUserStore';
@@ -24,9 +30,8 @@ import { MainBottomTabsParamList } from '../../navigations/MainBottomTabs';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation, useTheme } from '@react-navigation/native';
 import { Transaction } from '../../types/types';
-import { ScrollView, Swipeable } from 'react-native-gesture-handler';
+import { Swipeable } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
-import { Line } from 'react-native-svg';
 import { currencySymbols } from '../../constants/Transactions';
 
 const screenWidth = Dimensions.get('window').width;
@@ -48,14 +53,15 @@ export default function HomeScreen() {
   const loadRecentTransactions = useTransactionStore(
     state => state.loadRecentTransactions,
   );
-  const recentTransactions = loadRecentTransactions();
-
   const deleteTransaction = useTransactionStore(
     state => state.deleteTransaction,
   );
 
+  const recentTransactions = loadRecentTransactions();
+
   const [refreshing, setRefreshing] = useState(false);
-  const [openRow, setOpenRow] = useState<Swipeable | null>(null);
+  const swipeableRefs = useRef<Record<string, Swipeable | null>>({});
+  const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -125,6 +131,20 @@ export default function HomeScreen() {
     };
   }, [transactions]);
 
+  const closeOpenSwipe = () => {
+    if (openSwipeId && swipeableRefs.current[openSwipeId]) {
+      swipeableRefs.current[openSwipeId]?.close();
+    }
+    setOpenSwipeId(null);
+  };
+
+  const handleSwipeableOpen = (id: string) => {
+    if (openSwipeId && openSwipeId !== id) {
+      swipeableRefs.current[openSwipeId]?.close();
+    }
+    setOpenSwipeId(id);
+  };
+
   const handleDelete = (id: string) => {
     Alert.alert(
       t('delete'),
@@ -134,10 +154,21 @@ export default function HomeScreen() {
         {
           text: t('delete'),
           style: 'destructive',
-          onPress: () => deleteTransaction(id),
+          onPress: () => {
+            deleteTransaction(id);
+            closeOpenSwipe();
+          },
         },
       ],
     );
+  };
+
+  const handleEdit = (item: Transaction) => {
+    closeOpenSwipe();
+    navigation.navigate('HistoryStack', {
+      screen: 'TransactionEdit',
+      params: { transaction: item },
+    });
   };
 
   const renderRightActions =
@@ -158,6 +189,17 @@ export default function HomeScreen() {
             <TouchableOpacity
               style={[
                 styles.actionTouchableOpacity,
+                { backgroundColor: '#FFA500' },
+              ]}
+              onPress={() => handleEdit(item)}
+            >
+              <Ionicons name="pencil-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+          </Animated.View>
+          <Animated.View style={{ transform: [{ translateX: trans1 }] }}>
+            <TouchableOpacity
+              style={[
+                styles.actionTouchableOpacity,
                 { backgroundColor: '#9A031E' },
               ]}
               onPress={() => handleDelete(item.id)}
@@ -165,54 +207,26 @@ export default function HomeScreen() {
               <Ionicons name="trash-outline" size={24} color="#fff" />
             </TouchableOpacity>
           </Animated.View>
-          <Animated.View style={{ transform: [{ translateX: trans1 }] }}>
-            <TouchableOpacity
-              style={[
-                styles.actionTouchableOpacity,
-                { backgroundColor: '#FFA500' },
-              ]}
-              onPress={() =>
-                navigation.navigate('HistoryStack', {
-                  screen: 'TransactionEdit',
-                  params: { transaction: item },
-                })
-              }
-            >
-              <Ionicons name="pencil-outline" size={24} color="#fff" />
-            </TouchableOpacity>
-          </Animated.View>
         </View>
       );
     };
 
-  const handleSwipeableOpen = (ref: Swipeable) => {
-    if (openRow && openRow !== ref) {
-      openRow.close();
-    }
-    setOpenRow(ref);
-  };
-
   const renderItem = useCallback(
-    ({ item }: { item: Transaction }) => {
-      let swipeableRef: Swipeable | null = null;
-      return (
-        <Swipeable
-          ref={ref => {
-            swipeableRef = ref;
-          }}
-          onSwipeableOpen={() =>
-            swipeableRef && handleSwipeableOpen(swipeableRef)
-          }
-          renderRightActions={renderRightActions(item)}
-          overshootRight={false}
-          rightThreshold={150}
-          containerStyle={{ marginTop: 2 }}
-        >
-          <TransactionItem transaction={item} />
-        </Swipeable>
-      );
-    },
-    [openRow],
+    ({ item }: { item: Transaction }) => (
+      <Swipeable
+        ref={ref => {
+          swipeableRefs.current[item.id] = ref;
+        }}
+        onSwipeableOpen={() => handleSwipeableOpen(item.id)}
+        renderRightActions={renderRightActions(item)}
+        overshootRight={false}
+        rightThreshold={150}
+        containerStyle={{ marginTop: 2 }}
+      >
+        <TransactionItem transaction={item} />
+      </Swipeable>
+    ),
+    [openSwipeId],
   );
 
   const handleRefresh = async () => {
@@ -358,7 +372,7 @@ export default function HomeScreen() {
             </Text>
             <LineChart
               data={chartData}
-              width={screenWidth - 40} // padding left/right = 20
+              width={screenWidth - 40}
               height={220}
               yAxisLabel=""
               chartConfig={{
@@ -366,7 +380,7 @@ export default function HomeScreen() {
                 backgroundGradientFrom: '#ffffff',
                 backgroundGradientTo: '#ffffff',
                 decimalPlaces: 2,
-                color: (opacity = 1) => `rgba(255, 112, 67, ${opacity})`, // màu cam
+                color: (opacity = 1) => `rgba(255, 112, 67, ${opacity})`,
                 labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
                 propsForDots: {
                   r: '5',
@@ -449,7 +463,6 @@ const styles = StyleSheet.create({
   },
   quickCard: {
     flex: 1,
-
     marginHorizontal: 5,
     borderRadius: 10,
     padding: 15,
@@ -477,16 +490,4 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
   },
   listContent: { paddingBottom: 20, paddingHorizontal: 5, marginTop: 10 },
-  quickActions: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 20,
-  },
-  actionBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: 10,
-  },
-  actionBtnText: { color: '#fff', marginLeft: 5, fontWeight: 'bold' },
 });

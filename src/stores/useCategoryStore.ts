@@ -11,6 +11,7 @@ type CategoryState = {
   updateCategory: (updatedCategory: Category) => void;
   deleteCategory: (id: string) => Promise<void>;
   loadCategories: () => Promise<void>;
+  updateCategoryOrder: (newOrder: Category[]) => void;
 };
 
 export const useCategoryStore = create<CategoryState>()(
@@ -30,15 +31,11 @@ export const useCategoryStore = create<CategoryState>()(
 
       deleteCategory: async (id: string) => {
         try {
-          const transactionData = await AsyncStorage.getItem(
-            'transaction-storage',
-          );
+          const transactionData = await AsyncStorage.getItem('transaction-storage');
           const parsed = transactionData ? JSON.parse(transactionData) : null;
           const transactions = parsed?.state?.transactions || [];
 
-          const used = transactions.some(
-            (t: Transaction) => t.category?.id === id,
-          );
+          const used = transactions.some((t: Transaction) => t.category?.id === id);
 
           if (used) {
             Alert.alert(
@@ -69,6 +66,10 @@ export const useCategoryStore = create<CategoryState>()(
         } catch (error) {
           console.error('Failed to load categories from AsyncStorage:', error);
         }
+      },
+
+      updateCategoryOrder: (newOrder: Category[]) => {
+        set({ categories: newOrder });
       },
     }),
     {

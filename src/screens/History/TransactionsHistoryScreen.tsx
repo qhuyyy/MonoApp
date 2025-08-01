@@ -60,6 +60,8 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const { categories, loadCategories } = useCategoryStore();
 
   const swipeableRefs = useRef<Record<string, Swipeable | null>>({});
+  const [openSwipeId, setOpenSwipeId] = useState<string | null>(null);
+
   const [refreshing, setRefreshing] = useState(false);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
@@ -67,6 +69,61 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  const closeOpenSwipe = () => {
+    if (openSwipeId && swipeableRefs.current[openSwipeId]) {
+      swipeableRefs.current[openSwipeId]?.close();
+    }
+    setOpenSwipeId(null);
+  };
+
+  const handleSwipeableOpen = (id: string) => {
+    if (openSwipeId && openSwipeId !== id) {
+      swipeableRefs.current[openSwipeId]?.close();
+    }
+    setOpenSwipeId(id);
+  };
+
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      t('delete'),
+      t('are-you-sure-you-want-to-delete-this-transaction?'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('delete'),
+          style: 'destructive',
+          onPress: () => {
+            useTransactionStore.getState().deleteTransaction(id);
+            closeOpenSwipe();
+          },
+        },
+      ],
+    );
+  };
+
+  const handleDuplicate = (id: string) => {
+    Alert.alert(
+      t('duplicate'),
+      t('do-you-want-to-duplicate-this-transcation?'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('duplicate'),
+          style: 'default',
+          onPress: () => {
+            duplicateTransaction(id);
+            closeOpenSwipe();
+          },
+        },
+      ],
+    );
+  };
+
+  const handleEdit = (item: Transaction) => {
+    closeOpenSwipe();
+    navigation.navigate('TransactionEdit', { transaction: item });
+  };
 
   useEffect(() => {
     AsyncStorage.getItem('search-history').then(stored => {
@@ -86,12 +143,11 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
   useEffect(() => {
     (async () => {
-      await loadCategories(); // load từ AsyncStorage hoặc API
+      await loadCategories();
       setLoadingCategories(false);
     })();
   }, [loadCategories]);
 
-  // Refresh khi quay lại màn hình
   useFocusEffect(
     useCallback(() => {
       loadTransactions();
@@ -145,42 +201,6 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
     setTimeout(() => setRefreshing(false), 500);
   };
 
-  const handleDelete = (id: string) => {
-    Alert.alert(
-      t('delete'),
-      t('are-you-sure-you-want-to-delete-this-transaction?'),
-      [
-        { text: t('cancel'), style: 'cancel' },
-        {
-          text: t('delete'),
-          style: 'destructive',
-          onPress: () => useTransactionStore.getState().deleteTransaction(id),
-        },
-      ],
-    );
-  };
-
-  const handleDuplicate = (id: string) => {
-    Alert.alert(
-      t('duplicate'),
-      t('do-you-want-to-duplicate-this-transcation?'),
-      [
-        { text: t('cancel'), style: 'cancel' },
-        {
-          text: t('duplicate'),
-          style: 'default',
-          onPress: () => duplicateTransaction(id),
-        },
-      ],
-    );
-  };
-
-  const handleSwipeableOpen = (id: string) => {
-    Object.entries(swipeableRefs.current).forEach(([key, ref]) => {
-      if (key !== id && ref) ref.close();
-    });
-  };
-
   const renderRightActions =
     (item: Transaction) =>
     (progress: Animated.AnimatedInterpolation<number>) => {
@@ -215,6 +235,18 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
             <TouchableOpacity
               style={[
                 styles.actionTouchableOpacity,
+                { backgroundColor: '#FFA500' },
+              ]}
+              onPress={() => handleEdit(item)}
+            >
+              <Ionicons name="pencil-outline" size={24} color="#fff" />
+            </TouchableOpacity>
+          </Animated.View>
+          
+          <Animated.View style={{ transform: [{ translateX: trans1 }] }}>
+            <TouchableOpacity
+              style={[
+                styles.actionTouchableOpacity,
                 { backgroundColor: '#9A031E' },
               ]}
               onPress={() => handleDelete(item.id)}
@@ -222,25 +254,10 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
               <Ionicons name="trash-outline" size={24} color="#fff" />
             </TouchableOpacity>
           </Animated.View>
-
-          <Animated.View style={{ transform: [{ translateX: trans1 }] }}>
-            <TouchableOpacity
-              style={[
-                styles.actionTouchableOpacity,
-                { backgroundColor: '#FFA500' },
-              ]}
-              onPress={() =>
-                navigation.navigate('TransactionEdit', { transaction: item })
-              }
-            >
-              <Ionicons name="pencil-outline" size={24} color="#fff" />
-            </TouchableOpacity>
-          </Animated.View>
         </View>
       );
     };
 
-  // Reset page khi filter thay đổi
   useEffect(() => {
     setPage(1);
   }, [search, filterType, sortBy, selectedCategories, setPage]);
