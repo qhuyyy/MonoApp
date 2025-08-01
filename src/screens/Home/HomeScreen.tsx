@@ -33,7 +33,6 @@ import { Transaction } from '../../types/types';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 import { currencySymbols } from '../../constants/Transactions';
-import { Notifications } from 'react-native-notifications';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -236,19 +235,6 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
-  const sendLocalNotification = () => {
-    Notifications.postLocalNotification({
-      identifier: '1',
-      title: 'Test Notification',
-      body: 'Xin chào! Đây là thông báo thử nghiệm.',
-      sound: 'default',
-      badge: 1,
-      type: '',
-      thread: '',
-      payload: { customKey: 'customValue' },
-    });
-  };
-
   return loading ? (
     <View
       style={{
@@ -282,7 +268,6 @@ export default function HomeScreen() {
             </View>
             <TouchableOpacity
               style={{ position: 'absolute', top: 70, right: 60 }}
-              onPress={sendLocalNotification}
             >
               <Ionicons name="notifications-outline" size={24} color="#fff" />
             </TouchableOpacity>
