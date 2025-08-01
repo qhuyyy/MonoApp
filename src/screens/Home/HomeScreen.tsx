@@ -33,6 +33,7 @@ import { Transaction } from '../../types/types';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 import { currencySymbols } from '../../constants/Transactions';
+import { Notifications } from 'react-native-notifications';
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -235,6 +236,19 @@ export default function HomeScreen() {
     setRefreshing(false);
   };
 
+  const sendLocalNotification = () => {
+    Notifications.postLocalNotification({
+      identifier: '1',
+      title: 'Test Notification',
+      body: 'Xin chào! Đây là thông báo thử nghiệm.',
+      sound: 'default',
+      badge: 1,
+      type: '',
+      thread: '',
+      payload: { customKey: 'customValue' },
+    });
+  };
+
   return loading ? (
     <View
       style={{
@@ -268,6 +282,7 @@ export default function HomeScreen() {
             </View>
             <TouchableOpacity
               style={{ position: 'absolute', top: 70, right: 60 }}
+              onPress={sendLocalNotification}
             >
               <Ionicons name="notifications-outline" size={24} color="#fff" />
             </TouchableOpacity>
@@ -294,7 +309,7 @@ export default function HomeScreen() {
             <View
               style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
             >
-              <Text style={[styles.balanceCardText]}>{t('total_balance')}</Text>
+              <Text style={[styles.balanceCardText]}>{t('total-balance')}</Text>
               <Ionicons name="chevron-up-outline" size={16} color="#fff" />
             </View>
             <Text
@@ -352,13 +367,13 @@ export default function HomeScreen() {
           {/* Quick stats */}
           <View style={styles.quickStats}>
             <View style={[styles.quickCard, { backgroundColor: '#EB9486' }]}>
-              <Text style={[styles.quickLabel]}>{t('today_expense')}</Text>
+              <Text style={[styles.quickLabel]}>{t('today-expense')}</Text>
               <Text style={[styles.quickValue]}>
                 {todayExpense.toFixed(2)} {currencySymbol}
               </Text>
             </View>
             <View style={[styles.quickCard, { backgroundColor: '#FF9F1C' }]}>
-              <Text style={[styles.quickLabel]}>{t('month_expense')}</Text>
+              <Text style={[styles.quickLabel]}>{t('month-expense')}</Text>
               <Text style={[styles.quickValue]}>
                 {monthExpense.toFixed(2)} {currencySymbol}
               </Text>
@@ -368,7 +383,7 @@ export default function HomeScreen() {
           {/* Mini chart */}
           <View style={styles.chartCard}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {t('seven_day_expense_trend')}
+              {t('seven-day-expense-trend')}
             </Text>
             <LineChart
               data={chartData}
@@ -407,7 +422,7 @@ export default function HomeScreen() {
             }}
           >
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              {t('transactions_history')}
+              {t('transactions-history')}
             </Text>
             <TouchableOpacity
               onPress={() =>
@@ -417,7 +432,7 @@ export default function HomeScreen() {
               }
             >
               <Text style={{ fontStyle: 'italic', color: colors.text }}>
-                {t('see_all')}
+                {t('see-all')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -427,7 +442,7 @@ export default function HomeScreen() {
         <Text
           style={{ textAlign: 'center', marginTop: 20, color: colors.text }}
         >
-          {t('no_transactions_found')}
+          {t('no-transactions-found')}
         </Text>
       }
     />
@@ -472,7 +487,7 @@ const styles = StyleSheet.create({
   quickValue: { fontSize: 18, fontWeight: 'bold', marginTop: 5, color: '#fff' },
   chartCard: { marginTop: 20, paddingHorizontal: 20 },
   transactionContainer: { padding: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: '600' },
+  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 5 },
   actionContainer: {
     flexDirection: 'row',
     width: 120,

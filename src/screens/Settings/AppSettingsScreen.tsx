@@ -32,12 +32,12 @@ const AppSettingsScreen = ({ navigation }: Props) => {
         >
           <Ionicons name="chevron-back-outline" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.title}>{t('app_settings')}</Text>
+        <Text style={styles.title}>{t('app-settings')}</Text>
       </View>
 
       <View style={styles.settingContainer}>
         <View style={styles.settingItem}>
-          <Text style={styles.settingText}>{t('dark_mode')}</Text>
+          <Text style={styles.settingText}>{t('dark-mode')}</Text>
           <Switch
             value={theme === 'dark'}
             onValueChange={value => setTheme(value ? 'dark' : 'light')}
@@ -46,8 +46,7 @@ const AppSettingsScreen = ({ navigation }: Props) => {
 
         <View style={styles.settingItem}>
           <Text style={styles.settingText}>
-            {t('language')}:{' '}
-            {language === 'en' ? t('english') : t('vietnamese')}
+            {t('language')}: {language === 'en' ? t('english') : t('vietnamese')}
           </Text>
           <TouchableOpacity
             onPress={() => setLanguage(language === 'en' ? 'vi' : 'en')}
