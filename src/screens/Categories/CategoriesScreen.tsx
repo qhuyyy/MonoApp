@@ -153,7 +153,7 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
               style={styles.dragIconContainer}
               hitSlop={10}
             >
-              <Ionicons name="reorder-three-outline" size={28} color="#888" />
+              <Ionicons name="reorder-three-outline" size={28} color="#ccc" />
             </Pressable>
             <TouchableOpacity
               style={[styles.itemContent, { opacity: isActive ? 0.7 : 1 }]}
@@ -198,6 +198,9 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
           <Text style={[styles.title]}>{t('categories')}</Text>
           <Text style={styles.subTitle}>
             {t('press-into-the-categories-to-edit-or-delete!')}
+          </Text>
+          <Text style={styles.subTitle}>
+            {t('long-press-into-the-icon-to-drag-and-drop!')}
           </Text>
         </View>
         <TouchableOpacity
