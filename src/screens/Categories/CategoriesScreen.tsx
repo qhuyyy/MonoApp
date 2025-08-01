@@ -148,22 +148,16 @@ const CategoriesScreen = ({ navigation }: CategoriesScreenProps) => {
           }}
         >
           <View style={styles.itemRow}>
-            <Pressable
+            <TouchableOpacity
               onLongPress={drag}
               style={styles.dragIconContainer}
               hitSlop={10}
             >
               <Ionicons name="reorder-three-outline" size={28} color="#ccc" />
-            </Pressable>
-            <TouchableOpacity
-              style={[styles.itemContent, { opacity: isActive ? 0.7 : 1 }]}
-              onPress={() => {
-                closeSwipe();
-                navigation.navigate('CategoryEdit', { category: item });
-              }}
-            >
-              <CategoryItem category={item} />
             </TouchableOpacity>
+            <View style={[styles.itemContent, { opacity: isActive ? 0.7 : 1 }]}>
+              <CategoryItem category={item} />
+            </View>
           </View>
         </Swipeable>
       </ScaleDecorator>
@@ -279,6 +273,7 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginLeft: 10,
     marginTop: 5,
+    alignSelf: 'center',
   },
   addIcon: { position: 'absolute', right: 16 },
   sectionContainer: { paddingHorizontal: 16, marginBottom: 20 },

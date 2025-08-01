@@ -1,21 +1,19 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import { Category } from '../types/types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTranslation } from 'react-i18next';
 
 type Props = {
   category: Category;
-  onPress?: () => void;
 };
 
-const CategoryItem = ({ category, onPress }: Props) => {
+const CategoryItem = ({ category }: Props) => {
   const { t } = useTranslation();
 
   return (
-    <TouchableOpacity
+    <View
       style={[styles.container, { backgroundColor: category.color }]}
-      onPress={onPress}
     >
       <View style={styles.textContainer}>
         <Text style={styles.text}>
@@ -24,7 +22,7 @@ const CategoryItem = ({ category, onPress }: Props) => {
         <Text style={styles.subText}>{t(category.status.toLowerCase(), category.status)}</Text>
       </View>
       <Ionicons name={category.icon} size={30} color="white" />
-    </TouchableOpacity>
+    </View>
   );
 };
 
