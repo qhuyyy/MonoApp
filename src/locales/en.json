@@ -197,5 +197,7 @@
   "full-name-required": "Full name is required",
   "email-invalid": "Invalid email address",
   "currency-required": "Currency is required",
-  "currency-invalid": "Invalid currency"
+  "currency-invalid": "Invalid currency",
+
+  "cannot-update": "Cannot update"
 }

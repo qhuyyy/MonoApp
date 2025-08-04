@@ -22,20 +22,62 @@ export const useCategoryStore = create<CategoryState>()(
       addCategory: (category: Category) =>
         set(state => ({ categories: [...state.categories, category] })),
 
-      updateCategory: updatedCategory =>
-        set(state => ({
-          categories: state.categories.map(cat =>
-            cat.id === updatedCategory.id ? updatedCategory : cat,
-          ),
-        })),
+      updateCategory: async (updatedCategory: Category) => {
+        try {
+          const transactionData = await AsyncStorage.getItem(
+            'transaction-storage',
+          );
+          const parsed = transactionData ? JSON.parse(transactionData) : null;
+          const transactions: Transaction[] = parsed?.state?.transactions || [];
+
+          const existingCategory = get().categories.find(
+            cat => cat.id === updatedCategory.id,
+          );
+
+          if (!existingCategory) return;
+
+          const used = transactions.some(
+            t => t.category?.id === updatedCategory.id,
+          );
+
+          const noChanges =
+            existingCategory.name === updatedCategory.name &&
+            existingCategory.status === updatedCategory.status &&
+            existingCategory.color === updatedCategory.color &&
+            existingCategory.icon === updatedCategory.icon;
+
+          if (used && !noChanges) {
+            Alert.alert(
+              i18n.t('cannot-update'),
+              i18n.t('this-category-is-being-used-in-a-transaction'),
+            );
+            return;
+          }
+
+          // Cập nhật state nếu có thay đổi hoặc category chưa được dùng
+          if (!noChanges) {
+            set(state => ({
+              categories: state.categories.map(cat =>
+                cat.id === updatedCategory.id ? updatedCategory : cat,
+              ),
+            }));
+          }
+        } catch (error) {
+          console.error('Failed to update category:', error);
+        }
+      },
 
       deleteCategory: async (id: string) => {
         try {
-          const transactionData = await AsyncStorage.getItem('transaction-storage');
+          const transactionData = await AsyncStorage.getItem(
+            'transaction-storage',
+          );
           const parsed = transactionData ? JSON.parse(transactionData) : null;
           const transactions = parsed?.state?.transactions || [];
 
-          const used = transactions.some((t: Transaction) => t.category?.id === id);
+          const used = transactions.some(
+            (t: Transaction) => t.category?.id === id,
+          );
 
           if (used) {
             Alert.alert(
