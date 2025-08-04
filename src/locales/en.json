@@ -200,5 +200,8 @@
   "currency-invalid": "Invalid currency",
 
   "cannot-update": "Cannot update",
-  "amount-range": "Amount range"
+  "amount-range": "Amount range",
+
+  "reminder-title": "Expense Reminder",
+  "reminder-body": "Don't forget to log your expenses today!"
 }

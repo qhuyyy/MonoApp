@@ -9,6 +9,7 @@ import { darkTheme, lightTheme } from './src/constants/Theme';
 import './src/config/i18n';
 import { useCategoryStore } from './src/stores/useCategoryStore';
 import { useTransactionStore } from './src/stores/useTransactionStore';
+import NotificationService from './src/services/NotificationService';
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -19,15 +20,17 @@ const App = () => {
 
   useEffect(() => {
     const loadAll = async () => {
-      await Promise.all([
-        loadSettings(),
-        loadCategories(),
-        loadTransactions(),
-      ]);
+      await Promise.all([loadSettings(), loadCategories(), loadTransactions()]);
       setIsLoading(false);
     };
     loadAll();
   }, []);
+
+  useEffect(() => {
+    if (!isLoading) {
+      NotificationService.showReminder();
+    }
+  }, [isLoading]);
 
   if (isLoading) {
     return <SplashScreen />;

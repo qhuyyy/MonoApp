@@ -19,7 +19,7 @@
 
   "categories": "Danh mục",
   "press-into-the-categories-to-edit-or-delete!": "Kéo danh mục sang trái để chỉnh sửa hoặc xoá!",
-  "long-press-into-the-icon-to-drag-and-drop!" : "Nhấn giữ vào icon để kéo và thả!",
+  "long-press-into-the-icon-to-drag-and-drop!": "Nhấn giữ vào icon để kéo và thả!",
   "no-income": "Không có danh mục thu nhập nào",
   "no-expense": "Không có danh mục chi tiêu nào",
 
@@ -198,7 +198,10 @@
   "email-invalid": "Email không hợp lệ",
   "currency-required": "Vui lòng chọn loại tiền tệ",
   "currency-invalid": "Loại tiền tệ không hợp lệ",
-   
+
   "cannot-update": "Không thể cập nhật",
-  "amount-range": "Khoảng tiền"
+  "amount-range": "Khoảng tiền",
+
+  "reminder-title": "Nhắc nhở chi tiêu",
+  "reminder-body": "Đừng quên ghi lại chi tiêu hôm nay nhé!"
 }
