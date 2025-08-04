@@ -8,7 +8,7 @@ import {
   FlatList,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { pick } from '@react-native-documents/picker'; // ✅ dùng đúng API
+import { pick } from '@react-native-documents/picker';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { DataManagementStackParamList } from '../../../navigations/DataManagementStack';
 import Rectangle from '../../../assets/svg/Rectangle';
@@ -70,7 +70,10 @@ const ImportScreen = ({ navigation }: Props) => {
       <View style={styles.titleContainer}>
         <TouchableOpacity
           style={styles.backIcon}
-          onPress={() => navigation.navigate('DataManagement')}
+          onPress={() => [
+            navigation.navigate('DataManagement'),
+            setPreviewData([]),
+          ]}
         >
           <Ionicons name="chevron-back-outline" size={24} color="#fff" />
         </TouchableOpacity>
@@ -92,6 +95,7 @@ const ImportScreen = ({ navigation }: Props) => {
               data={previewData.slice(0, 10)}
               keyExtractor={(item, index) => `${item.id || index}`}
               renderItem={({ item }) => <TransactionItem transaction={item} />}
+              showsVerticalScrollIndicator={false}
             />
             {previewData.length > 10 && (
               <Text>

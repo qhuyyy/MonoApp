@@ -23,28 +23,37 @@ type Props = NativeStackScreenProps<DataManagementStackParamList, 'Export'>;
 
 const ExportScreen = ({ navigation }: Props) => {
   const { exportData, transactions } = useTransactionStore();
+  const { t } = useTranslation();
   const {
     includeTransactions,
     includeCategories,
     minDate,
     maxDate,
+    defaultMinDate,
+    defaultMaxDate,
     openMin,
     openMax,
     setIncludeTransactions,
     setIncludeCategories,
     setMinDate,
     setMaxDate,
+    setDefaultMinDate,
+    setDefaultMaxDate,
     setOpenMin,
     setOpenMax,
   } = useDataManagementStore();
 
-  const { t } = useTranslation();
-
   useEffect(() => {
     if (transactions.length > 0) {
       const dates = transactions.map(t => new Date(t.date));
-      setMinDate(new Date(Math.min(...dates.map(d => d.getTime()))));
-      setMaxDate(new Date(Math.max(...dates.map(d => d.getTime()))));
+      const min = new Date(Math.min(...dates.map(d => d.getTime())));
+      const max = new Date(Math.max(...dates.map(d => d.getTime())));
+      setDefaultMinDate(min);
+      setDefaultMaxDate(max);
+
+      // chỉ set giá trị mặc định nếu chưa chọn trước đó
+      if (!minDate) setMinDate(min);
+      if (!maxDate) setMaxDate(max);
     }
   }, [transactions]);
 
@@ -110,8 +119,8 @@ const ExportScreen = ({ navigation }: Props) => {
           open={openMin}
           date={minDate || new Date()}
           mode="date"
-          minimumDate={minDate || undefined}
-          maximumDate={maxDate || new Date()}
+          minimumDate={defaultMinDate || undefined}
+          maximumDate={defaultMaxDate || new Date()}
           onConfirm={d => {
             setOpenMin(false);
             setMinDate(d);
@@ -132,8 +141,8 @@ const ExportScreen = ({ navigation }: Props) => {
           open={openMax}
           date={maxDate || new Date()}
           mode="date"
-          minimumDate={minDate || undefined}
-          maximumDate={maxDate || new Date()}
+          minimumDate={defaultMinDate || undefined}
+          maximumDate={defaultMaxDate || new Date()}
           onConfirm={d => {
             setOpenMax(false);
             setMaxDate(d);

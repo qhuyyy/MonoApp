@@ -251,6 +251,7 @@ export default function HomeScreen() {
       data={recentTransactions}
       keyExtractor={item => item.id}
       renderItem={renderItem}
+      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
       }

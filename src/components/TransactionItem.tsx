@@ -10,10 +10,9 @@ import { currencySymbols } from '../constants/Transactions';
 
 type TransactionItemProps = {
   transaction: Transaction;
-  onPress?: (transaction: Transaction) => void;
 };
 
-const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
+const TransactionItem = ({ transaction }: TransactionItemProps) => {
   if (!transaction) return null;
 
   const { colors } = useTheme();
@@ -37,10 +36,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
   const currencySymbol = currencySymbols[currency] || currency;
 
   return (
-    <TouchableOpacity
-      style={[styles.container, { borderColor: category.color || '#ccc' }]}
-      onPress={onPress ? () => onPress(transaction) : undefined}
-    >
+    <View style={[styles.container, { borderColor: category.color || '#ccc' }]}>
       <View style={styles.iconContainer}>
         <Ionicons name={category.icon} size={28} color={category.color} />
       </View>
@@ -66,7 +62,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemProps) => {
           {isIncome ? '+' : '-'} {amount.toFixed(2)} {currencySymbol}
         </Text>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 

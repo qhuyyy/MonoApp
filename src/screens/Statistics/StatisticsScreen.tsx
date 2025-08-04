@@ -243,7 +243,8 @@ const StatisticsScreen = () => {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ flexGrow: 1, paddingBottom: 50  }}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 50 }}
     >
       <Rectangle style={styles.rectangleBackground} />
       <View style={styles.headerContainer}>
