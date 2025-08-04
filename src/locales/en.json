@@ -203,5 +203,7 @@
   "amount-range": "Amount range",
 
   "reminder-title": "Expense Reminder",
-  "reminder-body": "Don't forget to log your expenses today!"
+  "reminder-body": "Don't forget to log your expenses today!",
+  "backup-reminder-title": "Backup Reminder",
+  "backup-reminder-body": "Backup your data to prevent any loss."
 }

@@ -203,5 +203,7 @@
   "amount-range": "Khoảng tiền",
 
   "reminder-title": "Nhắc nhở chi tiêu",
-  "reminder-body": "Đừng quên ghi lại chi tiêu hôm nay nhé!"
+  "reminder-body": "Đừng quên ghi lại chi tiêu hôm nay nhé!",
+  "backup-reminder-title": "Nhắc nhở sao lưu",
+  "backup-reminder-body": "Hãy sao lưu dữ liệu của bạn để tránh mất mát."
 }

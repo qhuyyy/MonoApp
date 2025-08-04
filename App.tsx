@@ -22,15 +22,11 @@ const App = () => {
     const loadAll = async () => {
       await Promise.all([loadSettings(), loadCategories(), loadTransactions()]);
       setIsLoading(false);
+      NotificationService.showReminder();
+      NotificationService.showWeeklyBackupReminder();
     };
     loadAll();
   }, []);
-
-  useEffect(() => {
-    if (!isLoading) {
-      NotificationService.showReminder();
-    }
-  }, [isLoading]);
 
   if (isLoading) {
     return <SplashScreen />;
