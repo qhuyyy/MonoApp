@@ -58,16 +58,25 @@ const ExportScreen = ({ navigation }: Props) => {
   }, [transactions]);
 
   const handleExport = async () => {
+    if (!includeTransactions && !includeCategories) {
+      Alert.alert(t('error'), t('please-select-at-least-one-option'));
+      return;
+    }
+
     try {
-      await exportData({
+      const result = await exportData({
         includeTransactions,
         includeCategories,
         minDate,
         maxDate,
       });
 
-      Alert.alert(t('success'), t('data-has-been-exported-successfully!'));
-      navigation.navigate('DataManagement');
+      if (result) {
+        Alert.alert(t('success'), t('data-has-been-exported-successfully!'));
+        navigation.navigate('DataManagement');
+      } else {
+        console.log('Người dùng cancel, không hiển thị alert thành công.');
+      }
     } catch (error) {
       Alert.alert(t('error'), t('data-has-been-exported-unsuccessfully!'));
     }

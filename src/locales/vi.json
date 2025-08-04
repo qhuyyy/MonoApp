@@ -205,5 +205,7 @@
   "reminder-title": "Nhắc nhở chi tiêu",
   "reminder-body": "Đừng quên ghi lại chi tiêu hôm nay nhé!",
   "backup-reminder-title": "Nhắc nhở sao lưu",
-  "backup-reminder-body": "Hãy sao lưu dữ liệu của bạn để tránh mất mát."
+  "backup-reminder-body": "Hãy sao lưu dữ liệu của bạn để tránh mất mát.",
+
+  "please-select-at-least-one-option": "Vui lòng chọn ít nhất một tùy chọn để xuất dữ liệu"
 }

@@ -26,7 +26,7 @@ type TransactionState = {
     includeCategories: boolean;
     minDate?: Date | null;
     maxDate?: Date | null;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
 };
 
 export const useTransactionStore = create<TransactionState>()(
@@ -167,65 +167,82 @@ export const useTransactionStore = create<TransactionState>()(
         minDate,
         maxDate,
       }) => {
-        const transactions_raw = await AsyncStorage.getItem(
-          'transaction-storage',
-        );
-        const categories_raw = await AsyncStorage.getItem('category-storage');
-
-        const allTransactions: Transaction[] = transactions_raw
-          ? JSON.parse(transactions_raw)?.state?.transactions ?? []
-          : [];
-        const allCategories = categories_raw
-          ? JSON.parse(categories_raw)?.state?.categories ?? []
-          : [];
-
-        const filteredTransactions = includeTransactions
-          ? allTransactions.filter(t => {
-              const d = new Date(t.date);
-              if (minDate && d < minDate) return false;
-              if (maxDate && d > maxDate) return false;
-              return true;
-            })
-          : [];
-
-        if (includeTransactions && includeCategories) {
-          const transactionsPath = `${RNFS.CachesDirectoryPath}/transactions.json`;
-          const categoriesPath = `${RNFS.CachesDirectoryPath}/categories.json`;
-
-          await RNFS.writeFile(
-            transactionsPath,
-            JSON.stringify(filteredTransactions, null, 2),
-            'utf8',
+        try {
+          const transactions_raw = await AsyncStorage.getItem(
+            'transaction-storage',
           );
-          await RNFS.writeFile(
-            categoriesPath,
-            JSON.stringify(allCategories, null, 2),
-            'utf8',
-          );
+          const categories_raw = await AsyncStorage.getItem('category-storage');
 
-          await Share.open({
-            title: 'Export Data',
-            urls: [`file://${transactionsPath}`, `file://${categoriesPath}`],
-            type: 'application/json',
-            failOnCancel: false,
-          });
-        } else {
-          const exportData = {
-            transactions: filteredTransactions,
-            categories: includeCategories ? allCategories : undefined,
-          };
-          const path = `${RNFS.CachesDirectoryPath}/export.json`;
-          await RNFS.writeFile(
-            path,
-            JSON.stringify(exportData, null, 2),
-            'utf8',
-          );
-          await Share.open({
-            title: 'Export JSON',
-            url: `file://${path}`,
-            type: 'application/json',
-            failOnCancel: false,
-          });
+          const allTransactions: Transaction[] = transactions_raw
+            ? JSON.parse(transactions_raw)?.state?.transactions ?? []
+            : [];
+          const allCategories = categories_raw
+            ? JSON.parse(categories_raw)?.state?.categories ?? []
+            : [];
+
+          const filteredTransactions = includeTransactions
+            ? allTransactions.filter(t => {
+                const d = new Date(t.date);
+                if (minDate && d < minDate) return false;
+                if (maxDate && d > maxDate) return false;
+                return true;
+              })
+            : [];
+
+          let shareOptions: any = {};
+
+          if (includeTransactions && !includeCategories) {
+            const path = `${RNFS.CachesDirectoryPath}/transactions.json`;
+            await RNFS.writeFile(
+              path,
+              JSON.stringify(filteredTransactions, null, 2),
+              'utf8',
+            );
+            shareOptions = {
+              title: 'Export Transactions',
+              url: `file://${path}`,
+              type: 'application/json',
+            };
+          } else if (!includeTransactions && includeCategories) {
+            const path = `${RNFS.CachesDirectoryPath}/categories.json`;
+            await RNFS.writeFile(
+              path,
+              JSON.stringify(allCategories, null, 2),
+              'utf8',
+            );
+            shareOptions = {
+              title: 'Export Categories',
+              url: `file://${path}`,
+              type: 'application/json',
+            };
+          } else if (includeTransactions && includeCategories) {
+            const transactionsPath = `${RNFS.CachesDirectoryPath}/transactions.json`;
+            const categoriesPath = `${RNFS.CachesDirectoryPath}/categories.json`;
+            await RNFS.writeFile(
+              transactionsPath,
+              JSON.stringify(filteredTransactions, null, 2),
+              'utf8',
+            );
+            await RNFS.writeFile(
+              categoriesPath,
+              JSON.stringify(allCategories, null, 2),
+              'utf8',
+            );
+            shareOptions = {
+              title: 'Export Data',
+              urls: [`file://${transactionsPath}`, `file://${categoriesPath}`],
+              type: 'application/json',
+            };
+          }
+
+          await Share.open({ ...shareOptions, failOnCancel: true });
+          return true; // thành công
+        } catch (error: any) {
+          if (error?.message?.includes('User did not share')) {
+            console.log('Người dùng đã đóng hộp thoại chia sẻ.');
+            return false; // cancel
+          }
+          throw error;
         }
       },
 

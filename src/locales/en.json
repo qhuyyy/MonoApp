@@ -205,5 +205,7 @@
   "reminder-title": "Expense Reminder",
   "reminder-body": "Don't forget to log your expenses today!",
   "backup-reminder-title": "Backup Reminder",
-  "backup-reminder-body": "Backup your data to prevent any loss."
+  "backup-reminder-body": "Backup your data to prevent any loss.",
+
+  "please-select-at-least-one-option": "Please select at least one option to export data"
 }
