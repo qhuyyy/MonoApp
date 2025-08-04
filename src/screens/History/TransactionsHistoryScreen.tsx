@@ -18,6 +18,7 @@ import {
   RefreshControl,
   Keyboard,
   ActivityIndicator,
+  useColorScheme,
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -30,10 +31,16 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { HistoryStackParamList } from '../../navigations/HistoryStack';
 import { windowHeight } from '../../utils/Dimensions';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useTheme } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import { MAX_HISTORY, PAGE_SIZE } from '../../constants/Transactions';
+import {
+  currencySymbols,
+  MAX_HISTORY,
+  PAGE_SIZE,
+} from '../../constants/Transactions';
 import { useCategoryStore } from '../../stores/useCategoryStore';
+import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import { useUserStore } from '../../stores/useUserStore';
 
 type HistoryScreenProps = NativeStackScreenProps<
   HistoryStackParamList,
@@ -66,9 +73,17 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
   const [loadingCategories, setLoadingCategories] = useState(true);
 
   const { t } = useTranslation();
+  const { colors } = useTheme();
 
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // --- Khoảng số tiền ---
+  const [amountRange, setAmountRange] = useState<[number, number]>([0, 0]);
+  const [selectedRange, setSelectedRange] = useState<[number, number]>([0, 0]);
+
+  const { currency } = useUserStore();
+  const currencySymbol = currencySymbols[currency] || currency;
 
   const closeOpenSwipe = () => {
     if (openSwipeId && swipeableRefs.current[openSwipeId]) {
@@ -154,6 +169,50 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
     }, [loadTransactions]),
   );
 
+  const getRangeColor = (min: number, max: number) => {
+    const range = max - min;
+    if (range < (amountRange[1] - amountRange[0]) * 0.33) return '#2E7D32'; // xanh lá
+    if (range < (amountRange[1] - amountRange[0]) * 0.66) return '#FBC02D'; // vàng
+    return '#C62828'; // đỏ
+  };
+
+  const CustomMarker = ({ currentValue }: { currentValue: number }) => (
+    <View style={{ alignItems: 'center' }}>
+      <View
+        style={{
+          backgroundColor: '#3A837B',
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          borderRadius: 6,
+          marginBottom: 6,
+        }}
+      >
+        <Text style={{ color: '#fff', fontWeight: '600', fontSize: 12 }}>
+          {currentValue}
+        </Text>
+      </View>
+      <View
+        style={{
+          width: 20,
+          height: 20,
+          borderRadius: 10,
+          backgroundColor: '#3A837B',
+        }}
+      />
+    </View>
+  );
+
+  // --- Cập nhật min & max khi có transactions ---
+  useEffect(() => {
+    if (transactions.length > 0) {
+      const amounts = transactions.map(t => t.amount);
+      const min = Math.min(...amounts);
+      const max = Math.max(...amounts);
+      setAmountRange([min, max]);
+      setSelectedRange([min, max]);
+    }
+  }, [transactions]);
+
   const filteredTransactions = useMemo(() => {
     let result = [...transactions];
 
@@ -172,6 +231,11 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
         return selectedCategories.includes(key);
       });
     }
+    // --- Lọc theo khoảng số tiền ---
+    result = result.filter(
+      t => t.amount >= selectedRange[0] && t.amount <= selectedRange[1],
+    );
+
     if (sortBy === 'date') {
       result.sort(
         (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -185,7 +249,14 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
       );
     }
     return result;
-  }, [transactions, search, filterType, sortBy, selectedCategories]);
+  }, [
+    transactions,
+    search,
+    filterType,
+    sortBy,
+    selectedCategories,
+    selectedRange,
+  ]);
 
   const data = filteredTransactions.slice(0, page * PAGE_SIZE);
 
@@ -242,7 +313,7 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
               <Ionicons name="pencil-outline" size={24} color="#fff" />
             </TouchableOpacity>
           </Animated.View>
-          
+
           <Animated.View style={{ transform: [{ translateX: trans1 }] }}>
             <TouchableOpacity
               style={[
@@ -260,7 +331,7 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
 
   useEffect(() => {
     setPage(1);
-  }, [search, filterType, sortBy, selectedCategories, setPage]);
+  }, [search, filterType, sortBy, selectedCategories, selectedRange, setPage]);
 
   return (
     <View style={styles.container}>
@@ -323,7 +394,9 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
           </View>
 
           <View style={styles.filterContainer}>
-            <Text style={styles.title}>{t('status')}</Text>
+            <Text style={[styles.title, { color: colors.text }]}>
+              {t('status')}
+            </Text>
             <View style={styles.filterBar}>
               <View
                 style={{ flexDirection: 'row', justifyContent: 'flex-start' }}
@@ -374,7 +447,9 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
               </TouchableOpacity>
             </View>
 
-            <Text style={styles.title}>{t('categories')}</Text>
+            <Text style={[styles.title, { color: colors.text }]}>
+              {t('categories')}
+            </Text>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
               {categories.map(cat => (
                 <TouchableOpacity
@@ -409,6 +484,40 @@ const TransactionsHistoryScreen = ({ navigation }: HistoryScreenProps) => {
                   </Text>
                 </TouchableOpacity>
               ))}
+            </View>
+
+            {/* --- Khoảng số tiền --- */}
+            <Text style={[styles.title, { color: colors.text }]}>
+              {t('amount-range')}
+            </Text>
+            <View style={{ marginTop: 5, alignSelf: 'center' }}>
+              <Text style={[styles.selectedRangeText, { color: colors.text }]}>
+                {`${currencySymbol}${selectedRange[0]} - ${currencySymbol}${selectedRange[1]}`}
+              </Text>
+
+              <MultiSlider
+                values={selectedRange}
+                min={amountRange[0]}
+                max={amountRange[1]}
+                step={1}
+                sliderLength={250}
+                onValuesChange={values =>
+                  setSelectedRange(values as [number, number])
+                }
+                selectedStyle={{
+                  backgroundColor: getRangeColor(
+                    selectedRange[0],
+                    selectedRange[1],
+                  ),
+                }}
+                markerStyle={{ backgroundColor: '#3A837B' }}
+                customMarkerLeft={e => (
+                  <CustomMarker currentValue={e.currentValue} />
+                )}
+                customMarkerRight={e => (
+                  <CustomMarker currentValue={e.currentValue} />
+                )}
+              />
             </View>
           </View>
 
@@ -462,7 +571,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3A837B',
   },
   headerTitle: { fontSize: 24, fontWeight: 'bold', color: '#fff' },
-  title: { fontSize: 16, color: '#fff', fontStyle: 'italic' },
+  title: { fontSize: 16, color: '#000', fontStyle: 'italic' },
   searchContainer: { paddingHorizontal: 20, marginBottom: 5 },
   searchInput: {
     backgroundColor: '#fff',
@@ -497,9 +606,25 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   sortText: { fontWeight: 'bold', color: '#333', alignSelf: 'center' },
+  amountRangeContainer: { paddingVertical: 10, alignItems: 'center' },
+  rangeTextRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: 250,
+  },
+  rangeText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  selectedRangeText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '600',
+    alignSelf: 'center',
+  },
   contentContainer: {
-    maxHeight: windowHeight - 450,
-    marginTop: 10,
+    flex: 1,
     paddingBottom: 10,
   },
   listContent: { marginTop: 10 },
@@ -551,25 +676,15 @@ const styles = StyleSheet.create({
     zIndex: 100,
     elevation: 5,
   },
-  dropdownItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  dropdownText: {
-    fontSize: 16,
-    color: '#333',
-  },
+  dropdownItem: { paddingVertical: 8, paddingHorizontal: 12 },
+  dropdownText: { fontSize: 16, color: '#333' },
   dropdownClearButton: {
     paddingVertical: 8,
     alignItems: 'center',
     borderTopWidth: 1,
     borderColor: '#ccc',
   },
-  dropdownClearText: {
-    fontSize: 14,
-    color: '#d00',
-    fontWeight: 'bold',
-  },
+  dropdownClearText: { fontSize: 14, color: '#d00', fontWeight: 'bold' },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',

@@ -199,5 +199,6 @@
   "currency-required": "Currency is required",
   "currency-invalid": "Invalid currency",
 
-  "cannot-update": "Cannot update"
+  "cannot-update": "Cannot update",
+  "amount-range": "Amount range"
 }

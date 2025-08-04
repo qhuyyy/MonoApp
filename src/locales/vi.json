@@ -199,5 +199,6 @@
   "currency-required": "Vui lòng chọn loại tiền tệ",
   "currency-invalid": "Loại tiền tệ không hợp lệ",
    
-  "cannot-update": "Không thể cập nhật"
+  "cannot-update": "Không thể cập nhật",
+  "amount-range": "Khoảng tiền"
 }
